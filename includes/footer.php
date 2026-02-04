@@ -20,9 +20,9 @@
 
         <div class="footer-section">
             <h4>Team Members</h4>
-            <p>Bhavya Bhavya, Evan Di Placido,</p>
-            <p>Ahmad Fakhry, Gaganpreet Kaur,</p>
-            <p>Antonio Macedo, Justice Mazerolle</p>
+            <p>Bhavya Bhavya, Gaganpreet Kaur,</p>
+            <p>Ahmad Fakhry, Justice Mazerolle,</p>
+            <p>Ravneet Kaur, Ashnoor Kaur</p>
         </div>
     </div>
 
