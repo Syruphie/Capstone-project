@@ -16,6 +16,7 @@
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
                     <a href="my-orders.php" class="<?php echo $currentPage === 'my-orders.php' ? 'active' : ''; ?>">My Orders</a>
                     <a href="create-order.php" class="<?php echo $currentPage === 'create-order.php' ? 'active' : ''; ?>">New Order</a>
+                    <a href="create-event.php" class="<?php echo $currentPage === 'create-event.php' ? 'active' : ''; ?>">Event Scheduler</a>
                 <?php elseif ($_SESSION['user_role'] === 'technician'): ?>
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
                     <a href="#">Samples</a>
