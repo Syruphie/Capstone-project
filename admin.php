@@ -150,63 +150,70 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'approvals';
                     </div>
                 </section>
 
-            <?php elseif ($currentTab === 'equipment'): ?>
-                <!-- Manage Equipment Section -->
-                <section class="admin-section">
-                    <h1>Manage Equipment</h1>
-                    <p class="section-desc">Configure equipment settings, processing times, and schedules.</p>
-                    
-                    <div class="admin-actions-bar">
-                        <button class="btn btn-primary">Add Equipment</button>
-                    </div>
+                <!-- Manage Equipment page --> 
+           <?php elseif ($currentTab === 'equipment'): ?>
+            
+<section class="admin-section">
 
-                    <div class="admin-table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                    <th>Processing Time</th>
-                                    <th>Warmup Time</th>
-                                    <th>Break Interval</th>
-                                    <th>Daily Capacity</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $equipmentList = $equipment->getAllEquipment();
-                                if (empty($equipmentList)):
-                                ?>
-                                <tr>
-                                    <td colspan="8" class="empty-state">No equipment configured</td>
-                                </tr>
-                                <?php else: ?>
-                                    <?php foreach ($equipmentList as $eq): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($eq['name']); ?></td>
-                                        <td><?php echo htmlspecialchars($eq['equipment_type']); ?></td>
-                                        <td><?php echo $eq['processing_time_per_sample']; ?> min/sample</td>
-                                        <td><?php echo $eq['warmup_time']; ?> min</td>
-                                        <td><?php echo $eq['break_interval']; ?> samples</td>
-                                        <td><?php echo $eq['daily_capacity']; ?> samples</td>
-                                        <td>
-                                            <span class="badge <?php echo $eq['is_available'] ? 'badge-success' : 'badge-danger'; ?>">
-                                                <?php echo $eq['is_available'] ? 'Available' : 'Unavailable'; ?>
-                                            </span>
-                                        </td>
-                                        <td class="actions">
-                                            <button class="btn btn-small btn-secondary">Edit</button>
-                                            <button class="btn btn-small btn-warning">Log Delay</button>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+    <!-- Header row -->
+    <div class="equipment-header">
+        <div>
+            <h1>Manage Equipment</h1>
+            <p class="section-desc">Configure equipment settings, processing times, and schedules.</p>
+        </div>
+
+        <button class="btn btn-primary btn-small add-equipment-btn">Add Equipment</button>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Processing</th>
+                    <th>Warmup</th>
+                    <th>Break</th>
+                    <th>Capacity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $equipmentList = $equipment->getAllEquipment();
+                if (empty($equipmentList)):
+                ?>
+                <tr>
+                    <td colspan="8" class="empty-state">No equipment configured</td>
+                </tr>
+                <?php else: ?>
+                    <?php foreach ($equipmentList as $eq): ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($eq['name']); ?></td>
+                        <td><?php echo htmlspecialchars($eq['equipment_type']); ?></td>
+                        <td><?php echo $eq['processing_time_per_sample']; ?> min</td>
+                        <td><?php echo $eq['warmup_time']; ?> min</td>
+                        <td><?php echo $eq['break_interval']; ?></td>
+                        <td><?php echo $eq['daily_capacity']; ?></td>
+                        <td>
+                            <span class="status-pill <?php echo $eq['is_available'] ? 'available' : 'unavailable'; ?>">
+                                <?php echo $eq['is_available'] ? 'Available' : 'Unavailable'; ?>
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <button class="btn btn-xs btn-secondary">Edit</button>
+                            <button class="btn btn-xs btn-warning">Delay</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
 
             <?php elseif ($currentTab === 'samples'): ?>
                 <!-- Manage Samples Section -->
