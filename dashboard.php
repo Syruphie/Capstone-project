@@ -3,15 +3,15 @@ require_once 'config/database.php';
 require_once 'classes/User.php';
 require_once 'classes/Order.php';
 require_once 'classes/Queue.php';
-require_once 'classes/Equipment.php';
+require_once 'classes/Equipment.php'; 
 
-$user = new User();
+$user = new User(); 
 
 // Check if user is logged in
 if (!$user->isLoggedIn()) {
-    header('Location: login.php');
+    header('Location: login.php'); 
     exit;
-}
+} 
 
 $userRole = $user->getRole();
 $userName = $_SESSION['user_name'];
@@ -266,6 +266,7 @@ $equipment = new Equipment();
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <?php include 'chatbot/chat.php' ; ?> <!-- Chatbot feature --> 
     <script src="js/main.js"></script>
 </body>
 </html>
