@@ -1,12 +1,12 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 1); // Shows all php error, used during development. It helps in seeing mistakes instead of blank page. 
 
 require_once 'config/database.php';
-require_once 'classes/User.php';
+require_once 'classes/User.php'; // This shows that pages depends on these files. 
 
-$error = '';
-$user = new User();
+$error = '';  // Stores login error messages
+$user = new User(); // object to use user functions 
 
 // Redirect if already logged in
 if ($user->isLoggedIn()) {
