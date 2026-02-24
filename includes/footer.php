@@ -20,13 +20,13 @@
 
         <div class="footer-section">
             <h4>Team Members</h4>
-            <p>Bhavya Bhavya, Gaganpreet Kaur,</p>
-            <p>Ahmad Fakhry, Justice Mazerolle,</p>
-            <p>Ravneet Kaur, Ashnoor Kaur</p>
+            <p>Bhavya Bhavya, Evan Di Placido,</p>
+            <p>Ahmad Fakhry, Gaganpreet Kaur,</p>
+            <p>Ashnoor Kaur, Justice Mazerolle, Ravneet Kaur</p>
         </div>
     </div>
 
     <div class="footer-bottom">
-        <p>&copy; 2025 <?php echo APP_NAME; ?>. School Project - All rights reserved.</p>
+        <p>&copy; 2026 <?php echo APP_NAME; ?>. School Project - All rights reserved.</p>
     </div>
 </footer>
