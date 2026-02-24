@@ -76,23 +76,62 @@ class User {
     }
 
     public function updateUser($userId, $data) {
-        // Method signature for updating user information
+        $allowed = ['full_name', 'phone', 'company_name', 'address'];
+        $sets = [];
+        $params = [];
+        foreach ($allowed as $key) {
+            if (array_key_exists($key, $data)) {
+                $sets[] = "{$key} = ?";
+                $params[] = $data[$key];
+            }
+        }
+        if (empty($sets)) return false;
+        $params[] = $userId;
+        $stmt = $this->db->prepare("UPDATE users SET " . implode(', ', $sets) . " WHERE id = ?");
+        return $stmt->execute($params);
     }
 
     public function deleteUser($userId) {
-        // Method signature for deleting/deactivating a user
+        $stmt = $this->db->prepare("UPDATE users SET is_active = 0 WHERE id = ?");
+        return $stmt->execute([$userId]);
     }
 
-    public function getAllUsers($role = null) {
-        // Method signature for retrieving all users, optionally filtered by role
+    /**
+     * Get all users with optional filters.
+     * @param string|null $role Filter by role (customer, technician, administrator)
+     * @param string|null $search Search in full_name and email (LIKE %search%)
+     * @param bool|null $isActive Filter by status (true=active, false=inactive, null=all)
+     */
+    public function getAllUsers($role = null, $search = null, $isActive = null) {
+        $sql = "SELECT id, full_name, email, phone, company_name, role, is_active, last_login, created_at FROM users WHERE 1=1";
+        $params = [];
+        if ($role !== null && $role !== '') {
+            $sql .= " AND role = ?";
+            $params[] = $role;
+        }
+        if ($search !== null && trim($search) !== '') {
+            $sql .= " AND (full_name LIKE ? OR email LIKE ?)";
+            $term = '%' . trim($search) . '%';
+            $params[] = $term;
+            $params[] = $term;
+        }
+        if ($isActive !== null) {
+            $sql .= " AND is_active = ?";
+            $params[] = $isActive ? 1 : 0;
+        }
+        $sql .= " ORDER BY full_name ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     public function activateUser($userId) {
-        // Method signature for activating a user account
+        $stmt = $this->db->prepare("UPDATE users SET is_active = 1 WHERE id = ?");
+        return $stmt->execute([$userId]);
     }
 
     public function deactivateUser($userId) {
-        // Method signature for deactivating a user account
+        return $this->deleteUser($userId);
     }
 
     public function changePassword($userId, $oldPassword, $newPassword) {
@@ -109,7 +148,10 @@ class User {
     }
 
     public function assignRole($userId, $role) {
-        // Method signature for assigning a role to a user
+        $allowed = ['customer', 'technician', 'administrator'];
+        if (!in_array($role, $allowed, true)) return false;
+        $stmt = $this->db->prepare("UPDATE users SET role = ? WHERE id = ?");
+        return $stmt->execute([$role, $userId]);
     }
 
     public function getRole() {

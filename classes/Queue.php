@@ -200,6 +200,7 @@ class Queue {
 
     /**
      * Full calendar data: queue entries with order, sample types, equipment.
+     * Excludes finished orders (results_available, completed) so they appear in Order History only.
      * Ordered by queue_type (priority first), then position.
      */
     public function getCalendarData() {
@@ -211,6 +212,7 @@ class Queue {
              FROM queue q
              JOIN orders o ON q.order_id = o.id
              LEFT JOIN equipment e ON q.equipment_id = e.id
+             WHERE o.status NOT IN ('results_available', 'completed')
              ORDER BY q.queue_type DESC, q.position ASC"
         );
         $stmt->execute();

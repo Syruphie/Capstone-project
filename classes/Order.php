@@ -126,6 +126,71 @@ class Order {
         // Method signature for searching orders by order number or customer name
     }
 
+    /**
+     * Order history: finished orders only (results_available, completed).
+     * For customer: only their orders. Optional search by order number or date range.
+     */
+    public function getOrderHistoryForCustomer($customerId, $searchOrderNumber = '', $searchDateFrom = '', $searchDateTo = '', $limit = 100) {
+        $sql = "SELECT o.*, (SELECT COUNT(*) FROM samples WHERE order_id = o.id) as sample_count
+                FROM orders o
+                WHERE o.customer_id = ? AND o.status IN ('results_available', 'completed')";
+        $params = [$customerId];
+        if ($searchOrderNumber !== '') {
+            $sql .= " AND o.order_number LIKE ?";
+            $params[] = '%' . $searchOrderNumber . '%';
+        }
+        if ($searchDateFrom !== '') {
+            $sql .= " AND (o.completed_at >= ? OR o.estimated_completion >= ?)";
+            $params[] = $searchDateFrom;
+            $params[] = $searchDateFrom;
+        }
+        if ($searchDateTo !== '') {
+            $sql .= " AND (o.completed_at <= ? OR o.estimated_completion <= ?)";
+            $params[] = $searchDateTo;
+            $params[] = $searchDateTo;
+        }
+        $sql .= " ORDER BY COALESCE(o.completed_at, o.estimated_completion, o.updated_at) DESC LIMIT ?";
+        $params[] = $limit;
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Order history for admin: all finished orders, optional search by customer name, order number, or date.
+     * Returns orders with customer_name for display.
+     */
+    public function getOrderHistoryForAdmin($searchCustomerName = '', $searchOrderNumber = '', $searchDateFrom = '', $searchDateTo = '', $limit = 200) {
+        $sql = "SELECT o.*, u.full_name as customer_name, u.email as customer_email,
+                       (SELECT COUNT(*) FROM samples WHERE order_id = o.id) as sample_count
+                FROM orders o
+                JOIN users u ON o.customer_id = u.id
+                WHERE o.status IN ('results_available', 'completed')";
+        $params = [];
+        if ($searchCustomerName !== '') {
+            $sql .= " AND (u.full_name LIKE ? OR u.email LIKE ?)";
+            $params[] = '%' . $searchCustomerName . '%';
+            $params[] = '%' . $searchCustomerName . '%';
+        }
+        if ($searchOrderNumber !== '') {
+            $sql .= " AND o.order_number LIKE ?";
+            $params[] = '%' . $searchOrderNumber . '%';
+        }
+        if ($searchDateFrom !== '') {
+            $sql .= " AND COALESCE(o.completed_at, o.estimated_completion, o.updated_at) >= ?";
+            $params[] = $searchDateFrom;
+        }
+        if ($searchDateTo !== '') {
+            $sql .= " AND COALESCE(o.completed_at, o.estimated_completion, o.updated_at) <= ?";
+            $params[] = $searchDateTo;
+        }
+        $sql .= " ORDER BY o.priority DESC, COALESCE(o.completed_at, o.estimated_completion, o.updated_at) DESC LIMIT ?";
+        $params[] = $limit;
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
     // Order Timeline Methods
     public function getOrderTimeline($orderId) {
         // Method signature for retrieving order timeline/history

@@ -183,12 +183,24 @@
 
 .queue-item-actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    flex-shrink: 0;
+    min-width: 140px;
 }
 
 .queue-item-actions .btn {
     padding: 6px 12px;
     font-size: 12px;
+    white-space: nowrap;
+}
+
+.queue-item-actions .btn-finish {
+    background: #28a745;
+    color: #fff;
+}
+
+.queue-item-actions .btn-finish:hover {
+    background: #218838;
 }
 
 /* Equipment utilization */
@@ -284,6 +296,31 @@
     width: 90%;
     max-width: 420px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal.modal-wide {
+    max-width: 520px;
+}
+
+.edit-modal-divider {
+    margin: 20px 0 16px;
+    border-top: 1px solid #dee2e6;
+}
+
+.edit-modal-finish-section {
+    padding-top: 4px;
+}
+
+.edit-modal-finish-title {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.edit-modal-finish-desc {
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 14px;
 }
 
 .modal h2 {

@@ -59,10 +59,10 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
     </div>
 
     <div class="modal-overlay" id="editModal" aria-hidden="true">
-        <div class="modal" role="dialog" aria-labelledby="editModalTitle">
-            <h2 id="editModalTitle">Reschedule order</h2>
+        <div class="modal modal-wide" role="dialog" aria-labelledby="editModalTitle">
+            <h2 id="editModalTitle">Edit order</h2>
+            <input type="hidden" id="editQueueId" name="queue_id">
             <form id="editForm">
-                <input type="hidden" id="editQueueId" name="queue_id">
                 <div class="form-group">
                     <label for="editStart">Scheduled start</label>
                     <input type="datetime-local" id="editStart" name="scheduled_start" required>
@@ -71,11 +71,31 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
                     <label for="editEnd">Scheduled end</label>
                     <input type="datetime-local" id="editEnd" name="scheduled_end" required>
                 </div>
+                <div class="form-group">
+                    <label for="editMessage">Optional note to customer (for schedule change email)</label>
+                    <textarea id="editMessage" name="message" rows="2" class="form-control" placeholder="Optional note about this schedule change"></textarea>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="btnCancelEdit">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Save schedule</button>
                 </div>
             </form>
+            <div class="edit-modal-divider"></div>
+            <div class="edit-modal-finish-section">
+                <h3 class="edit-modal-finish-title">Mark as completed</h3>
+                <p class="edit-modal-finish-desc">Send the customer a completion email (optional note and attachment).</p>
+                <div class="form-group">
+                    <label for="finishMessageInEdit">Optional note (default: order analysis is done)</label>
+                    <textarea id="finishMessageInEdit" rows="3" class="form-control" placeholder="Optional note for completion email"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="finishAttachmentInEdit">Attach file (e.g. results PDF)</label>
+                    <input type="file" id="finishAttachmentInEdit" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,image/*">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary" id="btnFinishOrderInEdit">Finish order</button>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1,6 +1,10 @@
 <?php
 /**
- * POST: Reschedule a queue entry. Body: { "queue_id": 1, "scheduled_start": "...", "scheduled_end": "..." }
+ * POST: Mark an order as completed.
+ * Accepts multipart/form-data:
+ *  - queue_id (int)
+ *  - message (optional text)
+ *  - attachment (optional file)
  * Auth: admin or technician.
  */
 require_once __DIR__ . '/../config/database.php';
@@ -29,54 +33,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true) ?: [];
-$queueId = isset($input['queue_id']) ? (int) $input['queue_id'] : 0;
-$start = isset($input['scheduled_start']) ? trim($input['scheduled_start']) : '';
-$end = isset($input['scheduled_end']) ? trim($input['scheduled_end']) : '';
-$note = isset($input['message']) ? trim($input['message']) : '';
+$queueId = isset($_POST['queue_id']) ? (int) $_POST['queue_id'] : 0;
+$note = isset($_POST['message']) ? trim($_POST['message']) : '';
 
-if ($queueId < 1 || $start === '' || $end === '') {
+if ($queueId < 1) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Missing queue_id, scheduled_start, or scheduled_end']);
+    echo json_encode(['success' => false, 'error' => 'Missing or invalid queue_id']);
     exit;
 }
 
-$startTs = strtotime($start);
-$endTs = strtotime($end);
-if ($startTs === false || $endTs === false || $endTs <= $startTs) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid dates']);
-    exit;
+// Handle optional attachment
+$attachmentPath = null;
+$attachmentName = null;
+if (!empty($_FILES['attachment']) && isset($_FILES['attachment']['error']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+    $attachmentPath = $_FILES['attachment']['tmp_name'];
+    $attachmentName = $_FILES['attachment']['name'];
 }
 
 try {
     $queue = new Queue();
     $order = new Order();
     $email = new Email();
+
     $entry = $queue->getQueueById($queueId);
     if (!$entry) {
         http_response_code(404);
         echo json_encode(['success' => false, 'error' => 'Queue entry not found']);
         exit;
     }
+
     $orderId = (int) $entry['order_id'];
 
-    $newStartStr = date('Y-m-d H:i:s', $startTs);
-    $newEndStr = date('Y-m-d H:i:s', $endTs);
+    // Mark queue entry as completed (actual_end)
+    $pdo = Database::getInstance()->getConnection();
+    $stmt = $pdo->prepare("UPDATE queue SET actual_end = NOW() WHERE id = ?");
+    $stmt->execute([$queueId]);
 
-    $queue->updateSchedule($queueId, $newStartStr, $newEndStr);
-    $order->updateEstimatedCompletion($orderId, $newEndStr);
+    // Update order status to results_available and set completed_at
+    $order->updateOrderStatus($orderId, 'results_available');
+    $pdo->prepare("UPDATE orders SET completed_at = NOW() WHERE id = ?")->execute([$orderId]);
 
-    // Notify customer about schedule change (best-effort)
+    // Notify customer about completion (best-effort)
     $orderData = $order->getOrderWithCustomer($orderId);
     if ($orderData && !empty($orderData['customer_email'])) {
-        $email->sendOrderScheduleUpdate(
+        $email->sendOrderCompletedNotification(
             $orderData['customer_email'],
             $orderData['customer_name'],
             $orderData['order_number'],
-            date('Y-m-d H:i', $startTs),
-            date('Y-m-d H:i', $endTs),
-            $note
+            $note,
+            $attachmentPath,
+            $attachmentName
         );
     }
 
@@ -85,3 +91,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
+

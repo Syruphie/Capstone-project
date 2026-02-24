@@ -29,6 +29,10 @@
     const editStart = document.getElementById('editStart');
     const editEnd = document.getElementById('editEnd');
     const btnCancelEdit = document.getElementById('btnCancelEdit');
+    const editMessage = document.getElementById('editMessage');
+    const finishMessageInEdit = document.getElementById('finishMessageInEdit');
+    const finishAttachmentInEdit = document.getElementById('finishAttachmentInEdit');
+    const btnFinishOrderInEdit = document.getElementById('btnFinishOrderInEdit');
 
     function setStatus(text) {
         if (statusEl) statusEl.textContent = text;
@@ -85,7 +89,10 @@
                 html += '</div>';
                 html += '<div class="queue-item-equipment">' + escapeHtml(eq) + '</div>';
                 html += '<div class="queue-item-completion">' + escapeHtml(comp) + '</div>';
-                html += '<div class="queue-item-actions"><button type="button" class="btn btn-small btn-secondary btn-edit">Edit</button></div>';
+                html += '<div class="queue-item-actions">';
+                html += '<button type="button" class="btn btn-small btn-secondary btn-edit">Edit</button>';
+                html += '<button type="button" class="btn btn-small btn-primary btn-finish">Finish</button>';
+                html += '</div>';
                 html += '</div>';
             });
             html += '</div></div>';
@@ -98,6 +105,16 @@
             attachDragDrop(list);
         });
         queueListEl.querySelectorAll('.btn-edit').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const item = btn.closest('.queue-item');
+                if (!item) return;
+                const qid = item.getAttribute('data-queue-id');
+                const entry = (data.queue || []).find(function (r) { return String(r.queue_id) === qid; });
+                if (!entry) return;
+                openEditModal(entry);
+            });
+        });
+        queueListEl.querySelectorAll('.btn-finish').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const item = btn.closest('.queue-item');
                 if (!item) return;
@@ -227,6 +244,9 @@
         editQueueId.value = entry.queue_id;
         editStart.value = toDateTimeInput(entry.scheduled_start);
         editEnd.value = toDateTimeInput(entry.scheduled_end);
+        if (editMessage) editMessage.value = '';
+        if (finishMessageInEdit) finishMessageInEdit.value = '';
+        if (finishAttachmentInEdit) finishAttachmentInEdit.value = '';
         editModal.setAttribute('aria-hidden', 'false');
     }
 
@@ -259,12 +279,13 @@
             const qid = parseInt(editQueueId.value, 10);
             const start = toDateTimeLocal(editStart.value);
             const end = toDateTimeLocal(editEnd.value);
+            const message = editMessage ? editMessage.value.trim() : '';
             if (!qid || !start || !end) return;
 
             fetch(apiBase + '/calendar-reschedule.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ queue_id: qid, scheduled_start: start, scheduled_end: end })
+                body: JSON.stringify({ queue_id: qid, scheduled_start: start, scheduled_end: end, message: message })
             })
                 .then(function (r) { return r.json(); })
                 .then(function (j) {
@@ -276,6 +297,52 @@
                     }
                 })
                 .catch(function () { setStatus('Reschedule failed'); });
+        });
+    }
+
+    function finishOrder() {
+        if (!editQueueId || !editQueueId.value) {
+            setStatus('Cannot finish: no order selected.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('queue_id', String(editQueueId.value));
+
+        if (finishMessageInEdit && finishMessageInEdit.value.trim()) {
+            formData.append('message', finishMessageInEdit.value.trim());
+        }
+
+        if (finishAttachmentInEdit && finishAttachmentInEdit.files && finishAttachmentInEdit.files[0]) {
+            formData.append('attachment', finishAttachmentInEdit.files[0]);
+        }
+
+        if (btnFinishOrderInEdit) btnFinishOrderInEdit.disabled = true;
+        setStatus('Finishing order…');
+
+        fetch(apiBase + '/order-complete.php', { method: 'POST', body: formData })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+                if (btnFinishOrderInEdit) btnFinishOrderInEdit.disabled = false;
+                if (j.success) {
+                    closeEditModal();
+                    load();
+                    setStatus('Order finished and moved to history.');
+                } else {
+                    setStatus('Finish order failed: ' + (j.error || 'Unknown'));
+                }
+            })
+            .catch(function (err) {
+                if (btnFinishOrderInEdit) btnFinishOrderInEdit.disabled = false;
+                setStatus('Finish order failed.');
+                console.error('Finish order error', err);
+            });
+    }
+
+    if (btnFinishOrderInEdit) {
+        btnFinishOrderInEdit.addEventListener('click', function (e) {
+            e.preventDefault();
+            finishOrder();
         });
     }
 
