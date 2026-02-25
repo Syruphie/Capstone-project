@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS orders (
     priority ENUM('standard', 'priority') DEFAULT 'standard',
     total_cost DECIMAL(10, 2) DEFAULT 0.00,
     estimated_completion DATETIME NULL,
+    completed_at DATETIME NULL,
     approved_by INT NULL,
     approved_at TIMESTAMP NULL,
     rejection_reason TEXT NULL,

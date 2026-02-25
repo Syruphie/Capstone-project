@@ -23,27 +23,42 @@ class Queue {
 
     // Queue Management Methods
     public function addToQueue($orderId, $equipmentId, $queueType = 'standard') {
-        // Get next position in queue
         $stmt = $this->db->prepare(
-            "SELECT COALESCE(MAX(position), 0) + 1 as next_position 
-             FROM queue 
-             WHERE queue_type = ?"
+            "SELECT COALESCE(MAX(position), 0) + 1 as next_position FROM queue WHERE queue_type = ?"
         );
         $stmt->execute([$queueType]);
         $result = $stmt->fetch();
-        $position = $result['next_position'];
+        $position = (int) $result['next_position'];
 
         $stmt = $this->db->prepare(
-            "INSERT INTO queue (order_id, equipment_id, position, queue_type) 
-             VALUES (?, ?, ?, ?)"
+            "INSERT INTO queue (order_id, equipment_id, position, queue_type) VALUES (?, ?, ?, ?)"
         );
         $stmt->execute([$orderId, $equipmentId, $position, $queueType]);
-        
+        return $this->db->lastInsertId();
+    }
+
+    /**
+     * Add to queue with scheduled start/end. Used when auto-scheduling on approve.
+     */
+    public function addToQueueScheduled($orderId, $equipmentId, $queueType, $scheduledStart, $scheduledEnd) {
+        $stmt = $this->db->prepare(
+            "SELECT COALESCE(MAX(position), 0) + 1 as next_position FROM queue WHERE queue_type = ?"
+        );
+        $stmt->execute([$queueType]);
+        $result = $stmt->fetch();
+        $position = (int) $result['next_position'];
+
+        $stmt = $this->db->prepare(
+            "INSERT INTO queue (order_id, equipment_id, position, queue_type, scheduled_start, scheduled_end) 
+             VALUES (?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([$orderId, $equipmentId, $position, $queueType, $scheduledStart, $scheduledEnd]);
         return $this->db->lastInsertId();
     }
 
     public function removeFromQueue($queueId) {
-        // Method signature for removing an order from queue
+        $stmt = $this->db->prepare("DELETE FROM queue WHERE id = ?");
+        return $stmt->execute([$queueId]);
     }
 
     public function getQueueById($queueId) {
@@ -53,12 +68,42 @@ class Queue {
     }
 
     public function getQueueByOrder($orderId) {
-        // Method signature for retrieving queue entry by order ID
+        $stmt = $this->db->prepare("SELECT * FROM queue WHERE order_id = ?");
+        $stmt->execute([$orderId]);
+        return $stmt->fetch();
     }
 
     // Queue Position Methods
     public function updatePosition($queueId, $newPosition) {
-        // Method signature for updating queue position
+        $entry = $this->getQueueById($queueId);
+        if (!$entry) return false;
+        $queueType = $entry['queue_type'];
+        $oldPos = (int) $entry['position'];
+        $newPosition = (int) $newPosition;
+        if ($oldPos === $newPosition) return true;
+        try {
+            $this->db->beginTransaction();
+            $stmt = $this->db->prepare("UPDATE queue SET position = -1 WHERE id = ?");
+            $stmt->execute([$queueId]);
+            if ($newPosition > $oldPos) {
+                $stmt = $this->db->prepare(
+                    "UPDATE queue SET position = position - 1, updated_at = NOW() WHERE queue_type = ? AND position > ? AND position <= ?"
+                );
+                $stmt->execute([$queueType, $oldPos, $newPosition]);
+            } else {
+                $stmt = $this->db->prepare(
+                    "UPDATE queue SET position = position + 1, updated_at = NOW() WHERE queue_type = ? AND position >= ? AND position < ?"
+                );
+                $stmt->execute([$queueType, $newPosition, $oldPos]);
+            }
+            $stmt = $this->db->prepare("UPDATE queue SET position = ?, updated_at = NOW() WHERE id = ?");
+            $stmt->execute([$newPosition, $queueId]);
+            $this->db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
     }
 
     public function getPosition($queueId) {
@@ -117,20 +162,73 @@ class Queue {
     }
 
     public function getAllQueueEntries() {
-        // Method signature for retrieving all queue entries
+        $stmt = $this->db->prepare(
+            "SELECT q.*, o.order_number, o.status as order_status, o.priority, o.estimated_completion
+             FROM queue q
+             JOIN orders o ON q.order_id = o.id
+             ORDER BY q.queue_type DESC, q.position ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
-    public function getQueueByEquipment($equipmentId) {
-        // Method signature for retrieving queue entries for specific equipment
+    public function getQueueByEquipment($equipmentId, $fromDate = null, $toDate = null) {
+        $sql = "SELECT q.*, o.order_number, o.status as order_status
+                FROM queue q
+                JOIN orders o ON q.order_id = o.id
+                WHERE q.equipment_id = ? AND q.scheduled_start IS NOT NULL AND q.scheduled_end IS NOT NULL";
+        $params = [$equipmentId];
+        if ($fromDate) { $sql .= " AND q.scheduled_end >= ?"; $params[] = $fromDate; }
+        if ($toDate) { $sql .= " AND q.scheduled_start <= ?"; $params[] = $toDate; }
+        $sql .= " ORDER BY q.scheduled_start ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Last scheduled_end for an equipment, or null if none.
+     */
+    public function getLastScheduledEnd($equipmentId) {
+        $stmt = $this->db->prepare(
+            "SELECT scheduled_end FROM queue WHERE equipment_id = ? AND scheduled_end IS NOT NULL ORDER BY scheduled_end DESC LIMIT 1"
+        );
+        $stmt->execute([$equipmentId]);
+        $row = $stmt->fetch();
+        return $row ? $row['scheduled_end'] : null;
+    }
+
+    /**
+     * Full calendar data: queue entries with order, sample types, equipment.
+     * Excludes finished orders (results_available, completed) so they appear in Order History only.
+     * Ordered by queue_type (priority first), then position.
+     */
+    public function getCalendarData() {
+        $stmt = $this->db->prepare(
+            "SELECT q.id as queue_id, q.order_id, q.equipment_id, q.position, q.scheduled_start, q.scheduled_end,
+                    q.queue_type, o.order_number, o.status as order_status, o.priority, o.estimated_completion,
+                    e.name as equipment_name,
+                    (SELECT GROUP_CONCAT(DISTINCT s.sample_type ORDER BY s.sample_type) FROM samples s WHERE s.order_id = o.id) as sample_types
+             FROM queue q
+             JOIN orders o ON q.order_id = o.id
+             LEFT JOIN equipment e ON q.equipment_id = e.id
+             WHERE o.status NOT IN ('results_available', 'completed')
+             ORDER BY q.queue_type DESC, q.position ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     // Queue Scheduling Methods
     public function scheduleQueueEntry($queueId, $scheduledStart, $scheduledEnd) {
-        // Method signature for scheduling start and end times
+        $stmt = $this->db->prepare(
+            "UPDATE queue SET scheduled_start = ?, scheduled_end = ?, updated_at = NOW() WHERE id = ?"
+        );
+        return $stmt->execute([$scheduledStart, $scheduledEnd, $queueId]);
     }
 
     public function updateSchedule($queueId, $scheduledStart, $scheduledEnd) {
-        // Method signature for updating scheduled times
+        return $this->scheduleQueueEntry($queueId, $scheduledStart, $scheduledEnd);
     }
 
     public function recalculateSchedule($queueType, $startingPosition = 1) {

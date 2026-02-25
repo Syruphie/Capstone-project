@@ -9,6 +9,13 @@ define('DB_NAME', 'globentech_db');
 define('APP_NAME', 'GlobenTech');
 define('BASE_URL', 'http://localhost:8000');
 
+// Mail configuration (for Mailpit/similar local SMTP)
+define('MAIL_USE_SMTP', true);
+define('MAIL_SMTP_HOST', '127.0.0.1');
+define('MAIL_SMTP_PORT', 1025);
+// General support inbox for contact-us messages
+define('SUPPORT_EMAIL', 'support@globentech.com');
+
 // Session configuration
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_strict_mode', 1);

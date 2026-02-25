@@ -4,6 +4,7 @@ require_once 'classes/User.php';
 require_once 'classes/Order.php';
 require_once 'classes/Equipment.php';
 require_once 'classes/Sample.php';
+require_once 'classes/Queue.php';
 require_once 'classes/Email.php';
 
 $user = new User();
@@ -20,6 +21,8 @@ $userId = $_SESSION['user_id'];
 // Initialize classes
 $order = new Order();
 $equipment = new Equipment();
+$queue = new Queue();
+$sample = new Sample();
 $email = new Email();
 
 // Handle approve/reject actions
@@ -27,13 +30,38 @@ $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['approve_order'])) {
         $orderId = intval($_POST['order_id']);
-        // Get order with customer info before approving
         $orderData = $order->getOrderWithCustomer($orderId);
 
         if ($order->approveOrder($orderId, $userId)) {
             $message = 'Order approved successfully';
 
-            // Send email notification to customer
+            // Auto-schedule: add to queue, set equipment, estimated completion
+            $samples = $sample->getSamplesByOrder($orderId);
+            $equipmentList = $equipment->getAllEquipment(true);
+            $priority = $orderData['priority'] ?? 'standard';
+
+            if (!empty($equipmentList)) {
+                $eq = $equipmentList[0];
+                $eqId = (int) $eq['id'];
+                $processingPer = (int) $eq['processing_time_per_sample'];
+                $prepMins = 0;
+                foreach ($samples as $s) {
+                    $prepMins += (int) ($s['preparation_time'] ?? 0);
+                }
+                $testingMins = count($samples) * ($processingPer ?: 5);
+                $durationMins = $prepMins + $testingMins;
+
+                $lastEnd = $queue->getLastScheduledEnd($eqId);
+                $base = $lastEnd ? strtotime($lastEnd) : time();
+                $start = date('Y-m-d H:i:s', $base);
+                $end = date('Y-m-d H:i:s', $base + $durationMins * 60);
+
+                $queue->addToQueueScheduled($orderId, $eqId, $priority, $start, $end);
+                $order->updateOrderStatus($orderId, 'in_queue');
+                $order->updateEstimatedCompletion($orderId, $end);
+                $message .= ' - Queued and scheduled';
+            }
+
             if ($orderData && !empty($orderData['customer_email'])) {
                 $emailSent = $email->sendOrderApprovalNotification(
                     $orderData['customer_email'],
@@ -67,11 +95,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+    } elseif (isset($_POST['change_role'])) {
+        $targetUserId = isset($_POST['user_id']) ? (int) $_POST['user_id'] : 0;
+        $newRole = isset($_POST['role']) ? trim($_POST['role']) : '';
+        if ($targetUserId && in_array($newRole, ['customer', 'technician', 'administrator'], true)) {
+            if ($user->assignRole($targetUserId, $newRole)) {
+                $message = 'User role updated.';
+            } else {
+                $message = 'Failed to update role.';
+            }
+        }
     }
 }
 
 // Get current tab
 $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'approvals';
+
+// Users tab: search and filter
+$userSearch = isset($_GET['user_search']) ? trim($_GET['user_search']) : '';
+$userRoleFilter = isset($_GET['user_role']) ? trim($_GET['user_role']) : '';
+$userStatusFilter = isset($_GET['user_status']) ? trim($_GET['user_status']) : '';
+$userStatusActive = null;
+if ($userStatusFilter === 'active') $userStatusActive = true;
+elseif ($userStatusFilter === 'inactive') $userStatusActive = false;
+$usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $userStatusActive);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -266,27 +313,27 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'approvals';
                 <section class="admin-section">
                     <h1>Manage Users</h1>
                     <p class="section-desc">Create, modify, and manage user accounts and permissions.</p>
-                    
-                    <div class="admin-actions-bar">
-                        <button class="btn btn-primary">Add User</button>
-                        <button class="btn btn-secondary">Import CSV</button>
-                    </div>
 
-                    <div class="filter-bar">
-                        <input type="text" class="form-control" placeholder="Search by name or email...">
-                        <select class="form-control">
+                    <?php if ($message && $currentTab === 'users'): ?>
+                        <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
+                    <?php endif; ?>
+
+                    <form method="get" action="admin.php" class="filter-bar">
+                        <input type="hidden" name="tab" value="users">
+                        <input type="text" name="user_search" class="form-control" placeholder="Search by name or email..." value="<?php echo htmlspecialchars($userSearch); ?>">
+                        <select name="user_role" class="form-control">
                             <option value="">All Roles</option>
-                            <option value="customer">Customer</option>
-                            <option value="technician">Technician</option>
-                            <option value="administrator">Administrator</option>
+                            <option value="customer" <?php echo $userRoleFilter === 'customer' ? 'selected' : ''; ?>>Customer</option>
+                            <option value="technician" <?php echo $userRoleFilter === 'technician' ? 'selected' : ''; ?>>Technician</option>
+                            <option value="administrator" <?php echo $userRoleFilter === 'administrator' ? 'selected' : ''; ?>>Administrator</option>
                         </select>
-                        <select class="form-control">
+                        <select name="user_status" class="form-control">
                             <option value="">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="active" <?php echo $userStatusFilter === 'active' ? 'selected' : ''; ?>>Active</option>
+                            <option value="inactive" <?php echo $userStatusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                         </select>
-                        <button class="btn btn-secondary">Search</button>
-                    </div>
+                        <button type="submit" class="btn btn-secondary">Search</button>
+                    </form>
 
                     <div class="admin-table-container">
                         <table class="admin-table">
@@ -302,10 +349,37 @@ $currentTab = isset($_GET['tab']) ? $_GET['tab'] : 'approvals';
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php if (empty($usersList)): ?>
                                 <tr>
-                                    <td colspan="7" class="empty-state">Loading users...</td>
+                                    <td colspan="7" class="empty-state">No users found.</td>
                                 </tr>
-                                <!-- Prototype rows would be populated here -->
+                                <?php else: ?>
+                                    <?php foreach ($usersList as $u): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($u['full_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($u['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($u['company_name'] ?? '—'); ?></td>
+                                        <td>
+                                            <form method="post" action="admin.php?tab=users<?php echo $userSearch ? '&user_search=' . urlencode($userSearch) : ''; ?><?php echo $userRoleFilter ? '&user_role=' . urlencode($userRoleFilter) : ''; ?><?php echo $userStatusFilter ? '&user_status=' . urlencode($userStatusFilter) : ''; ?>" style="display:inline;">
+                                                <input type="hidden" name="user_id" value="<?php echo (int) $u['id']; ?>">
+                                                <select name="role" class="form-control" style="width:auto; display:inline-block; padding:6px 8px;" onchange="this.form.submit()">
+                                                    <option value="customer" <?php echo $u['role'] === 'customer' ? 'selected' : ''; ?>>Customer</option>
+                                                    <option value="technician" <?php echo $u['role'] === 'technician' ? 'selected' : ''; ?>>Technician</option>
+                                                    <option value="administrator" <?php echo $u['role'] === 'administrator' ? 'selected' : ''; ?>>Administrator</option>
+                                                </select>
+                                                <input type="hidden" name="change_role" value="1">
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <span class="badge <?php echo !empty($u['is_active']) ? 'badge-success' : 'badge-danger'; ?>">
+                                                <?php echo !empty($u['is_active']) ? 'Active' : 'Inactive'; ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo $u['last_login'] ? date('Y-m-d H:i', strtotime($u['last_login'])) : '—'; ?></td>
+                                        <td class="actions">—</td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
