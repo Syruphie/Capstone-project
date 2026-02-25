@@ -108,9 +108,9 @@ $equipment = new Equipment();
                                         <td><?php echo htmlspecialchars($co['order_number']); ?></td>
                                         <td><?php echo date('M d, Y', strtotime($co['created_at'])); ?></td>
                                         <td>
-                                            <span class="priority-badge priority-<?php echo $co['priority']; ?>">
-                                                <?php echo ucfirst($co['priority']); ?>
-                                            </span>
+                                           <span class="priority-badge status-<?php echo $co['status']; ?>">
+    <?php echo ucfirst($co['status']); ?>
+</span>
                                         </td>
                                         <td><?php echo $co['sample_count']; ?></td>
                                         <td>

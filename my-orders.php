@@ -2,24 +2,24 @@
 require_once 'config/database.php';
 require_once 'classes/User.php';
 require_once 'classes/Order.php';
-
+ 
 $user = new User();
-
+ 
 // Check if user is logged in and is customer
 if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
     header('Location: login.php');
     exit;
 }
-
+ 
 $userId = $_SESSION['user_id'];
 $userName = $_SESSION['user_name'];
-
+ 
 // Initialize Order class
 $order = new Order();
-
+ 
 // Get customer's orders
 $orders = $order->getOrdersByCustomer($userId);
-
+ 
 // Count orders by status
 $statusCounts = [
     'submitted' => 0,
@@ -28,7 +28,7 @@ $statusCounts = [
     'completed' => 0,
     'rejected' => 0
 ];
-
+ 
 foreach ($orders as $o) {
     if (isset($statusCounts[$o['status']])) {
         $statusCounts[$o['status']]++;
@@ -136,13 +136,13 @@ foreach ($orders as $o) {
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
-
+ 
     <div class="orders-container">
         <div class="orders-header">
             <h1>My Orders</h1>
             <p>View and track all your submitted orders</p>
         </div>
-
+ 
         <div class="status-cards">
             <div class="status-card pending">
                 <div class="count"><?php echo $statusCounts['submitted']; ?></div>
@@ -165,10 +165,10 @@ foreach ($orders as $o) {
                 <div class="label">Rejected</div>
             </div>
         </div>
-
+ 
         <div class="orders-table-container">
             <h2>Order History</h2>
-
+ 
             <?php if (empty($orders)): ?>
                 <div class="empty-orders">
                     <h3>No Orders Yet</h3>
@@ -212,15 +212,16 @@ foreach ($orders as $o) {
                         </tbody>
                     </table>
                 </div>
-
+ 
                 <div style="margin-top: 20px; text-align: right;">
                     <a href="create-order.php" class="btn btn-primary">Create New Order</a>
                 </div>
             <?php endif; ?>
         </div>
     </div>
-
+ 
     <?php include 'includes/footer.php'; ?>
     <script src="js/main.js"></script>
 </body>
 </html>
+ 
