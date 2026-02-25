@@ -373,7 +373,12 @@ body {
 .dashboard-card p {
     color: #666;
     font-size: 14px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.dashboard-card h3, .dashboard-card h4{
+    margin-bottom: 8px; 
 }
  
 .card-stats {
@@ -389,7 +394,7 @@ body {
  
 .dashboard-card .btn {
     width: 100%;
-    margin-top: 20px; 
+    margin-top: auto;  
 }
  
 .full-width {
