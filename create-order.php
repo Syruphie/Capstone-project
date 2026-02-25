@@ -18,11 +18,12 @@ $success = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
-    $priority = $_POST['priority'] ?? 'standard';
-    $sampleType = $_POST['sample_type'] ?? '';
-    $compoundName = trim($_POST['compound_name'] ?? '');
-    $quantity = floatval($_POST['quantity'] ?? 0);
-    $unit = trim($_POST['unit'] ?? '');
+   $priority = htmlspecialchars($_POST['priority'] ?? 'standard');
+$sampleType = htmlspecialchars($_POST['sample_type'] ?? '');
+$compoundName = htmlspecialchars(trim($_POST['compound_name'] ?? ''));
+$quantity = floatval($_POST['quantity'] ?? 0);
+$unit = htmlspecialchars(trim($_POST['unit'] ?? ''));
+
 
     // Basic validation
     if (empty($sampleType) || empty($compoundName) || $quantity <= 0 || empty($unit)) {
@@ -109,8 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
                 <div class="form-group">
                     <label for="priority">Priority Level *</label>
                     <select id="priority" name="priority" required>
-                        <option value="standard">Standard (Regular Queue)</option>
-                        <option value="priority">Priority (Night Shift - Additional Fee)</option>
+                        <option value="standard" <?php echo ($priority ?? '') === 'standard' ? 'selected' : ''; ?>>
+    Standard (Regular Queue)
+</option>
+<option value="priority" <?php echo ($priority ?? '') === 'priority' ? 'selected' : ''; ?>>
+    Priority (Night Shift - Additional Fee)
+</option>
+
                     </select>
                 </div>
 
@@ -118,44 +124,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
                     <label for="sample_type">Sample Type *</label>
                     <select id="sample_type" name="sample_type" required>
                         <option value="">Select type...</option>
-                        <option value="ore">Ore (30 min prep time)</option>
-                        <option value="liquid">Liquid (No prep needed)</option>
+                        <option value="ore" <?php echo ($sampleType ?? '') === 'ore' ? 'selected' : ''; ?>>
+    Ore (30 min prep time)
+</option>
+<option value="liquid" <?php echo ($sampleType ?? '') === 'liquid' ? 'selected' : ''; ?>>
+    Liquid (No prep needed)
+</option>
+
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="compound_name">Compound Name *</label>
                     <input 
-                        type="text" 
-                        id="compound_name" 
-                        name="compound_name" 
-                        required 
-                        placeholder="e.g., Iron Oxide, Sulfuric Acid"
-                    >
+    type="text" 
+    id="compound_name" 
+    name="compound_name" 
+    required 
+    placeholder="e.g., Iron Oxide, Sulfuric Acid"
+    value="<?php echo htmlspecialchars($_POST['compound_name'] ?? ''); ?>"
+>
+
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="quantity">Quantity *</label>
-                        <input 
-                            type="number" 
-                            id="quantity" 
-                            name="quantity" 
-                            required 
-                            min="0.01" 
-                            step="0.01"
-                            placeholder="Amount"
-                        >
+                       <input 
+    type="number" 
+    id="quantity" 
+    name="quantity" 
+    required 
+    min="0.01" 
+    step="0.01"
+    placeholder="Amount"
+    value="<?php echo htmlspecialchars($_POST['quantity'] ?? ''); ?>"
+>
+
                     </div>
 
                     <div class="form-group">
                         <label for="unit">Unit *</label>
                         <select id="unit" name="unit" required>
-                            <option value="">Select unit...</option>
-                            <option value="g">Grams (g)</option>
-                            <option value="kg">Kilograms (kg)</option>
-                            <option value="mL">Milliliters (mL)</option>
-                            <option value="L">Liters (L)</option>
+                           <option value="g"  <?php echo ($unit ?? '') === 'g'  ? 'selected' : ''; ?>>Grams (g)</option>
+<option value="kg" <?php echo ($unit ?? '') === 'kg' ? 'selected' : ''; ?>>Kilograms (kg)</option>
+<option value="mL" <?php echo ($unit ?? '') === 'mL' ? 'selected' : ''; ?>>Milliliters (mL)</option>
+<option value="L"  <?php echo ($unit ?? '') === 'L'  ? 'selected' : ''; ?>>Liters (L)</option>
+
                         </select>
                     </div>
                 </div>
