@@ -48,14 +48,12 @@
 
 <!-- ================= CHATBOT START ================= -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<!-- Chatbot Button -->
 <div id="chatbot-button">
-    <i class="fa-solid fa-comments"></i>
+    <span class="material-icons">chat</span>
 </div>
 
-<!-- Chatbot Window -->
 <div id="chatbot-window">
     <div id="chatbot-header">
         <span>Virtual Assistant</span>
@@ -82,5 +80,7 @@
 <script src="chatbot/chat.js"></script>
 
 <!-- ================= CHATBOT END ================= -->
+
+
 
 

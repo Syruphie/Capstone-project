@@ -1,18 +1,21 @@
 <?php
-$message = strtolower($_POST['message']);
+$message = strtolower($_POST['message'] ?? '');
 
 if (str_contains($message, 'order')) {
-    echo "Go to the Approvals tab to review and approve orders.";
+    echo "You can approve orders from the My Orders → Approvals section.";
 }
 elseif (str_contains($message, 'equipment')) {
-    echo "Click on Equipment in the top menu to manage lab equipment.";
+    echo "Equipment management is available under the Equipment tab.";
 }
-elseif (str_contains($message, 'users')) {
-    echo "User management is available under the Users tab (Admins only).";
+elseif (str_contains($message, 'user')) {
+    echo "User accounts are managed in the Users section.";
+}
+elseif (str_contains($message, 'report')) {
+    echo "Reports can be accessed from the Reports menu.";
 }
 elseif (str_contains($message, 'logout')) {
-    echo "Use the Logout button on the top-right corner.";
+    echo "Click the Logout button at the top-right corner.";
 }
 else {
-    echo "I can help with navigation. Try asking about Orders, Equipment, or Users.";
-}
+    echo "I can help you navigate the dashboard. Try asking about Orders, Equipment, Users, or Reports.";
+} 

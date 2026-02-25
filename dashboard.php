@@ -265,8 +265,10 @@ $equipment = new Equipment();
         </div>
     </div>
  
-    <?php include 'includes/footer.php'; ?>
-    <?php include 'chatbot/chat.php' ; ?> <!-- Chatbot feature -->
-    <script src="js/main.js"></script>
+ <?php include 'includes/footer.php'; ?>
+
+
+
+<script src="js/main.js"></script>
 </body>
 </html>

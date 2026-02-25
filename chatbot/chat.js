@@ -1,81 +1,103 @@
-const button = document.getElementById("chatbot-button");
-const windowBox = document.getElementById("chatbot-window");
-const closeBtn = document.getElementById("chatbot-close");
-const sendBtn = document.getElementById("chatbot-send");
-const input = document.getElementById("chatbot-input");
-const messages = document.getElementById("chatbot-messages");
+document.addEventListener("DOMContentLoaded", () => {
 
-/* Open chatbot */
-button.onclick = () => {
-    windowBox.style.display = "flex";
-    button.style.display = "none";
-};
+    const button = document.getElementById("chatbot-button");
+    const windowBox = document.getElementById("chatbot-window");
+    const closeBtn = document.getElementById("chatbot-close");
+    const messages = document.getElementById("chatbot-messages");
 
-/* Close chatbot */
-closeBtn.onclick = () => {
-    windowBox.style.display = "none";
-    button.style.display = "flex";
-};
-
-/* Send message button */
-sendBtn.onclick = sendMessage;
-
-/* Send message function (manual typing) */
-function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
-
-    messages.innerHTML += `<div class="chat user"><b>You:</b> ${text}</div>`;
-    input.value = "";
-
-    fetch("chatbot/chat_api.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "message=" + encodeURIComponent(text)
-    })
-    .then(res => res.text())
-    .then(reply => {
-        messages.innerHTML += `<div class="chat bot"><b>Bot:</b> ${reply}</div>`;
-        messages.scrollTop = messages.scrollHeight;
+    // OPEN chatbot
+    button.addEventListener("click", () => {
+        windowBox.style.display = "flex";
+        button.style.display = "none";
+        messages.innerHTML = "";
+        botGreeting();
     });
-}
 
-/* -----------------------------------
-   STEP 3: Quick Questions Click Logic
------------------------------------- */
+    // CLOSE chatbot
+    closeBtn.addEventListener("click", () => {
+        windowBox.style.display = "none";
+        button.style.display = "flex";
+    });
 
-const quickQuestions = document.querySelectorAll(".question");
+    /* ---------------- BOT FUNCTIONS ---------------- */
 
-quickQuestions.forEach(question => {
-    question.addEventListener("click", () => {
-        const text = question.innerText;
+    function botGreeting() {
+        showTyping();
 
-        // User message
-        messages.innerHTML += `<div class="chat user"><b>You:</b> ${text}</div>`;
+        setTimeout(() => {
+            removeTyping();
+            addBotMessage("Hi! How can I help you today?");
+            showOptions();
+        }, 1200);
+    }
+
+    function showOptions() {
+        const optionsHTML = `
+            <div class="chat-options">
+                <button onclick="handleOption('approve')">How do I approve orders?</button>
+                <button onclick="handleOption('newOrder')">How do I create a new order?</button>
+                <button onclick="handleOption('equipment')">Where can I manage equipment?</button>
+                <button onclick="handleOption('logout')">How do I logout?</button>
+            </div>
+        `;
+        messages.innerHTML += optionsHTML;
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    window.handleOption = function(type) {
+        document.querySelector(".chat-options")?.remove();
 
         let reply = "";
 
-        if (text.includes("approve")) {
-            reply = "Go to the Approvals tab from the top menu to review and approve orders.";
-        } 
-        else if (text.includes("users")) {
-            reply = "Click on the Users tab to manage user accounts and permissions.";
-        } 
-        else if (text.includes("equipment")) {
-            reply = "Use the Equipment tab to add, update, or view lab equipment.";
-        } 
-        else if (text.includes("reports")) {
-            reply = "Reports are available under the Reports tab in the navigation bar.";
-        } 
-        else if (text.includes("logout")) {
-            reply = "Click the Logout button in the top-right corner of the dashboard.";
+        switch (type) {
+            case "approve":
+                reply = "To approve orders, open the Approvals tab from the top navigation. This option is available only for admin users.";
+                break;
+
+            case "newOrder":
+                reply = "You can create a new order from the Dashboard. Look for the New Order option.";
+                break;
+
+            case "equipment":
+                reply = "Equipment management is available in the Admin panel under the Equipment section.";
+                break;
+
+            case "logout":
+                reply = "The logout option is located at the top-right corner of the application.";
+                break;
         }
 
-        // Bot reply
-        messages.innerHTML += `<div class="chat bot"><b>Bot:</b> ${reply}</div>`;
-        messages.scrollTop = messages.scrollHeight;
+        showTyping();
 
-        // Optional: hide questions after first click
-        document.getElementById("quick-questions").style.display = "none";
-    });
+        setTimeout(() => {
+            removeTyping();
+            addBotMessage(reply);
+            showOptions();
+        }, 1000);
+    };
+
+    /* ---------------- UI HELPERS ---------------- */
+
+    function addBotMessage(text) {
+        messages.innerHTML += `
+            <div class="bot-message">
+                <strong>Bot:</strong> ${text}
+            </div>
+        `;
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function showTyping() {
+        messages.innerHTML += `
+            <div class="typing" id="typing">
+                Bot is typing<span>.</span><span>.</span><span>.</span>
+            </div>
+        `;
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeTyping() {
+        document.getElementById("typing")?.remove();
+    }
+
 });

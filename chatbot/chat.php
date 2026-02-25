@@ -1,38 +1,53 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <!-- Chatbot Button -->
 <div id="chatbot-button">
-    <i class="fa-solid fa-comments"></i>
+    <span class="material-icons">chat</span>
 </div>
 
-<!-- Chat Window -->
+<!-- Chatbot Window -->
 <div id="chatbot-window">
     <div id="chatbot-header">
         <span>Virtual Assistant</span>
         <span id="chatbot-close">&times;</span>
     </div>
 
-    <!-- Chat Messages -->
-    <div id="chatbot-messages">
+    <div id="chatbot-messages"></div>
 
-        <!-- Quick Navigation Questions -->
-        <div id="quick-questions">
-            <div class="question">How do I approve orders?</div>
-            <div class="question">Where can I manage users?</div>
-            <div class="question">How do I manage equipment?</div>
-            <div class="question">Where can I view reports?</div>
-            <div class="question">How do I logout?</div>
-        </div>
-
-    </div>
-
-    <!-- Input Area -->
     <div id="chatbot-input-area">
         <input type="text" id="chatbot-input" placeholder="Ask me something...">
         <button id="chatbot-send">Send</button>
     </div>
 </div>
 
-<!-- Chatbot CSS & JS -->
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link rel="stylesheet" href="chatbot/chat.css">
+<script src="chatbot/chat.js"></script>
+
+<!-- Chatbot Window -->
+<div id="chatbot-window">
+    <div id="chatbot-header">
+        <span>Navigation Help</span>
+        <span id="chatbot-close">&times;</span>
+    </div>
+
+    <div id="chatbot-messages">
+        <div id="quick-questions">
+            <div class="question">Where are my orders?</div>
+            <div class="question">How do I create a new order?</div>
+            <div class="question">Where is equipment?</div>
+            <div class="question">How do I logout?</div>
+        </div>
+    </div>
+
+    <div id="chatbot-input-area">
+        <input type="text" id="chatbot-input" placeholder="Ask about navigation…">
+        <button id="chatbot-send">Send</button>
+    </div>
+</div>
+
 <link rel="stylesheet" href="chatbot/chat.css">
 <script src="chatbot/chat.js"></script>
