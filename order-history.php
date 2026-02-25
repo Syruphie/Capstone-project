@@ -12,27 +12,22 @@ if (!$user->isLoggedIn()) {
 
 $role = $user->getRole();
 
-// Technicians do not have access to Order History
-if ($role === 'technician') {
-    header('Location: dashboard.php');
-    exit;
-}
+// technicians are allowed to view calendar; they don't see tables/search if not needed
+// (role-based filtering happens later in the HTML)
 
 $order = new Order();
 $searchOrderNumber = isset($_GET['order_number']) ? trim($_GET['order_number']) : '';
 $searchDateFrom   = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
 $searchDateTo     = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
 $searchCustomerName = isset($_GET['customer_name']) ? trim($_GET['customer_name']) : '';
+// status filter array from query
+$searchStatuses = isset($_GET['status']) ? (array)$_GET['status'] : [];
 
-if ($role === 'customer') {
-    $orders = $order->getOrderHistoryForCustomer($_SESSION['user_id'], $searchOrderNumber, $searchDateFrom, $searchDateTo);
-    $standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
-    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'prioritized'; });
-} else {
-    $orders = $order->getOrderHistoryForAdmin($searchCustomerName, $searchOrderNumber, $searchDateFrom, $searchDateTo);
-    $standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
-    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'prioritized'; });
-}
+// fetch orders using general helper (applies filters and status)
+$orders = $order->getOrdersForRole($role, $_SESSION['user_id'], $searchOrderNumber, $searchDateFrom, $searchDateTo, $searchStatuses);
+// split by priority for table display
+$standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
+$prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'prioritized'; });
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,17 +37,45 @@ if ($role === 'customer') {
     <title>Order History - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
     <style>
-        .orders-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .orders-header { background: white; border-radius: 10px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .orders-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        /* sidebar fixed width */
+        .sidebar { flex: 0 0 300px; max-width: 300px; }
+
+        /* calendar styling */
+        #calendar { max-width:900px; margin:20px auto 40px; background:#f9fafb; padding:15px; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.05); min-height:400px; }
+        .orders-header { text-align: center; margin-bottom: 20px; }
         .orders-header h1 { color: #333; margin-bottom: 5px; }
         .orders-header p { color: #666; margin: 0; }
         .search-form { background: white; border-radius: 10px; padding: 20px 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .search-form form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+        .sidebar .search-form form { flex-direction: column; align-items: stretch; }
+        .sidebar .search-form form > div { width: 100%; }
         .search-form label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
-        .search-form input[type="text"], .search-form input[type="date"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 140px; }
+        .search-form input[type="text"], .search-form input[type="date"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; width: 100%; box-sizing: border-box; }
         .search-form button { padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; }
         .search-form button[type="reset"] { background: #6c757d; }
+        .search-form .status-group { display:flex; flex-wrap: wrap; gap:8px; max-width:100%; overflow-x:auto; }
+        .search-form .status-group label { font-size:12px; white-space:nowrap; flex-shrink:0; }
+
+        .search-form .status-group label { font-size:12px; white-space:nowrap; }
+        @media (max-width:600px) {
+            .search-form form { flex-direction: column; align-items: stretch; }
+            .search-form input[type="text"], .search-form input[type="date"] { width:100%; }
+            .search-form .status-group { justify-content:flex-start; }
+        }
+        /* new layout rules */
+        .layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: nowrap; }
+        .sidebar { flex: 0 0 300px; background: #fff; border-radius:10px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+
+
+        .main-content { flex: 1; }
+        @media (max-width:800px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; }
+        }
         .history-section { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .history-section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
         .admin-table-container { overflow-x: auto; }
@@ -64,6 +87,10 @@ if ($role === 'customer') {
         .badge-standard { background: #e9ecef; color: #495057; }
         .badge-prioritized { background: #fff3cd; color: #856404; }
         .empty-history { text-align: center; padding: 40px 20px; color: #666; }
+        /* calendar box styling */
+        .calendar-card { max-width:900px; margin:0 auto 20px; background:#f9fafb; padding:15px; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.05); min-height:400px; }
+        .calendar-card h2 { text-align:center; margin:0 0 10px; }
+        .sidebar h2, .calendar-card h2 { font-size:18px; color:#333; margin-bottom:15px; }
     </style>
 </head>
 <body>
@@ -71,11 +98,20 @@ if ($role === 'customer') {
 
     <div class="orders-container">
         <div class="orders-header">
-            <h1>Order History</h1>
-            <p><?php echo $role === 'customer' ? 'Your completed orders' : 'All completed orders'; ?></p>
+            <h1><?php echo $role === 'technician' ? 'Order Calendar' : 'Order History & Calendar'; ?></h1>
+            <?php if ($role === 'customer'): ?>
+                <p>Your completed orders</p>
+            <?php elseif ($role === 'administrator'): ?>
+                <p>All completed orders</p>
+            <?php else: ?>
+                <p>View order schedule and key dates</p>
+            <?php endif; ?>
         </div>
 
+        <div class="layout">
+            <aside class="sidebar">
         <div class="search-form">
+            <h2>Filters</h2>
             <form method="get" action="order-history.php">
                 <?php if ($role === 'administrator'): ?>
                     <div>
@@ -96,21 +132,46 @@ if ($role === 'customer') {
                     <input type="date" name="date_to" value="<?php echo htmlspecialchars($searchDateTo); ?>">
                 </div>
                 <div>
+                    <label>Status</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <?php
+                        $allStatuses = ['completed','submitted','approved','in_queue','rejected','pending_approval','payment_pending','payment_confirmed','preparation_in_progress','testing_in_progress','results_available'];
+                        foreach ($allStatuses as $s): ?>
+                            <label style="font-size:12px;">
+                                <input type="checkbox" name="status[]" value="<?= $s ?>" <?= in_array($s, $searchStatuses) ? 'checked' : '' ?>>
+                                <?= htmlspecialchars(str_replace('_', ' ', ucfirst($s))) ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <div>
                     <button type="submit">Search</button>
                     <button type="reset" onclick="window.location='order-history.php';">Clear</button>
                 </div>
             </form>
+        </div>
+            </aside>
+            <div class="main-content">
+
+        <!-- calendar container -->
+        <div class="calendar-card">
+            <h2>Order Calendar</h2>
+            <div id="calendar"></div>
         </div>
 
         <?php if (empty($orders)): ?>
             <div class="history-section">
                 <div class="empty-history">
                     <h3>No completed orders found</h3>
-                    <p><?php echo $role === 'customer' ? 'You have no finished orders yet, or no orders match your search.' : 'No finished orders match your search.'; ?></p>
+                    <?php if($role !== 'technician'): ?>
+                        <p><?php echo $role === 'customer' ? 'You have no finished orders yet, or no orders match your search.' : 'No finished orders match your search.'; ?></p>
+                    <?php else: ?>
+                        <p>There are currently no orders to display on the calendar.</p>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php else: ?>
-            <?php if (!empty($prioritizedOrders)): ?>
+            <?php if ($role !== 'technician' && !empty($prioritizedOrders)): ?>
             <div class="history-section">
                 <h2>Prioritized orders</h2>
                 <div class="admin-table-container">
@@ -142,7 +203,7 @@ if ($role === 'customer') {
             </div>
             <?php endif; ?>
 
-            <?php if (!empty($standardOrders)): ?>
+            <?php if ($role !== 'technician' && !empty($standardOrders)): ?>
             <div class="history-section">
                 <h2>Standard orders</h2>
                 <div class="admin-table-container">
@@ -174,9 +235,52 @@ if ($role === 'customer') {
             </div>
             <?php endif; ?>
         <?php endif; ?>
+            </div> <!-- end main-content -->
+        </div> <!-- end layout -->
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            // fetch events, including any current query parameters (filters)
+            events: function(fetchInfo, success, failure) {
+                var query = window.location.search.substring(1);
+                var url = 'get_calendar_events.php' + (query ? '?' + query : '');
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('calendar events', data);
+                        // if there are no events, just pass empty array; the grid will still render
+                        success((data && data.length) ? data : []);
+                    })
+                    .catch(e => { console.error(e); failure(e); });
+            },
+            eventColor: '#667eea',
+            eventTextColor: '#fff',
+            eventDisplay: 'block',
+            // give a fixed height so the grid is visible even with no events
+            height: 700,
+            navLinks: true,
+            editable: false,
+            dayMaxEvents: true,
+            eventDidMount: function(info) {
+                info.el.setAttribute('title', info.event.extendedProps.description);
+            },
+            noEventsContent: 'No orders scheduled',
+        });
+        calendar.render();
+    });
+    </script>
     <script src="js/main.js"></script>
 </body>
 </html>

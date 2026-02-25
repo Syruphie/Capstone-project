@@ -426,6 +426,18 @@ body {
     background: #f8f9fa;
 }
 
+#calendar {
+    margin-top: 15px;
+}
+
+.calendar-event {
+    background: #f4f4f4;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border-left: 4px solid #5a4fcf;
+}
+
 /* Priority Badges */
 .priority-badge {
     display: inline-block;

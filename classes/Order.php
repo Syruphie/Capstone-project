@@ -74,6 +74,51 @@ class Order {
         // Method signature for calculating total cost of an order
     }
 
+    /**
+     * Retrieve orders for calendar/history depending on role and optional filters.
+     * Filters may include order number, date range (created/estimated/completed), and statuses.
+     */
+    public function getOrdersForRole($role, $userId = null, $searchOrderNumber = '', $searchDateFrom = '', $searchDateTo = '', $filterStatuses = []) {
+        $sql = "SELECT o.*, u.full_name as customer_name, u.email as customer_email
+                FROM orders o
+                LEFT JOIN users u ON o.customer_id = u.id
+                WHERE 1=1";
+        $params = [];
+
+        if ($role === 'customer') {
+            $sql .= " AND o.customer_id = ?";
+            $params[] = $userId;
+        }
+
+        if ($searchOrderNumber !== '') {
+            $sql .= " AND o.order_number LIKE ?";
+            $params[] = '%' . $searchOrderNumber . '%';
+        }
+        if ($searchDateFrom !== '') {
+            $sql .= " AND (o.created_at >= ? OR o.estimated_completion >= ? OR o.completed_at >= ?)";
+            $params[] = $searchDateFrom;
+            $params[] = $searchDateFrom;
+            $params[] = $searchDateFrom;
+        }
+        if ($searchDateTo !== '') {
+            $sql .= " AND (o.created_at <= ? OR o.estimated_completion <= ? OR o.completed_at <= ?)";
+            $params[] = $searchDateTo;
+            $params[] = $searchDateTo;
+            $params[] = $searchDateTo;
+        }
+        if (!empty($filterStatuses)) {
+            $placeholders = implode(',', array_fill(0, count($filterStatuses), '?'));
+            $sql .= " AND o.status IN ($placeholders)";
+            foreach ($filterStatuses as $s) {
+                $params[] = $s;
+            }
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
     public function updateEstimatedCompletion($orderId, $estimatedCompletion) {
         $stmt = $this->db->prepare("UPDATE orders SET estimated_completion = ? WHERE id = ?");
         return $stmt->execute([$estimatedCompletion, $orderId]);
@@ -190,6 +235,104 @@ class Order {
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
+
+    /**
+ * Fetch orders as events for calendar display.
+ * Customer sees only their orders, admin sees all.
+ */
+public function getCalendarEvents($role, $userId = null, $filterStatuses = [], $searchOrderNumber = '', $searchDateFrom = '', $searchDateTo = '') {
+    $events = [];
+
+    // delegate retrieval to helper which handles filters
+    $orders = $this->getOrdersForRole($role, $userId, $searchOrderNumber, $searchDateFrom, $searchDateTo, $filterStatuses);
+
+    // helper color map
+    $getColor = function($status) {
+        switch ($status) {
+            case 'submitted':
+            case 'pending_approval': return '#ffc107'; // yellow
+            case 'approved':
+            case 'payment_pending':
+            case 'payment_confirmed': return '#0d6efd'; // blue
+            case 'in_queue':
+            case 'preparation_in_progress':
+            case 'testing_in_progress': return '#fd7e14'; // orange
+            case 'results_available':
+            case 'completed': return '#198754'; // green
+            case 'rejected': return '#dc3545'; // red
+            default: return '#6c757d'; // grey
+        }
+    };
+
+    foreach ($orders as $o) {
+        // Event for when order was created/submitted
+        if (!empty($o['created_at'])) {
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Submitted",
+                'date' => $o['created_at'],
+                'description' => "Status: " . ($o['status'] ?? 'N/A'),
+                'status' => $o['status'] ?? null,
+                'color' => $getColor($o['status'] ?? '')
+            ];
+        }
+        // Event for approval action
+        if (!empty($o['approved_at'])) {
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Approved",
+                'date' => $o['approved_at'],
+                'description' => "Status: approved",
+                'status' => 'approved',
+                'color' => $getColor('approved')
+            ];
+        }
+        // Event for rejection
+        if (($o['status'] ?? '') === 'rejected') {
+            $date = !empty($o['updated_at']) ? $o['updated_at'] : $o['created_at'];
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Rejected",
+                'date' => $date,
+                'description' => "Status: rejected",
+                'status' => 'rejected',
+                'color' => $getColor('rejected')
+            ];
+        }
+
+        // Event for estimated completion
+        if (!empty($o['estimated_completion'])) {
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Estimated Completion",
+                'date' => $o['estimated_completion'],
+                'description' => "Status: " . ($o['status'] ?? 'N/A'),
+                'status' => $o['status'] ?? null,
+                'color' => $getColor($o['status'] ?? '')
+            ];
+        }
+
+        // Event for completed orders
+        if (!empty($o['completed_at'])) {
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Completed",
+                'date' => $o['completed_at'],
+                'description' => "Status: " . ($o['status'] ?? 'N/A'),
+                'status' => $o['status'] ?? null,
+                'color' => $getColor($o['status'] ?? '')
+            ];
+        }
+
+        // Event for delivery date (optional)
+        if (!empty($o['delivery_date'])) {
+            $events[] = [
+                'title' => "Order #" . ($o['order_number'] ?? $o['id']) . " Delivery",
+                'date' => $o['delivery_date'],
+                'description' => "Status: " . ($o['status'] ?? 'N/A'),
+                'status' => $o['status'] ?? null,
+                'color' => $getColor($o['status'] ?? '')
+            ];
+        }
+    }
+
+    return $events;
+}
 
     // Order Timeline Methods
     public function getOrderTimeline($orderId) {

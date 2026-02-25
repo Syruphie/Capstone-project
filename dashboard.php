@@ -256,6 +256,12 @@ $equipment = new Equipment();
             </div>
         <?php endif; ?>
 
+        <!-- Order Calendar Section -->
+<div class="dashboard-card full-width">
+    <h2>Order Calendar</h2>
+    <div id="calendar"></div>
+</div>
+
         <!-- System Information Card -->
         <div class="dashboard-card system-info">
             <h3>System Information</h3>
@@ -267,6 +273,33 @@ $equipment = new Equipment();
 
     <?php include 'includes/footer.php'; ?>
     <?php include 'chatbot/chat.php' ; ?> <!-- Chatbot feature --> 
+
+    <script>
+fetch("get_calendar_events.php")
+.then(response => response.json())
+.then(events => {
+    let calendar = document.getElementById("calendar");
+
+    if (!events.length) {
+        calendar.innerHTML = "<p>No calendar events available.</p>";
+        return;
+    }
+
+    events.forEach(event => {
+        calendar.innerHTML += `
+            <div class="calendar-event">
+                <strong>${event.title}</strong><br>
+                <small>Date: ${event.date}</small><br>
+                ${event.description}
+            </div>
+        `;
+    });
+})
+.catch(error => {
+    console.error("Calendar error:", error);
+});
+</script>
+
     <script src="js/main.js"></script>
 </body>
 </html>

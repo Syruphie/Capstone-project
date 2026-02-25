@@ -128,6 +128,8 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     <title>Admin Panel - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -139,7 +141,9 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                 <section class="admin-section">
                     <h1>Pending Approvals</h1>
                     <p class="section-desc">Review and approve or reject submitted orders.</p>
-                    
+                    <div id="approvalsCalendar" style="max-width:900px;margin:20px auto 40px;
+                        background:#fff;padding:15px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.1);
+                        min-height:300px;"></div>
                     <?php if ($message): ?>
                         <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
                     <?php endif; ?>
@@ -464,5 +468,29 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
 
     <?php include 'includes/footer.php'; ?>
     <script src="js/main.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calEl = document.getElementById('approvalsCalendar');
+        if (calEl) {
+            var cal = new FullCalendar.Calendar(calEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {left:'prev,next today',center:'title',right:'dayGridMonth,timeGridWeek,timeGridDay'},
+                events: 'get_calendar_events.php',
+                eventColor: '#667eea',
+                eventTextColor: '#fff',
+                eventDisplay: 'block',
+                height: 'auto',
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: true,
+                eventDidMount: function(info) {
+                    info.el.setAttribute('title', info.event.extendedProps.description);
+                },
+                noEventsContent: 'No orders scheduled'
+            });
+            cal.render();
+        }
+    });
+    </script>
 </body>
 </html>
