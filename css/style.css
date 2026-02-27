@@ -512,3 +512,28 @@ body {
         text-align: center;
     }
 }
+
+.orders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.orders-header {
+    background: white;
+    border-radius: 10px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.status-approved { background:#d1ecf1; color:#0c5460; }
+.status-processing { background:#e7e3ff; color:#5a4fcf; }
+.status-completed { background:#d4edda; color:#155724; }
+.status-rejected { background:#f8d7da; color:#721c24; }

@@ -12,7 +12,7 @@ if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
 }
 
 $userId = $_SESSION['user_id'];
-$userName = $_SESSION['user_name'];
+$userName = $_SESSION['user_name'] ?? 'Customer';
 
 // Initialize Order class
 $order = new Order();
@@ -37,143 +37,298 @@ foreach ($orders as $o) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Orders - <?php echo APP_NAME; ?></title>
+    <title>My Orders -
+        <?php echo APP_NAME; ?>
+    </title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+
     <style>
+        :root {
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: rgba(15, 23, 42, .10);
+        }
+
+        /* PAGE WRAPPER */
         .orders-container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px 60px;
         }
+
+        /* SHARP OUTER HEADER */
         .orders-header {
-            background: white;
-            border-radius: 10px;
-            padding: 25px 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
         }
+
         .orders-header h1 {
-            color: #333;
-            margin-bottom: 5px;
+            margin: 0 0 8px;
+            font-size: 46px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: var(--text);
         }
+
         .orders-header p {
-            color: #666;
             margin: 0;
+            color: var(--muted);
+            font-size: 16px;
         }
+
+        /* STATUS CARDS - SAME SIZE */
         .status-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
         }
+
         .status-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 18px 14px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
+
         .status-card .count {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 8px;
         }
+
         .status-card .label {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .3px;
         }
-        .status-card.pending .count { color: #ffc107; }
-        .status-card.approved .count { color: #17a2b8; }
-        .status-card.processing .count { color: #667eea; }
-        .status-card.completed .count { color: #28a745; }
-        .status-card.rejected .count { color: #dc3545; }
-        .orders-table-container {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+        .status-card.pending .count {
+            color: #ca8a04;
         }
-        .orders-table-container h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 18px;
+
+        .status-card.approved .count {
+            color: #0284c7;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+
+        .status-card.processing .count {
+            color: #5b4ae6;
+        }
+
+        .status-card.completed .count {
+            color: #16a34a;
+        }
+
+        .status-card.rejected .count {
+            color: #dc2626;
+        }
+
+        /* MAIN TABLE CARD (SHARP OUTSIDE) */
+        .section-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
+            overflow: hidden;
+        }
+
+        .section-title {
+            padding: 20px 28px;
+            font-size: 26px;
+            font-weight: 900;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        /* TABLE */
+        .admin-table-container {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 16px;
+            font-weight: 900;
+            border-bottom: 1px solid var(--border);
+            color: var(--muted);
+            background: #fafafa;
+            white-space: nowrap;
+        }
+
+        .admin-table td {
+            padding: 18px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .admin-table tr:hover {
+            background: rgba(91, 74, 230, .05);
+        }
+
+        /* STATUS PILL (ROUNDED INSIDE) */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 999px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 900;
             text-transform: uppercase;
+            letter-spacing: .5px;
+            border: 1px solid rgba(0, 0, 0, .10);
         }
-        .status-submitted { background: #fff3cd; color: #856404; }
-        .status-approved { background: #d1ecf1; color: #0c5460; }
-        .status-processing { background: #e7e3ff; color: #5a4fcf; }
-        .status-completed { background: #d4edda; color: #155724; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        .pill-submitted {
+            background: rgba(202, 138, 4, .12);
+            color: #854d0e;
+        }
+
+        .pill-approved {
+            background: rgba(14, 165, 233, .12);
+            color: #075985;
+        }
+
+        .pill-processing {
+            background: rgba(91, 74, 230, .12);
+            color: #4338ca;
+        }
+
+        .pill-completed {
+            background: rgba(22, 163, 74, .12);
+            color: #166534;
+        }
+
+        .pill-rejected {
+            background: rgba(220, 38, 38, .12);
+            color: #991b1b;
+        }
+
+        /* BUTTONS (ROUNDED) */
+        .btn {
+            border-radius: 16px;
+            font-weight: 900;
+            padding: 12px 16px;
+        }
+
+        .btn.btn-small {
+            padding: 10px 14px;
+            border-radius: 14px;
+        }
+
+        /* EMPTY STATE */
         .empty-orders {
+            padding: 50px 28px;
             text-align: center;
-            padding: 60px 20px;
-            color: #666;
+            color: var(--muted);
         }
+
         .empty-orders h3 {
-            color: #333;
-            margin-bottom: 10px;
+            margin: 0 0 8px;
+            color: var(--text);
+            font-size: 22px;
+            font-weight: 900;
         }
+
         .empty-orders p {
-            margin-bottom: 20px;
+            margin: 0 0 18px;
         }
-        .new-order-btn {
-            display: inline-block;
-            margin-top: 15px;
+
+        /* CTA AREA */
+        .cta-row {
+            padding: 18px 22px 22px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .status-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .status-cards {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
     <?php include 'includes/header.php'; ?>
 
     <div class="orders-container">
         <div class="orders-header">
             <h1>My Orders</h1>
-            <p>View and track all your submitted orders</p>
+            <p>View and track all your submitted orders.</p>
         </div>
 
         <div class="status-cards">
             <div class="status-card pending">
-                <div class="count"><?php echo $statusCounts['submitted']; ?></div>
+                <div class="count">
+                    <?php echo $statusCounts['submitted']; ?>
+                </div>
                 <div class="label">Pending</div>
             </div>
             <div class="status-card approved">
-                <div class="count"><?php echo $statusCounts['approved']; ?></div>
+                <div class="count">
+                    <?php echo $statusCounts['approved']; ?>
+                </div>
                 <div class="label">Approved</div>
             </div>
             <div class="status-card processing">
-                <div class="count"><?php echo $statusCounts['processing']; ?></div>
+                <div class="count">
+                    <?php echo $statusCounts['processing']; ?>
+                </div>
                 <div class="label">Processing</div>
             </div>
             <div class="status-card completed">
-                <div class="count"><?php echo $statusCounts['completed']; ?></div>
+                <div class="count">
+                    <?php echo $statusCounts['completed']; ?>
+                </div>
                 <div class="label">Completed</div>
             </div>
             <div class="status-card rejected">
-                <div class="count"><?php echo $statusCounts['rejected']; ?></div>
+                <div class="count">
+                    <?php echo $statusCounts['rejected']; ?>
+                </div>
                 <div class="label">Rejected</div>
             </div>
         </div>
 
-        <div class="orders-table-container">
-            <h2>Order History</h2>
+        <div class="section-card">
+            <div class="section-title">Order History</div>
 
             <?php if (empty($orders)): ?>
                 <div class="empty-orders">
                     <h3>No Orders Yet</h3>
                     <p>You haven't submitted any orders. Start by creating a new order.</p>
-                    <a href="create-order.php" class="btn btn-primary new-order-btn">Create New Order</a>
+                    <a href="create-order.php" class="btn btn-primary">Create New Order</a>
                 </div>
             <?php else: ?>
                 <div class="admin-table-container">
@@ -190,30 +345,54 @@ foreach ($orders as $o) {
                         </thead>
                         <tbody>
                             <?php foreach ($orders as $o): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($o['order_number']); ?></td>
-                                <td><?php echo date('M d, Y H:i', strtotime($o['created_at'])); ?></td>
-                                <td>
-                                    <span class="badge badge-<?php echo $o['priority']; ?>">
-                                        <?php echo ucfirst($o['priority']); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo $o['sample_count']; ?></td>
-                                <td>
-                                    <span class="status-badge status-<?php echo $o['status']; ?>">
-                                        <?php echo ucfirst($o['status']); ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-small btn-secondary">View Details</a>
-                                </td>
-                            </tr>
+                                <?php
+                                $st = strtolower($o['status']);
+                                $pill = 'pill-processing';
+                                if ($st === 'submitted')
+                                    $pill = 'pill-submitted';
+                                if ($st === 'approved')
+                                    $pill = 'pill-approved';
+                                if ($st === 'processing')
+                                    $pill = 'pill-processing';
+                                if ($st === 'completed')
+                                    $pill = 'pill-completed';
+                                if ($st === 'rejected')
+                                    $pill = 'pill-rejected';
+                                ?>
+                                <tr>
+                                    <td>
+                                        <?php echo htmlspecialchars($o['order_number']); ?>
+                                    </td>
+                                    <td>
+                                        <?php echo date('M d, Y H:i', strtotime($o['created_at'])); ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-<?php echo htmlspecialchars($o['priority']); ?>">
+                                            <?php echo strtoupper(htmlspecialchars($o['priority'])); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php echo (int) $o['sample_count']; ?>
+                                    </td>
+                                    <td>
+                                        <span class="status-pill <?php echo $pill; ?>">
+                                            <?php echo htmlspecialchars($st); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <!-- customer details page -->
+                                        <a href="order-details-cus.php?id=<?php echo (int) $o['id']; ?>"
+                                            class="btn btn-small btn-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
 
-                <div style="margin-top: 20px; text-align: right;">
+                <div class="cta-row">
                     <a href="create-order.php" class="btn btn-primary">Create New Order</a>
                 </div>
             <?php endif; ?>
@@ -223,4 +402,5 @@ foreach ($orders as $o) {
     <?php include 'includes/footer.php'; ?>
     <script src="js/main.js"></script>
 </body>
+
 </html>
