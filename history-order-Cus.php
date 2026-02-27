@@ -81,7 +81,7 @@ foreach ($orders as $o) {
       font-size: 44px;
       line-height: 1.05;
       letter-spacing: -0.03em;
-      font-weight: 900;
+      font-weight: 700;
       color: var(--oh-text);
     }
 

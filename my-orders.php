@@ -74,7 +74,7 @@ foreach ($orders as $o) {
         .orders-header h1 {
             margin: 0 0 8px;
             font-size: 46px;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: -1px;
             color: var(--text);
         }
