@@ -5,7 +5,6 @@ require_once 'classes/Order.php';
 
 $user = new User();
 
-
 if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
   header('Location: login.php');
   exit;
@@ -14,17 +13,23 @@ if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
 $customerId = $_SESSION['user_id'];
 
 $orderObj = new Order();
-$orders = $orderObj->getOrderHistoryByCustomer($customerId);
+$ordersAll = $orderObj->getOrderHistoryByCustomer($customerId);
 
-
+/* keep only completed + rejected for "Order History" */
+$orders = [];
 $completedCount = 0;
 $rejectedCount = 0;
 
-foreach ($orders as $o) {
-  if ($o['status'] === 'completed')
+foreach ($ordersAll as $o) {
+  $status = strtolower($o['status'] ?? '');
+  if ($status === 'completed')
     $completedCount++;
-  if ($o['status'] === 'rejected')
+  if ($status === 'rejected')
     $rejectedCount++;
+
+  if (in_array($status, ['completed', 'rejected'])) {
+    $orders[] = $o;
+  }
 }
 ?>
 <!DOCTYPE html>
@@ -38,273 +43,261 @@ foreach ($orders as $o) {
   </title>
 
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/admin.css" />
 
+  <!-- ✅ ALL-IN-ONE CSS (Dashboard containers + smaller stat cards + bottom button) -->
   <style>
-    <style>:root {
-      --oh-text: #0f172a;
-      --oh-muted: #64748b;
-      --oh-border: rgba(15, 23, 42, .10);
-
-      --oh-primary: #5b4ae6;
-      --oh-primary2: #7c3aed;
-
-      --r1: 14px;
-      --r2: 18px;
-      --r3: 22px;
-
-      --sh1: 0 1px 2px rgba(15, 23, 42, .06);
-      --sh2: 0 10px 30px rgba(15, 23, 42, .12);
-      --sh3: 0 18px 60px rgba(15, 23, 42, .14);
+    :root {
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: rgba(15, 23, 42, .10);
     }
 
-    /* Page container */
-    .orders-container {
-      max-width: 1120px;
+    /* MAIN WRAPPER (same as dashboard) */
+    .dashboard-container {
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 16px 50px;
+      padding: 40px 20px 60px;
     }
 
-    /* Top header card */
-    .orders-header {
-      background: rgba(255, 255, 255, .92);
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: var(--r3);
-      padding: 28px;
-      margin-bottom: 18px;
-      box-shadow: var(--sh3);
-      backdrop-filter: blur(8px);
+    /* HEADER CARD (same as dashboard welcome-section) */
+    .welcome-section {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
     }
 
-    .orders-header h1 {
+    .welcome-section h1 {
+      font-size: 42px;
+      font-weight: 900;
+      margin: 0 0 10px;
+      letter-spacing: -1px;
+      color: var(--text);
+    }
+
+    .welcome-section p {
       margin: 0;
-      font-size: 44px;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      font-weight: 700;
-      color: var(--oh-text);
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      font-weight: 600;
     }
 
-    .orders-header p {
-      margin: 10px 0 0;
-      color: var(--oh-muted);
-      font-size: 16px;
+    /* GRID (same as dashboard) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+    }
+
+    /* CARDS (same as dashboard) */
+    .dashboard-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dashboard-card h2 {
+      font-size: 22px;
+      font-weight: 900;
+      margin: 0 0 10px;
+      color: var(--text);
+    }
+
+    .dashboard-card p {
+      font-size: 15px;
+      color: var(--muted);
+      margin: 0 0 18px;
       line-height: 1.6;
     }
 
-    /* Stats cards */
-    .status-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .status-card {
-      background: rgba(255, 255, 255, .92);
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: var(--r3);
+    /* ✅ smaller stat cards */
+    .dashboard-card.stat-card {
       padding: 22px;
-      text-align: center;
-      box-shadow: var(--sh2);
-      backdrop-filter: blur(8px);
+      min-height: 160px;
     }
 
-    .status-card .count {
-      font-size: 52px;
+    .dashboard-card.stat-card h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .dashboard-card.stat-card p {
+      margin: 0 0 14px;
+      font-size: 14px;
+    }
+
+    /* STATS */
+    .card-stats .stat {
+      font-size: 28px;
       font-weight: 900;
-      margin-bottom: 8px;
-      line-height: 1;
-      letter-spacing: -0.02em;
+      color: #5b4ae6;
+      display: inline-block;
+      margin-bottom: 0;
     }
 
-    .status-card .label {
-      color: var(--oh-muted);
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .status-card.completed .count {
+    .stat.completed {
       color: #16a34a;
     }
 
-    .status-card.rejected .count {
+    .stat.rejected {
       color: #dc2626;
     }
 
-    /* Main section card */
-    .section-card {
-      background: rgba(255, 255, 255, .92);
-      border: 1px solid rgba(255, 255, 255, .65);
-      border-radius: var(--r3);
-      padding: 0;
-      box-shadow: var(--sh3);
-      overflow: hidden;
-      backdrop-filter: blur(8px);
+    /* FULL WIDTH (same as dashboard) */
+    .dashboard-card.full-width {
+      grid-column: 1 / -1;
+      min-height: auto;
     }
 
-    .section-title {
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      color: var(--oh-text);
-      margin: 0;
-      padding: 18px 22px;
-      border-bottom: 1px solid rgba(15, 23, 42, .08);
-    }
-
-    /* Bigger table */
-    .admin-table-container {
-      padding: 0;
-      overflow-x: auto;
-    }
-
-    .admin-table {
+    /* TABLE (same as dashboard) */
+    .dashboard-table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 15px;
+      border-collapse: collapse;
+      font-size: 14px;
     }
 
-    .admin-table thead th {
+    .dashboard-table th {
       text-align: left;
-      padding: 14px 16px;
-      background: rgba(15, 23, 42, .02);
-      color: var(--oh-muted);
+      padding: 14px;
       font-weight: 900;
-      border-bottom: 1px solid rgba(15, 23, 42, .10);
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+      color: var(--muted);
       white-space: nowrap;
     }
 
-    .admin-table tbody td {
-      padding: 16px 16px;
-      border-bottom: 1px solid rgba(15, 23, 42, .08);
-      color: var(--oh-text);
+    .dashboard-table td {
+      padding: 16px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
       vertical-align: middle;
     }
 
-    .admin-table tbody tr:hover {
+    .dashboard-table tr:hover {
       background: rgba(91, 74, 230, .05);
+    }
+
+    /* BUTTONS */
+    .btn {
+      border-radius: 16px;
+      font-weight: 900;
+      padding: 12px 16px;
+      display: inline-block;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #5b4ae6, #6b5df6);
+      color: #fff;
+    }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border: 1px solid rgba(0, 0, 0, .10);
+    }
+
+    .pill-completed {
+      background: rgba(22, 163, 74, .12);
+      color: #166534;
+    }
+
+    .pill-rejected {
+      background: rgba(220, 38, 38, .12);
+      color: #991b1b;
     }
 
     .empty-state {
       text-align: center;
-      padding: 26px 16px !important;
-      color: var(--oh-muted);
-      font-weight: 700;
-    }
-
-    /* Status pills */
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
+      padding: 18px !important;
       font-weight: 900;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      border: 1px solid rgba(15, 23, 42, .10);
+      color: var(--muted);
     }
 
-    .pill-rejected {
-      background: rgba(220, 38, 38, .10);
-      border-color: rgba(220, 38, 38, .18);
-      color: #991b1b;
+    /* ✅ Create button row at bottom */
+    .history-actions {
+      padding-top: 18px;
+      display: flex;
+      justify-content: flex-end;
     }
 
-    .pill-completed {
-      background: rgba(22, 163, 74, .10);
-      border-color: rgba(22, 163, 74, .18);
-      color: #166534;
-    }
-
-    .pill-approved {
-      background: rgba(14, 165, 233, .10);
-      border-color: rgba(14, 165, 233, .18);
-      color: #075985;
-    }
-
-    .pill-processing {
-      background: rgba(91, 74, 230, .10);
-      border-color: rgba(91, 74, 230, .18);
-      color: #4338ca;
-    }
-
-    /* Buttons */
-    .btn.btn-small.btn-primary {
-      border-radius: 14px;
-      padding: 10px 14px;
-      font-weight: 900;
-    }
-
-    /* CTA */
-    .cta-wrap {
-      padding: 18px 22px 22px;
-    }
-
-    .cta-full {
-      width: 100%;
-      display: block;
-      text-align: center;
-      padding: 16px 18px;
-      border-radius: 16px;
-      font-weight: 900;
-      font-size: 16px;
-      color: #fff !important;
-      background: linear-gradient(90deg, #5b4ae6, #7c3aed) !important;
-      box-shadow: 0 14px 26px rgba(91, 74, 230, .25);
-      text-decoration: none !important;
-    }
-
-    .cta-full:hover {
-      filter: brightness(1.05);
-    }
-
-    /* Responsive */
-    @media (max-width:900px) {
-      .status-cards {
+    /* responsive */
+    @media (max-width: 900px) {
+      .dashboard-grid {
         grid-template-columns: 1fr;
       }
+    }
 
-      .orders-header h1 {
-        font-size: 34px;
+    @media (max-width: 600px) {
+      .history-actions {
+        justify-content: center;
+      }
+
+      .history-actions .btn {
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
       }
     }
   </style>
 </head>
 
 <body>
-
   <?php include 'includes/header.php'; ?>
 
-  <div class="orders-container">
+  <div class="dashboard-container">
 
-    <div class="orders-header">
+    <div class="welcome-section">
       <h1>Order History</h1>
       <p>View your completed and rejected orders</p>
     </div>
 
-    <div class="status-cards">
-      <div class="status-card completed">
-        <div class="count">
-          <?php echo $completedCount; ?>
-        </div>
-        <div class="label">Completed</div>
-      </div>
-      <div class="status-card rejected">
-        <div class="count">
-          <?php echo $rejectedCount; ?>
-        </div>
-        <div class="label">Rejected</div>
-      </div>
-    </div>
+    <div class="dashboard-grid">
 
-    <div class="section-card">
-      <div class="section-title">Past Orders</div>
+      <div class="dashboard-card stat-card">
+        <div>
+          <h2>Completed Orders</h2>
+          <p>Total orders that finished successfully.</p>
+        </div>
+        <div class="card-stats">
+          <div class="stat completed">
+            <?php echo (int) $completedCount; ?> Completed
+          </div>
+        </div>
+      </div>
 
-      <div class="admin-table-container">
-        <table class="admin-table">
+      <div class="dashboard-card stat-card">
+        <div>
+          <h2>Rejected Orders</h2>
+          <p>Total orders that were rejected by the lab.</p>
+        </div>
+        <div class="card-stats">
+          <div class="stat rejected">
+            <?php echo (int) $rejectedCount; ?> Rejected
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card full-width">
+        <h2 style="margin-bottom:14px;">Past Orders</h2>
+
+        <table class="dashboard-table">
           <thead>
             <tr>
               <th>Order #</th>
@@ -319,54 +312,46 @@ foreach ($orders as $o) {
           <tbody>
             <?php if (empty($orders)): ?>
               <tr>
-                <td colspan="6" class="empty-state">No past orders found</td>
+                <td colspan="6" class="empty-state">No completed or rejected orders found.</td>
               </tr>
             <?php else: ?>
               <?php foreach ($orders as $o): ?>
                 <?php
-                $status = $o['status'];
-                $pillClass = 'pill-processing';
-                if ($status === 'rejected')
-                  $pillClass = 'pill-rejected';
-                if ($status === 'completed')
-                  $pillClass = 'pill-completed';
-                if ($status === 'approved')
-                  $pillClass = 'pill-approved';
+                $id = (int) ($o['id'] ?? 0);
+                $orderNumber = $o['order_number'] ?? ('ORD-' . str_pad((string) $id, 6, '0', STR_PAD_LEFT));
+                $priority = strtoupper($o['priority'] ?? 'STANDARD');
+                $samples = (int) ($o['sample_count'] ?? 0);
+                $status = strtolower($o['status'] ?? '');
+                $pill = ($status === 'completed') ? 'pill-completed' : 'pill-rejected';
                 ?>
                 <tr>
                   <td>
-                    <?php echo htmlspecialchars($o['order_number']); ?>
+                    <?php echo htmlspecialchars($orderNumber); ?>
                   </td>
                   <td>
-                    <?php echo date('M d, Y H:i', strtotime($o['created_at'])); ?>
+                    <?php echo !empty($o['created_at']) ? date('M d, Y H:i', strtotime($o['created_at'])) : '-'; ?>
                   </td>
                   <td>
-                    <span class="badge badge-<?php echo htmlspecialchars($o['priority']); ?>">
-                      <?php echo strtoupper(htmlspecialchars($o['priority'])); ?>
-                    </span>
+                    <?php echo htmlspecialchars($priority); ?>
                   </td>
                   <td>
-                    <?php echo (int) ($o['sample_count'] ?? 0); ?>
+                    <?php echo $samples; ?>
                   </td>
-                  <td>
-                    <span class="status-pill <?php echo $pillClass; ?>">
+                  <td><span class="status-pill <?php echo $pill; ?>">
                       <?php echo htmlspecialchars($status); ?>
-                    </span>
-                  </td>
+                    </span></td>
                   <td>
-                    <a href="order-details-cus.php?id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-primary">
-                      View Details
-                    </a>
+                    <a class="btn btn-primary" href="order-details-cus.php?id=<?php echo $id; ?>">View Details</a>
                   </td>
                 </tr>
               <?php endforeach; ?>
             <?php endif; ?>
           </tbody>
         </table>
-      </div>
 
-      <div class="cta-wrap">
-        <a href="create-order.php" class="btn btn-primary cta-full">Create New Order</a>
+        <div class="history-actions">
+          <a class="btn btn-primary" href="create-order.php">Create New Order</a>
+        </div>
       </div>
 
     </div>
@@ -374,7 +359,6 @@ foreach ($orders as $o) {
 
   <?php include 'includes/footer.php'; ?>
   <script src="js/main.js"></script>
-
 </body>
 
 </html>

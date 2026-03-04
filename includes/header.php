@@ -30,6 +30,8 @@
                     <a href="#">Samples</a>
                     <a href="#">Equipment</a>
                     <a href="#">Queue</a>
+                    <a href="history-order-tech.php"
+                        class="<?php echo $currentPage === 'history-order-tech.php' ? 'active' : ''; ?>">Order History</a>
                 <?php elseif ($_SESSION['user_role'] === 'administrator'): ?>
                     <a href="dashboard.php"
                         class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
@@ -41,6 +43,9 @@
                         class="<?php echo $currentPage === 'admin.php' && $currentTab === 'equipment' ? 'active' : ''; ?>">Equipment</a>
                     <a href="admin.php?tab=reports"
                         class="<?php echo $currentPage === 'admin.php' && $currentTab === 'reports' ? 'active' : ''; ?>">Reports</a>
+                    <a href="history-order-Adm.php?tab=order history"
+                        class="<?php echo $currentPage === 'history-order-Adm.php' && $currentTab === 'order history' ? 'active' : ''; ?>">Order
+                        History</a>
                 <?php endif; ?>
             <?php endif; ?>
         </nav>

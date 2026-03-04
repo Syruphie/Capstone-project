@@ -108,6 +108,24 @@ class Order
         return $stmt->fetchAll();
     }
 
+    public function getAllOrders()
+    {
+        $query = "
+    SELECT 
+        o.*, 
+        u.full_name AS customer_name
+    FROM orders o
+    LEFT JOIN users u 
+        ON o.customer_id = u.id
+    ORDER BY o.created_at DESC
+    ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function getOrderHistoryForAdmin()
     {
         $stmt = $this->db->prepare(
@@ -200,10 +218,7 @@ class Order
         return $stmt->fetchAll();
     }
 
-    public function getAllOrders($limit = 50, $offset = 0)
-    {
-        // Method signature for retrieving all orders with pagination
-    }
+
 
     public function searchOrders($searchTerm)
     {
