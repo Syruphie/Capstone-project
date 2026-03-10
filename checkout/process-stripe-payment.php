@@ -1,32 +1,48 @@
 <?php
-require_once 'stripe_env_loader.php';
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../classes/User.php';
+require_once __DIR__ . '/../classes/Order.php';
+require_once __DIR__ . '/../classes/Payment.php';
 header('Content-Type: application/json');
 
-
-$input = json_decode(file_get_contents('php://input'), true);
-$email = $input['email'] ?? '';
-
-if (!$email) {
-    echo json_encode(['success' => false, 'error' => 'Missing email']);
+$user = new User();
+if (!$user->isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
 
-\Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+$input = json_decode(file_get_contents('php://input'), true);
+$email = $input['email'] ?? '';
+$orderId = isset($input['order_id']) ? (int) $input['order_id'] : 0;
+$customerId = (int) $_SESSION['user_id'];
+
+if (!$email || $orderId <= 0) {
+    echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+    exit;
+}
+
+$order = new Order();
+$orderData = $order->getOrderById($orderId);
+if (!$orderData || (int) $orderData['customer_id'] !== $customerId) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid order']);
+    exit;
+}
+
+$amount = (float) ($orderData['total_cost'] ?? 0);
+if ($amount <= 0) {
+    $amount = 20.00;
+}
 
 try {
-    $paymentIntent = \Stripe\PaymentIntent::create([
-        'amount' => 2000, // $20.00 in cents
-        'currency' => 'cad',
-        'automatic_payment_methods' => [
-            'enabled' => true,
-            'allow_redirects' => 'never'
-        ],
-        'receipt_email' => $email,
-    ]);
+    $payment = new Payment();
+    $paymentIntent = $payment->createPaymentIntentForOrder($orderId, $customerId, $email, $amount, 'cad');
+
     echo json_encode([
         'success' => true,
-        'client_secret' => $paymentIntent->client_secret
+        'client_secret' => $paymentIntent->client_secret,
+        'payment_intent_id' => $paymentIntent->id
     ]);
 } catch (\Stripe\Exception\CardException $e) {
     echo json_encode(['success' => false, 'error' => $e->getError()->message]);

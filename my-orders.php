@@ -24,6 +24,8 @@ $orders = $order->getOrdersByCustomer($userId);
 $statusCounts = [
     'submitted' => 0,
     'approved' => 0,
+    'payment_pending' => 0,
+    'payment_confirmed' => 0,
     'processing' => 0,
     'completed' => 0,
     'rejected' => 0
@@ -90,6 +92,8 @@ foreach ($orders as $o) {
         .status-card.pending .count { color: #ffc107; }
         .status-card.approved .count { color: #17a2b8; }
         .status-card.processing .count { color: #667eea; }
+        .status-card.payment-pending .count { color: #fd7e14; }
+        .status-card.payment-confirmed .count { color: #20c997; }
         .status-card.completed .count { color: #28a745; }
         .status-card.rejected .count { color: #dc3545; }
         .orders-table-container {
@@ -113,6 +117,8 @@ foreach ($orders as $o) {
         }
         .status-submitted { background: #fff3cd; color: #856404; }
         .status-approved { background: #d1ecf1; color: #0c5460; }
+        .status-payment_pending { background: #fff0d9; color: #8a5a00; }
+        .status-payment_confirmed { background: #d4f7ee; color: #0f766e; }
         .status-processing { background: #e7e3ff; color: #5a4fcf; }
         .status-completed { background: #d4edda; color: #155724; }
         .status-rejected { background: #f8d7da; color: #721c24; }
@@ -151,6 +157,14 @@ foreach ($orders as $o) {
             <div class="status-card approved">
                 <div class="count"><?php echo $statusCounts['approved']; ?></div>
                 <div class="label">Approved</div>
+            </div>
+            <div class="status-card payment-pending">
+                <div class="count"><?php echo $statusCounts['payment_pending']; ?></div>
+                <div class="label">Payment Pending</div>
+            </div>
+            <div class="status-card payment-confirmed">
+                <div class="count"><?php echo $statusCounts['payment_confirmed']; ?></div>
+                <div class="label">Payment Confirmed</div>
             </div>
             <div class="status-card processing">
                 <div class="count"><?php echo $statusCounts['processing']; ?></div>
@@ -205,7 +219,13 @@ foreach ($orders as $o) {
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-small btn-secondary">View Details</a>
+                                    <?php if (in_array($o['status'], ['approved', 'payment_pending'])): ?>
+                                        <a href="checkout/index.php?order_id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-primary">Pay Now</a>
+                                    <?php elseif (in_array($o['status'], ['payment_confirmed', 'completed'])): ?>
+                                        <a href="invoice.php?order_id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-secondary">View Invoice</a>
+                                    <?php else: ?>
+                                        <a href="#" class="btn btn-small btn-secondary">View Details</a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

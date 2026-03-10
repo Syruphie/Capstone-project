@@ -1,4 +1,5 @@
 # GlobenTech - Laboratory Order Management System
+
 **CPSY 301-D School Project Prototype**
 
 This is a Phase 3 prototype for a Laboratory Order Management System designed to streamline the ordering, processing, and delivery of chemical compounds for GMJ Global Energy. This prototype demonstrates the login system, account management, and basic class structure as outlined in the project design document.
@@ -19,6 +20,31 @@ This is a Phase 3 prototype for a Laboratory Order Management System designed to
 - Role-based access control (Customer, Laboratory Technician, Administrator)
 - Basic dashboard layout
 - Object-oriented class structure with properties and method signatures
+
+## Payment Integration (Current)
+
+The project now includes Stripe-backed payment synchronization with application data:
+
+- Real-time payment status polling endpoint: `/api/payment-status.php`
+- Stripe webhook listener endpoint: `/api/payment-webhook.php`
+- Persistent payment records and event logs (`payments`, `payment_events`)
+- Invoice/receipt storage and retrieval (`invoices`, `/invoice.php`)
+- Customer/admin notifications for payment confirmation/failures (`notifications`)
+- Accounting/report synchronization records (`accounting_sync`)
+
+### Related Files
+
+- `classes/Payment.php`
+- `checkout/index.php`
+- `checkout/process-stripe-payment.php`
+- `api/payment-status.php`
+- `api/payment-webhook.php`
+- `api/invoice.php`
+- `invoice.php`
+
+### Test Checklist
+
+See `docs/payment-testing-checklist.md` for sandbox, end-to-end, security, and compliance validation scenarios.
 
 ## Installation Instructions
 
@@ -92,14 +118,17 @@ You need to create a MySQL database and import the schema.
 For testing purposes, the following accounts are pre-configured:
 
 **Administrator:**
+
 - Email: `admin@globentech.com`
 - Password: `admin123`
 
 **Laboratory Technician:**
+
 - Email: `tech@globentech.com`
 - Password: `tech123`
 
 **Customer:**
+
 - Email: `customer@globentech.com`
 - Password: `customer123`
 

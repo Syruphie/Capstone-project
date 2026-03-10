@@ -33,34 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $orderData = $order->getOrderWithCustomer($orderId);
 
         if ($order->approveOrder($orderId, $userId)) {
-            $message = 'Order approved successfully';
-
-            // Auto-schedule: add to queue, set equipment, estimated completion
-            $samples = $sample->getSamplesByOrder($orderId);
-            $equipmentList = $equipment->getAllEquipment(true);
-            $priority = $orderData['priority'] ?? 'standard';
-
-            if (!empty($equipmentList)) {
-                $eq = $equipmentList[0];
-                $eqId = (int) $eq['id'];
-                $processingPer = (int) $eq['processing_time_per_sample'];
-                $prepMins = 0;
-                foreach ($samples as $s) {
-                    $prepMins += (int) ($s['preparation_time'] ?? 0);
-                }
-                $testingMins = count($samples) * ($processingPer ?: 5);
-                $durationMins = $prepMins + $testingMins;
-
-                $lastEnd = $queue->getLastScheduledEnd($eqId);
-                $base = $lastEnd ? strtotime($lastEnd) : time();
-                $start = date('Y-m-d H:i:s', $base);
-                $end = date('Y-m-d H:i:s', $base + $durationMins * 60);
-
-                $queue->addToQueueScheduled($orderId, $eqId, $priority, $start, $end);
-                $order->updateOrderStatus($orderId, 'in_queue');
-                $order->updateEstimatedCompletion($orderId, $end);
-                $message .= ' - Queued and scheduled';
-            }
+            $order->updateOrderStatus($orderId, 'payment_pending');
+            $message = 'Order approved and marked as payment pending';
 
             if ($orderData && !empty($orderData['customer_email'])) {
                 $emailSent = $email->sendOrderApprovalNotification(
