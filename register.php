@@ -75,12 +75,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/register.css">
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-box register-box">
@@ -107,80 +110,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             <form method="POST" action="" class="login-form">
                 <div class="form-group">
                     <label for="full_name">Full Name *</label>
-                    <input 
-                        type="text" 
-                        id="full_name" 
-                        name="full_name" 
-                        required 
-                        placeholder="Enter your full name"
-                        value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>"
-                    >
+                    <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name"
+                        value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email Address *</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        required 
-                        placeholder="Enter your email"
-                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
-                    >
+                    <input type="email" id="email" name="email" required placeholder="Enter your email"
+                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input 
-                        type="tel" 
-                        id="phone" 
-                        name="phone" 
-                        placeholder="Enter your phone number"
-                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
-                    >
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number"
+                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="company_name">Company Name</label>
-                    <input 
-                        type="text" 
-                        id="company_name" 
-                        name="company_name" 
-                        placeholder="Enter your company name"
-                        value="<?php echo isset($_POST['company_name']) ? htmlspecialchars($_POST['company_name']) : ''; ?>"
-                    >
+                    <input type="text" id="company_name" name="company_name" placeholder="Enter your company name"
+                        value="<?php echo isset($_POST['company_name']) ? htmlspecialchars($_POST['company_name']) : ''; ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="address">Address</label>
-                    <textarea 
-                        id="address" 
-                        name="address" 
-                        rows="3" 
-                        placeholder="Enter your address"
-                    ><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
+                    <textarea id="address" name="address" rows="3"
+                        placeholder="Enter your address"><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password *</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        required 
-                        placeholder="Enter password (min. 6 characters)"
-                    >
+                    <input type="password" id="password" name="password" required
+                        placeholder="Enter password (min. 6 characters)">
                 </div>
 
                 <div class="form-group">
                     <label for="confirm_password">Confirm Password *</label>
-                    <input 
-                        type="password" 
-                        id="confirm_password" 
-                        name="confirm_password" 
-                        required 
-                        placeholder="Confirm your password"
-                    >
+                    <input type="password" id="confirm_password" name="confirm_password" required
+                        placeholder="Confirm your password">
                 </div>
 
                 <button type="submit" name="register" class="btn btn-primary">Register</button>
@@ -195,4 +162,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 
     <script src="js/main.js"></script>
 </body>
+
 </html>

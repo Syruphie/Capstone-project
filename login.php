@@ -29,12 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/login.css">
+
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-box">
@@ -54,26 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             <form method="POST" action="" class="login-form">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        required 
-                        placeholder="Enter your email"
-                        autocomplete="email"
-                    >
+                    <input type="email" id="email" name="email" required placeholder="Enter your email"
+                        autocomplete="email">
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        required 
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
-                    >
+                    <input type="password" id="password" name="password" required placeholder="Enter your password"
+                        autocomplete="current-password">
                 </div>
 
                 <button type="submit" name="login" class="btn btn-primary">Login</button>
@@ -101,4 +93,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
     <script src="js/main.js"></script>
 </body>
+
 </html>

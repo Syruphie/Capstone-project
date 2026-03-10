@@ -6,8 +6,8 @@
 
 /* Container */
 .container {
+    width: min(1200px, calc(100% - 48px));
     margin: 0 auto;
-    padding: 0 20px;
 }
 
 /* Landing Header */
@@ -17,14 +17,14 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 20px 0;
+    padding: 18px 0;
     transition: all 0.3s ease;
 }
 
 .landing-header.scrolled {
     background: rgba(255, 255, 255, 0.98);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    padding: 15px 0;
+    padding: 12px 0;
 }
 
 /* Scrolled header - logo turns purple */
@@ -65,9 +65,8 @@
 }
 
 .landing-header-content {
-    max-width: 1200px;
+    width: min(1200px, calc(100% - 48px));
     margin: 0 auto;
-    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -95,7 +94,7 @@
 
 .landing-nav {
     display: flex;
-    gap: 35px;
+    gap: 32px;
 }
 
 .landing-nav a {
@@ -112,7 +111,7 @@
 
 .landing-header-actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
 }
 
 /* Button Styles */
@@ -163,9 +162,14 @@
 }
 
 .btn-large {
-    align-content: center;
+    min-height: 56px;
+    min-width: 220px;
+    width: auto;
+    padding: 0 28px;
     font-size: 16px;
-    width: 200px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-large svg {
@@ -246,7 +250,7 @@
 /* Hero Section */
 .hero {
     min-height: 100vh;
-    padding: 120px 20px 80px;
+    padding: 140px 24px 96px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     position: relative;
     overflow: hidden;
@@ -292,6 +296,7 @@
     top: 50%;
     left: 50%;
     animation: float 10s ease-in-out infinite;
+    opacity: 0.15;
 }
 
 @keyframes float {
@@ -304,18 +309,18 @@
 }
 
 .hero-content {
-    max-width: 650px;
+    max-width: 720px;
     text-align: center;
     position: relative;
     z-index: 2;
 }
 
 .hero-title {
-    font-size: 56px;
+    font-size: 64px;
     font-weight: 700;
     color: white;
-    line-height: 1.2;
-    margin-bottom: 25px;
+    line-height: 1.1;
+    margin-bottom: 24px;
 }
 
 .gradient-text {
@@ -328,15 +333,18 @@
 .hero-subtitle {
     font-size: 20px;
     color: rgba(255, 255, 255, 0.9);
-    line-height: 1.7;
-    margin-bottom: 40px;
+    line-height: 1.65;
+    margin-bottom: 36px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-actions {
     display: flex;
-    gap: 15px;
+    gap: 16px;
     justify-content: center;
-    margin-bottom: 60px;
+    margin-bottom: 72px;
 }
 
 /* Hero CTA button - make it stand out */
@@ -369,7 +377,7 @@
 .hero-stats {
     display: flex;
     justify-content: center;
-    gap: 50px;
+    gap: 56px;
 }
 
 .hero-stat {
@@ -491,7 +499,7 @@
 /* Trusted Section */
 .trusted-section {
     background: #f8f9fa;
-    padding: 40px 20px;
+    padding: 56px 24px;
 }
 
 .trusted-label {
@@ -500,14 +508,14 @@
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 25px;
+    margin-bottom: 24px;
 }
 
 .trusted-logos {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 60px;
+    gap: 48px;
     flex-wrap: wrap;
 }
 
@@ -520,8 +528,8 @@
 /* Section Styles */
 .section-header {
     text-align: center;
-    max-width: 700px;
-    margin: 0 auto 60px;
+    max-width: 720px;
+    margin: 0 auto 64px;
 }
 
 .section-tag {
@@ -532,15 +540,15 @@
     border-radius: 20px;
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .section-title {
-    font-size: 42px;
+    font-size: 44px;
     font-weight: 700;
     color: #333;
     margin-bottom: 20px;
-    line-height: 1.2;
+    line-height: 1.15;
 }
 
 .section-subtitle {
@@ -551,21 +559,21 @@
 
 /* Features Section */
 .features-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: white;
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
+    gap: 32px;
 }
 
 .feature-card {
     background: white;
     border: 1px solid #eee;
-    border-radius: 16px;
-    padding: 35px 30px;
+    border-radius: 18px;
+    padding: 32px;
     transition: all 0.3s ease;
 }
 
@@ -606,21 +614,22 @@
 
 /* How It Works Section */
 .how-it-works-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: #f8f9fa;
 }
 
 .steps-container {
     display: flex;
     align-items: flex-start;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: nowrap;
 }
 
 .step {
     text-align: center;
-    max-width: 220px;
+    flex: 1;
+    max-width: none;
 }
 
 .step-number {
@@ -641,33 +650,36 @@
     font-size: 18px;
     font-weight: 600;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .step-content p {
     font-size: 14px;
     color: #666;
     line-height: 1.6;
+    max-width: 220px;
+    margin: 0 auto;
 }
 
 .step-connector {
-    width: 60px;
+    width: 48px;
     height: 2px;
     background: #ddd;
-    margin-top: 30px;
+    margin-top: 40px;
+    flex-shrink: 0;
 }
 
 /* Services Section */
 .services-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: white;
 }
 
 .services-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-    margin-bottom: 50px;
+    gap: 32px;
+    margin-bottom: 56px;
 }
 
 .service-card {
@@ -723,7 +735,7 @@
 }
 
 .service-content {
-    padding: 25px;
+    padding: 24px;
 }
 
 .service-category {
@@ -742,14 +754,14 @@
     font-size: 20px;
     font-weight: 600;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .service-content > p {
     font-size: 14px;
     color: #666;
     line-height: 1.6;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .service-features {
@@ -772,8 +784,8 @@
 .service-meta {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding-top: 15px;
+    gap: 16px;
+    padding-top: 16px;
     border-top: 1px solid #eee;
 }
 
@@ -796,14 +808,14 @@
 
 /* About Section */
 .about-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: #f8f9fa;
 }
 
 .about-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 80px;
+    gap: 64px;
     align-items: center;
 }
 
@@ -814,27 +826,27 @@
 .about-content .section-title {
     text-align: left;
     font-size: 36px;
-    margin-bottom: 25px;
+    margin-bottom: 24px;
 }
 
 .about-content p {
     font-size: 16px;
     color: #666;
     line-height: 1.8;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
 }
 
 .about-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 30px;
+    margin: 0 0 32px;
 }
 
 .about-list li {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 0;
+    padding: 8px 0;
     font-size: 16px;
     color: #333;
 }
@@ -880,7 +892,7 @@
 
 /* CTA Section */
 .cta-section {
-    padding: 100px 20px;
+    padding: 96px 24px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
@@ -895,31 +907,33 @@
     font-weight: 700;
     color: white;
     margin-bottom: 20px;
+    line-height: 1.15;
 }
 
 .cta-content p {
     font-size: 18px;
     color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 40px;
+    margin-bottom: 32px;
+    line-height: 1.7;
 }
 
 .cta-actions {
     display: flex;
-    gap: 15px;
+    gap: 16px;
     justify-content: center;
 }
 
 /* Landing Footer */
 .landing-footer {
     background: #1a1a2e;
-    padding: 80px 20px 30px;
+    padding: 72px 24px 32px;
 }
 
 .footer-grid {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 50px;
-    margin-bottom: 50px;
+    gap: 40px;
+    margin-bottom: 40px;
 }
 
 .footer-brand p {
@@ -941,7 +955,7 @@
     color: white;
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .footer-links ul {
@@ -951,7 +965,7 @@
 }
 
 .footer-links li {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .footer-links a {
@@ -1030,6 +1044,20 @@
     .footer-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .steps-container {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .step {
+        flex: 0 1 220px;
+        max-width: 220px;
+    }
+
+    .step-connector {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1047,21 +1075,27 @@
     }
 
     .hero {
-        padding: 100px 20px 60px;
+        padding: 112px 20px 72px;
         min-height: auto;
     }
 
     .hero-title {
-        font-size: 36px;
+        font-size: 40px;
+        line-height: 1.12;
+        margin-bottom: 20px;
     }
 
     .hero-subtitle {
-        font-size: 16px;
+        font-size: 17px;
+        line-height: 1.65;
+        margin-bottom: 28px;
     }
 
     .hero-actions {
         flex-direction: column;
         align-items: center;
+        gap: 12px;
+        margin-bottom: 48px;
     }
 
     .hero-actions .btn {
@@ -1071,7 +1105,7 @@
 
     .hero-stats {
         flex-direction: column;
-        gap: 25px;
+        gap: 24px;
     }
 
     .stat-number {
@@ -1080,6 +1114,10 @@
 
     .section-title {
         font-size: 32px;
+    }
+
+    .section-header {
+        margin-bottom: 48px;
     }
 
     .features-grid {
@@ -1093,12 +1131,28 @@
     .steps-container {
         flex-direction: column;
         align-items: center;
+        gap: 24px;
+    }
+
+    .step {
+        width: 100%;
+        max-width: 320px;
+        flex: none;
     }
 
     .step-connector {
         width: 2px;
         height: 40px;
         margin: 0;
+        display: none;
+    }
+
+    .features-section,
+    .how-it-works-section,
+    .services-section,
+    .about-section,
+    .cta-section {
+        padding: 72px 20px;
     }
 
     .cta-content h2 {
@@ -1132,7 +1186,8 @@
 
 @media (max-width: 480px) {
     .hero-title {
-        font-size: 28px;
+        font-size: 32px;
+        line-height: 1.15;
     }
 
     .section-title {
@@ -1140,7 +1195,7 @@
     }
 
     .feature-card {
-        padding: 25px 20px;
+        padding: 24px 20px;
     }
 
     .about-card {
