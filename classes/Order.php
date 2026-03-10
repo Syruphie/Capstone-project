@@ -218,6 +218,22 @@ class Order
         return $stmt->fetchAll();
     }
 
+    public function getApprovedOrdersForTechnician(){
+    $stmt = $this->db->prepare(
+        "SELECT o.*,
+                u.full_name AS customer_name,
+                u.company_name,
+                (SELECT COUNT(*) FROM samples WHERE order_id = o.id) AS sample_count
+         FROM orders o
+         JOIN users u ON o.customer_id = u.id
+         WHERE o.status = 'approved'
+           AND o.priority IN ('standard', 'priority')
+         ORDER BY o.created_at DESC"
+    );
+    $stmt->execute();
+    return $stmt->fetchAll();
+    }
+
 
 
     public function searchOrders($searchTerm)

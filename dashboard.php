@@ -7,7 +7,6 @@ require_once 'classes/Equipment.php';
 
 $user = new User();
 
-
 if (!$user->isLoggedIn()) {
     header('Location: login.php');
     exit;
@@ -16,7 +15,6 @@ if (!$user->isLoggedIn()) {
 $userRole = $user->getRole();
 $userName = $_SESSION['user_name'];
 $userId = $_SESSION['user_id'];
-
 
 $order = new Order();
 $queue = new Queue();
@@ -28,11 +26,8 @@ $equipment = new Equipment();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard -
-        <?php echo APP_NAME; ?>
-    </title>
+    <title>Dashboard - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
-
 
     <style>
         :root {
@@ -41,19 +36,16 @@ $equipment = new Equipment();
             --border: rgba(15, 23, 42, .10);
         }
 
-        /* MAIN WRAPPER */
         .dashboard-container {
             max-width: 1100px;
             margin: 0 auto;
             padding: 40px 20px 60px;
         }
 
-        /* WELCOME HEADER */
         .welcome-section {
             background: #fff;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            /* sharp */
+            border-radius: 0px;
             padding: 32px;
             margin-bottom: 28px;
             box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
@@ -71,33 +63,26 @@ $equipment = new Equipment();
             display: inline-block;
             padding: 6px 14px;
             border-radius: 999px;
-            /* rounded inside */
             font-size: 12px;
             font-weight: 900;
         }
 
-        /* GRID */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 26px;
         }
 
-        /* CARDS */
         .dashboard-card {
             background: #fff;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            /* sharp outside */
+            border-radius: 0px;
             padding: 28px;
             box-shadow: 0 20px 60px rgba(15, 23, 42, .12);
-
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-
             min-height: 230px;
-            /* same size */
         }
 
         .dashboard-card h2 {
@@ -114,7 +99,6 @@ $equipment = new Equipment();
             line-height: 1.6;
         }
 
-        /* STATS */
         .card-stats .stat {
             font-size: 28px;
             font-weight: 900;
@@ -123,14 +107,11 @@ $equipment = new Equipment();
             margin-bottom: 18px;
         }
 
-        /* FULL WIDTH */
         .dashboard-card.full-width {
             grid-column: 1 / -1;
             min-height: auto;
-            /* allow table to size naturally */
         }
 
-        /* TABLE */
         .dashboard-table {
             width: 100%;
             border-collapse: collapse;
@@ -156,19 +137,16 @@ $equipment = new Equipment();
             background: rgba(91, 74, 230, .05);
         }
 
-        /* BUTTONS (rounded inside feel) */
         .btn {
-            border-radius: 16px;
+            border-radius: 0px;
             font-weight: 900;
             padding: 12px 16px;
         }
 
-        /* SYSTEM INFO */
         .dashboard-card.system-info {
             margin-top: 30px;
         }
 
-        /* RESPONSIVE */
         @media (max-width: 900px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -182,16 +160,13 @@ $equipment = new Equipment();
 
     <div class="dashboard-container">
         <div class="welcome-section">
-            <h1>Welcome,
-                <?php echo htmlspecialchars($userName); ?>!
-            </h1>
+            <h1>Welcome, <?php echo htmlspecialchars($userName); ?>!</h1>
             <p class="role-badge role-<?php echo $userRole; ?>">
                 <?php echo ucfirst($userRole); ?>
             </p>
         </div>
 
         <?php if ($userRole === 'customer'): ?>
-            <!-- Customer Dashboard -->
             <?php
             $customerOrders = $order->getOrdersByCustomer($userId);
             $activeCount = 0;
@@ -210,9 +185,7 @@ $equipment = new Equipment();
                         <h2>My Orders</h2>
                         <p>View and track your chemical compound orders</p>
                         <div class="card-stats">
-                            <span class="stat">
-                                <?php echo $activeCount; ?> Active
-                            </span>
+                            <span class="stat"><?php echo $activeCount; ?> Active</span>
                         </div>
                     </div>
                     <a href="my-orders.php" class="btn btn-primary">View Orders</a>
@@ -231,12 +204,9 @@ $equipment = new Equipment();
                         <h2>Completed Orders</h2>
                         <p>View completed orders and test results</p>
                         <div class="card-stats">
-                            <span class="stat">
-                                <?php echo $completedCount; ?> Completed
-                            </span>
+                            <span class="stat"><?php echo $completedCount; ?> Completed</span>
                         </div>
                     </div>
-
                     <a href="history-order-Cus.php" class="btn btn-primary">View History</a>
                 </div>
 
@@ -267,32 +237,22 @@ $equipment = new Equipment();
                                 <tbody>
                                     <?php foreach (array_slice($customerOrders, 0, 5) as $co): ?>
                                         <tr>
-                                            <td>
-                                                <?php echo htmlspecialchars($co['order_number']); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo date('M d, Y', strtotime($co['created_at'])); ?>
-                                            </td>
+                                            <td><?php echo htmlspecialchars($co['order_number']); ?></td>
+                                            <td><?php echo date('M d, Y', strtotime($co['created_at'])); ?></td>
                                             <td>
                                                 <span class="priority-badge priority-<?php echo $co['priority']; ?>">
                                                     <?php echo ucfirst($co['priority']); ?>
                                                 </span>
                                             </td>
-                                            <td>
-                                                <?php echo $co['sample_count']; ?>
-                                            </td>
+                                            <td><?php echo $co['sample_count']; ?></td>
                                             <td>
                                                 <span
                                                     class="priority-badge priority-<?php echo $co['status'] === 'submitted' ? 'priority' : 'standard'; ?>"
                                                     style="<?php
-                                                    if ($co['status'] === 'approved')
-                                                        echo 'background: #d1ecf1; color: #0c5460;';
-                                                    elseif ($co['status'] === 'processing')
-                                                        echo 'background: #e7e3ff; color: #5a4fcf;';
-                                                    elseif ($co['status'] === 'completed')
-                                                        echo 'background: #d4edda; color: #155724;';
-                                                    elseif ($co['status'] === 'rejected')
-                                                        echo 'background: #f8d7da; color: #721c24;';
+                                                    if ($co['status'] === 'approved') echo 'background: #d1ecf1; color: #0c5460;';
+                                                    elseif ($co['status'] === 'processing') echo 'background: #e7e3ff; color: #5a4fcf;';
+                                                    elseif ($co['status'] === 'completed') echo 'background: #d4edda; color: #155724;';
+                                                    elseif ($co['status'] === 'rejected') echo 'background: #f8d7da; color: #721c24;';
                                                     ?>">
                                                     <?php echo ucfirst($co['status']); ?>
                                                 </span>
@@ -313,8 +273,18 @@ $equipment = new Equipment();
             </div>
 
         <?php elseif ($userRole === 'technician'): ?>
-            <!-- Technician Dashboard -->
             <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div>
+                        <h2>Approved Orders</h2>
+                        <p>View all approved Standard & Priority orders</p>
+                        <div class="card-stats">
+                            <span class="stat">View</span>
+                        </div>
+                    </div>
+                    <a href="history-order-tech.php" class="btn btn-primary">View Approved Orders</a>
+                </div>
+
                 <div class="dashboard-card">
                     <div>
                         <h2>Pending Samples</h2>
@@ -323,7 +293,7 @@ $equipment = new Equipment();
                             <span class="stat">0 Pending</span>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Samples</a>
+                    <a href="tech-samples.php" class="btn btn-primary">View Samples</a>
                 </div>
 
                 <div class="dashboard-card">
@@ -335,12 +305,10 @@ $equipment = new Equipment();
                         $availableCount = count($equipmentList);
                         ?>
                         <div class="card-stats">
-                            <span class="stat">
-                                <?php echo $availableCount; ?> Available
-                            </span>
+                            <span class="stat"><?php echo $availableCount; ?> Available</span>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Equipment</a>
+                    <a href="tech-equipment.php" class="btn btn-primary">View Equipment</a>
                 </div>
 
                 <div class="dashboard-card">
@@ -352,12 +320,10 @@ $equipment = new Equipment();
                         $queueCount = count($standardQueue);
                         ?>
                         <div class="card-stats">
-                            <span class="stat">
-                                <?php echo $queueCount; ?> in Queue
-                            </span>
+                            <span class="stat"><?php echo $queueCount; ?> in Queue</span>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Queue</a>
+                    <a href="tech-queue.php" class="btn btn-primary">View Queue</a>
                 </div>
 
                 <div class="dashboard-card">
@@ -365,12 +331,11 @@ $equipment = new Equipment();
                         <h2>Log Delay</h2>
                         <p>Report equipment delays or issues</p>
                     </div>
-                    <a href="#" class="btn btn-warning">Log Delay</a>
+                    <a href="tech-log-delay.php" class="btn btn-warning">Log Delay</a>
                 </div>
             </div>
 
         <?php elseif ($userRole === 'administrator'): ?>
-            <!-- Administrator Dashboard -->
             <?php $pendingOrders = $order->getPendingOrders(); ?>
             <div class="dashboard-grid">
                 <div class="dashboard-card">
@@ -378,9 +343,7 @@ $equipment = new Equipment();
                         <h2>Pending Approvals</h2>
                         <p>Orders waiting for approval</p>
                         <div class="card-stats">
-                            <span class="stat">
-                                <?php echo count($pendingOrders); ?> Pending
-                            </span>
+                            <span class="stat"><?php echo count($pendingOrders); ?> Pending</span>
                         </div>
                     </div>
                     <a href="admin.php?tab=approvals" class="btn btn-primary">Review Orders</a>
@@ -391,7 +354,7 @@ $equipment = new Equipment();
                         <h2>User Management</h2>
                         <p>Manage user accounts and permissions</p>
                     </div>
-                    <a href="#" class="btn btn-secondary">Manage Users</a>
+                    <a href="admin.php?tab=users" class="btn btn-primary">Manage Users</a>
                 </div>
 
                 <div class="dashboard-card">
@@ -399,7 +362,7 @@ $equipment = new Equipment();
                         <h2>Equipment Management</h2>
                         <p>Configure equipment settings and schedules</p>
                     </div>
-                    <a href="#" class="btn btn-secondary">Manage Equipment</a>
+                    <a href="admin.php?tab=equipment" class="btn btn-primary">Manage Equipment</a>
                 </div>
 
                 <div class="dashboard-card">
@@ -407,7 +370,7 @@ $equipment = new Equipment();
                         <h2>Reports & Analytics</h2>
                         <p>View system statistics and performance</p>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Reports</a>
+                    <a href="admin.php?tab=reports" class="btn btn-primary">View Reports</a>
                 </div>
 
                 <div class="dashboard-card full-width">
@@ -430,26 +393,16 @@ $equipment = new Equipment();
                                 <tbody>
                                     <?php foreach ($pendingOrders as $po): ?>
                                         <tr>
-                                            <td>
-                                                <?php echo htmlspecialchars($po['order_number']); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo htmlspecialchars($po['customer_name']); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo htmlspecialchars($po['company_name'] ?? '-'); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo date('Y-m-d H:i', strtotime($po['created_at'])); ?>
-                                            </td>
+                                            <td><?php echo htmlspecialchars($po['order_number']); ?></td>
+                                            <td><?php echo htmlspecialchars($po['customer_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($po['company_name'] ?? '-'); ?></td>
+                                            <td><?php echo date('Y-m-d H:i', strtotime($po['created_at'])); ?></td>
                                             <td>
                                                 <span class="priority-badge priority-<?php echo $po['priority']; ?>">
                                                     <?php echo ucfirst($po['priority']); ?>
                                                 </span>
                                             </td>
-                                            <td>
-                                                <?php echo $po['sample_count']; ?>
-                                            </td>
+                                            <td><?php echo $po['sample_count']; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -464,7 +417,6 @@ $equipment = new Equipment();
             </div>
         <?php endif; ?>
 
-        <!-- System Information Card -->
         <div class="dashboard-card system-info">
             <h3 style="margin:0 0 10px; font-size:20px; font-weight:900;">System Information</h3>
             <p><strong>Project:</strong> Phase 3 Prototype</p>

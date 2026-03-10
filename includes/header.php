@@ -27,11 +27,15 @@
                 <?php elseif ($_SESSION['user_role'] === 'technician'): ?>
                     <a href="dashboard.php"
                         class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
-                    <a href="#">Samples</a>
-                    <a href="#">Equipment</a>
-                    <a href="#">Queue</a>
+                    <a href="tech-samples.php"
+                        class="<?php echo $currentPage === 'tech-samples.php' ? 'active' : ''; ?>">Samples</a>
+                    <a href="tech-equipment.php"
+                        class="<?php echo $currentPage === 'tech-equipment.php' ? 'active' : ''; ?>">Equipment</a>
+                    <a href="tech-queue.php"
+                        class="<?php echo $currentPage === 'tech-queue.php' ? 'active' : ''; ?>">Queue</a>
                     <a href="history-order-tech.php"
                         class="<?php echo $currentPage === 'history-order-tech.php' ? 'active' : ''; ?>">Order History</a>
+
                 <?php elseif ($_SESSION['user_role'] === 'administrator'): ?>
                     <a href="dashboard.php"
                         class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
