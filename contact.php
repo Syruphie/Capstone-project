@@ -106,11 +106,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3>Contact Details</h3>
                 <p><strong>Laboratory:</strong> <?php echo APP_NAME; ?></p>
                 <p><strong>Email:</strong> <?php echo defined('SUPPORT_EMAIL') ? htmlspecialchars(SUPPORT_EMAIL) : 'support@example.com'; ?></p>
-                <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                <p><strong>Phone:</strong> +6281802175466</p>
                 <p><strong>Address:</strong><br>
-                    123 Research Park Way<br>
-                    Calgary, AB<br>
-                    Canada
+                    Jl. Terusan Cisokan Dalam No.5<br>
+                    Cihaur Geulis, Kec. Cibeunying Kaler,<br>
+                    Kota Bandung, Jawa Barat 40122
                 </p>
                 <p style="margin-top:10px; color:#6c757d; font-size:13px;">
                     Our team is available during regular business hours to assist with order questions, scheduling, and general inquiries.

@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     <div class="login-container">
         <div class="login-box register-box">
             <div class="logo">
-                <a href="index.php" style="text-decoration: none; color: inherit;">
+                <a href="index.php" class="logo-link">
                     <h1><?php echo APP_NAME; ?></h1>
                 </a>
                 <p>Create Your Account</p>
