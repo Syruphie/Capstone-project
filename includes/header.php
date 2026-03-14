@@ -21,7 +21,6 @@
                 <?php elseif ($_SESSION['user_role'] === 'technician'): ?>
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
                     <a href="admin.php?tab=approvals" class="<?php echo $currentPage === 'admin.php' && $currentTab === 'approvals' ? 'active' : ''; ?>">Approvals</a>
-                    <a href="admin.php?tab=equipment" class="<?php echo $currentPage === 'admin.php' && $currentTab === 'equipment' ? 'active' : ''; ?>">Equipment</a>
                     <a href="calendar.php" class="<?php echo $currentPage === 'calendar.php' ? 'active' : ''; ?>">Calendar</a>
                 <?php elseif ($_SESSION['user_role'] === 'administrator'): ?>
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>

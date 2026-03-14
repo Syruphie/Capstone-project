@@ -20,8 +20,8 @@ if (!$user->isLoggedIn() || !in_array($userRole, ['administrator', 'technician']
 $userName = $_SESSION['user_name'];
 $userId = $_SESSION['user_id'];
 
-// Technicians may only access approvals and equipment
-$allowedTabsForTechnician = ['approvals', 'equipment'];
+// Technicians may only access the approvals tab (same page as admin for order approval)
+$allowedTabsForTechnician = ['approvals'];
 if ($userRole === 'technician') {
     $currentTabParam = isset($_GET['tab']) ? $_GET['tab'] : 'approvals';
     if (!in_array($currentTabParam, $allowedTabsForTechnician, true)) {
@@ -118,18 +118,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'Failed to update role.';
             }
         }
-    } elseif (isset($_POST['action']) && $userRole === 'technician') {
-        $sampleId = isset($_POST['sample_id']) ? (int) $_POST['sample_id'] : 0;
-        $action = $_POST['action'];
-        if ($sampleId && $action === 'approve') {
-            if ($sample->updateSampleStatus($sampleId, 'ready')) {
-                $message = 'Sample marked as ready for testing.';
-            }
-        } elseif ($sampleId && $action === 'start_prep') {
-            if ($sample->updateSampleStatus($sampleId, 'preparing')) {
-                $message = 'Sample preparation started.';
-            }
-        }
     }
 }
 
@@ -160,22 +148,16 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     <div class="admin-container">
         <main class="admin-content">
             <?php if ($currentTab === 'approvals'): ?>
-                <!-- Pending Approvals – same workflow for Admin (orders) and Technician (samples) -->
+                <!-- Pending Approvals – same order approval page for Admin and Technician -->
                 <section class="admin-section">
-                    <?php if ($userRole === 'administrator'): ?>
                     <h1>Pending Approvals</h1>
                     <p class="section-desc">Review and approve or reject submitted orders.</p>
-                    <?php else: ?>
-                    <h1>Pending Approvals</h1>
-                    <p class="section-desc">Review pending samples. Start preparation or mark as ready for testing.</p>
-                    <?php endif; ?>
                     
                     <?php if ($message): ?>
                         <div class="alert alert-success"><?php echo htmlspecialchars($message); ?></div>
                     <?php endif; ?>
                     
                     <div class="admin-table-container">
-                        <?php if ($userRole === 'administrator'): ?>
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -216,7 +198,7 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                                             </form>
                                             <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
-                                                <input type="hidden" name="rejection_reason" value="Order rejected by administrator">
+                                                <input type="hidden" name="rejection_reason" value="Order rejected">
                                                 <button type="submit" name="reject_order" class="btn btn-small btn-danger">Reject</button>
                                             </form>
                                         </td>
@@ -225,54 +207,6 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                                 <?php endif; ?>
                             </tbody>
                         </table>
-                        <?php else: ?>
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Sample ID</th>
-                                    <th>Order #</th>
-                                    <th>Type</th>
-                                    <th>Compound</th>
-                                    <th>Quantity</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                $pendingSamples = $sample->getPendingSamples();
-                                if (empty($pendingSamples)): 
-                                ?>
-                                <tr>
-                                    <td colspan="7" class="empty-state">No pending samples</td>
-                                </tr>
-                                <?php else: ?>
-                                    <?php foreach ($pendingSamples as $s): ?>
-                                    <tr>
-                                        <td><?php echo (int) $s['id']; ?></td>
-                                        <td><?php echo htmlspecialchars($s['order_number']); ?></td>
-                                        <td><?php echo htmlspecialchars($s['sample_type']); ?></td>
-                                        <td><?php echo htmlspecialchars($s['compound_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($s['quantity'] . ' ' . $s['unit']); ?></td>
-                                        <td><span class="status-pill <?php echo $s['status'] === 'pending' ? 'unavailable' : 'available'; ?>"><?php echo ucfirst($s['status']); ?></span></td>
-                                        <td class="actions">
-                                            <form method="POST" style="display:inline;">
-                                                <input type="hidden" name="sample_id" value="<?php echo $s['id']; ?>">
-                                                <input type="hidden" name="action" value="start_prep">
-                                                <button type="submit" class="btn btn-small btn-primary">Start prep</button>
-                                            </form>
-                                            <form method="POST" style="display:inline;">
-                                                <input type="hidden" name="sample_id" value="<?php echo $s['id']; ?>">
-                                                <input type="hidden" name="action" value="approve">
-                                                <button type="submit" class="btn btn-small btn-success">Approve (Ready)</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                        <?php endif; ?>
                     </div>
                 </section>
 
@@ -284,12 +218,10 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     <!-- Header row -->
     <div class="equipment-header">
         <div>
-            <h1><?php echo $userRole === 'technician' ? 'Equipment' : 'Manage Equipment'; ?></h1>
-            <p class="section-desc"><?php echo $userRole === 'technician' ? 'View equipment status and availability.' : 'Configure equipment settings, processing times, and schedules.'; ?></p>
+            <h1>Manage Equipment</h1>
+            <p class="section-desc">Configure equipment settings, processing times, and schedules.</p>
         </div>
-        <?php if ($userRole === 'administrator'): ?>
         <button class="btn btn-primary btn-small add-equipment-btn">Add Equipment</button>
-        <?php endif; ?>
     </div>
 
     <!-- Table -->
@@ -330,9 +262,7 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                             </span>
                         </td>
                         <td class="actions">
-                            <?php if ($userRole === 'administrator'): ?>
                             <button class="btn btn-xs btn-secondary">Edit</button>
-                            <?php endif; ?>
                             <button class="btn btn-xs btn-warning">Delay</button>
                         </td>
                     </tr>
@@ -343,7 +273,6 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     </div>
 </section>
 
-    <?php if ($userRole === 'administrator'): ?>
     <!-- Add Equipment Modal -->
     <div class="modal-overlay" id="addEquipmentModal" aria-hidden="true">
         <div class="modal" role="dialog" aria-labelledby="addEquipmentModalTitle">
@@ -395,7 +324,6 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
             </form>
         </div>
     </div>
-    <?php endif; ?>
 
             <?php elseif ($currentTab === 'samples'): ?>
                 <!-- Manage Samples Section -->

@@ -4,7 +4,6 @@ require_once 'classes/User.php';
 require_once 'classes/Order.php';
 require_once 'classes/Queue.php';
 require_once 'classes/Equipment.php';
-require_once 'classes/Sample.php';
  
 $user = new User();
  
@@ -139,34 +138,20 @@ $equipment = new Equipment();
             </div>
  
         <?php elseif ($userRole === 'technician'): ?>
-            <!-- Technician Dashboard -->
-            <?php
-            $sample = new Sample();
-            $pendingCount = count($sample->getPendingSamples());
-            $equipmentList = $equipment->getAllEquipment(true);
-            $availableCount = count($equipmentList);
-            ?>
+            <!-- Technician Dashboard – Approvals and Calendar only -->
+            <?php $pendingOrdersTech = $order->getPendingOrders(); ?>
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <h2>Pending Approvals</h2>
-                    <p>Samples and orders waiting for approval</p>
+                    <p>Orders waiting for approval</p>
                     <div class="card-stats">
-                        <span class="stat"><?php echo $pendingCount; ?> Pending</span>
+                        <span class="stat"><?php echo count($pendingOrdersTech); ?> Pending</span>
                     </div>
                     <a href="admin.php?tab=approvals" class="btn btn-primary">Review Approvals</a>
                 </div>
 
                 <div class="dashboard-card">
-                    <h2>Equipment</h2>
-                    <p>View equipment status and availability</p>
-                    <div class="card-stats">
-                        <span class="stat"><?php echo $availableCount; ?> Available</span>
-                    </div>
-                    <a href="admin.php?tab=equipment" class="btn btn-primary">View Equipment</a>
-                </div>
-
-                <div class="dashboard-card">
-                    <h2>Calendar &amp; Queue</h2>
+                    <h2>Calendar</h2>
                     <p>View scheduled orders, queue, and reschedule or finish orders</p>
                     <?php $queueCount = count($queue->getStandardQueue()); ?>
                     <div class="card-stats">
