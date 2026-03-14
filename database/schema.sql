@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS orders (
     priority ENUM('standard', 'priority') DEFAULT 'standard',
     total_cost DECIMAL(10, 2) DEFAULT 0.00,
     estimated_completion DATETIME NULL,
-    completed_at DATETIME NULL,
     approved_by INT NULL,
     approved_at TIMESTAMP NULL,
     rejection_reason TEXT NULL,
@@ -46,25 +45,10 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_order_number (order_number)
 );
 
--- Order types (catalogue) – must exist before samples (FK). sample_type drives prep time (ore/liquid).
-CREATE TABLE IF NOT EXISTS order_types (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    sample_type ENUM('ore', 'liquid') NOT NULL DEFAULT 'ore',
-    cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_active (is_active)
-);
-
--- Samples table (order_type_id links to Order Catalogue for revenue)
+-- Samples table
 CREATE TABLE IF NOT EXISTS samples (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
-    order_type_id INT NOT NULL,
-    unit_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     sample_type ENUM('ore', 'liquid') NOT NULL,
     compound_name VARCHAR(255) NOT NULL,
     quantity DECIMAL(10, 2) NOT NULL,
@@ -76,10 +60,8 @@ CREATE TABLE IF NOT EXISTS samples (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (order_type_id) REFERENCES order_types(id) ON DELETE RESTRICT,
     INDEX idx_order (order_id),
-    INDEX idx_status (status),
-    INDEX idx_order_type (order_type_id)
+    INDEX idx_status (status)
 );
 
 -- Equipment table
@@ -148,23 +130,122 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX idx_created (created_at)
 );
 
+-- Payments table
+CREATE TABLE IF NOT EXISTS payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    provider ENUM('stripe') NOT NULL DEFAULT 'stripe',
+    provider_payment_intent_id VARCHAR(255) UNIQUE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(10) NOT NULL DEFAULT 'cad',
+    status ENUM('created', 'requires_payment_method', 'requires_action', 'processing', 'succeeded', 'failed', 'canceled', 'refunded') DEFAULT 'created',
+    payment_method_type VARCHAR(50) NULL,
+    failure_reason TEXT NULL,
+    paid_at TIMESTAMP NULL,
+    provider_payload JSON NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_payment_order (order_id),
+    INDEX idx_payment_customer (customer_id),
+    INDEX idx_payment_status (status)
+);
+
+-- Payment events table (webhook/event log for idempotent processing)
+CREATE TABLE IF NOT EXISTS payment_events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT NULL,
+    provider ENUM('stripe') NOT NULL DEFAULT 'stripe',
+    provider_event_id VARCHAR(255) UNIQUE NOT NULL,
+    event_type VARCHAR(120) NOT NULL,
+    payload JSON NOT NULL,
+    processed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL,
+    INDEX idx_event_type (event_type),
+    INDEX idx_event_processed (processed_at)
+);
+
+-- Invoices / receipts storage
+CREATE TABLE IF NOT EXISTS invoices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT NOT NULL,
+    order_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    invoice_number VARCHAR(64) UNIQUE NOT NULL,
+    transaction_details JSON NOT NULL,
+    receipt_html MEDIUMTEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_invoice_order (order_id),
+    INDEX idx_invoice_customer (customer_id)
+);
+
+-- Notifications table for customer/admin payment alerts
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    order_id INT NULL,
+    payment_id INT NULL,
+    notification_type VARCHAR(60) NOT NULL,
+    severity ENUM('info', 'warning', 'critical') DEFAULT 'info',
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+    FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL,
+    INDEX idx_notification_user (user_id),
+    INDEX idx_notification_read (is_read),
+    INDEX idx_notification_type (notification_type)
+);
+
+-- Accounting synchronization table
+CREATE TABLE IF NOT EXISTS accounting_sync (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT NOT NULL,
+    order_id INT NOT NULL,
+    sync_status ENUM('pending', 'synced', 'failed') DEFAULT 'pending',
+    reporting_period VARCHAR(20) NOT NULL,
+    synced_at TIMESTAMP NULL,
+    error_message TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    INDEX idx_accounting_sync_status (sync_status),
+    INDEX idx_accounting_period (reporting_period)
+);
+
 -- Insert default admin user (password: admin123)
 INSERT INTO users (full_name, email, password_hash, role) VALUES
-('System Administrator', 'admin@globentech.com', '$2y$12$ispYnU5LnCx0XMyJ8x2aiOC6YteIq8ZqOFyVzuvp1vrnamajyv07m', 'administrator');
+('System Administrator', 'admin@globentech.com', '$2y$12$ispYnU5LnCx0XMyJ8x2aiOC6YteIq8ZqOFyVzuvp1vrnamajyv07m', 'administrator')
+ON DUPLICATE KEY UPDATE
+    full_name = VALUES(full_name),
+    password_hash = VALUES(password_hash),
+    role = VALUES(role);
 
 -- Insert default technician (password: tech123)
 INSERT INTO users (full_name, email, password_hash, role) VALUES
-('Lab Technician', 'tech@globentech.com', '$2y$12$p8DMkw4Jo6j.9vgKiwfV5u25FE2VvWf9fYnHEd/67YL57cQBkZSoS', 'technician');
+('Lab Technician', 'tech@globentech.com', '$2y$12$p8DMkw4Jo6j.9vgKiwfV5u25FE2VvWf9fYnHEd/67YL57cQBkZSoS', 'technician')
+ON DUPLICATE KEY UPDATE
+    full_name = VALUES(full_name),
+    password_hash = VALUES(password_hash),
+    role = VALUES(role);
 
 -- Insert default customer (password: customer123)
 INSERT INTO users (full_name, email, password_hash, role, company_name) VALUES
-('Test Customer', 'customer@globentech.com', '$2y$12$hBiceBSwHp9Rcqk5mh1k0uPjWflxDNEn/JMOUYzVekFGW4pKTSMQu', 'customer', 'Test Company Inc.');
-
--- Seed order types (sample_type: ore = 30 min prep, liquid = no prep)
-INSERT INTO order_types (name, description, sample_type, cost) VALUES
-('Gold Ore Analysis', 'Comprehensive gold content analysis', 'ore', 150.00),
-('Silver Ore Analysis', 'Silver content determination', 'ore', 120.00),
-('Water Quality Testing', 'Standard water analysis', 'liquid', 85.00);
+('Test Customer', 'customer@globentech.com', '$2y$12$hBiceBSwHp9Rcqk5mh1k0uPjWflxDNEn/JMOUYzVekFGW4pKTSMQu', 'customer', 'Test Company Inc.')
+ON DUPLICATE KEY UPDATE
+    full_name = VALUES(full_name),
+    password_hash = VALUES(password_hash),
+    role = VALUES(role),
+    company_name = VALUES(company_name);
 
 -- Insert sample equipment
 INSERT INTO equipment (name, equipment_type, processing_time_per_sample, warmup_time, break_interval, break_duration, daily_capacity) VALUES

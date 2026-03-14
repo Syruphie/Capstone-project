@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $end = date('Y-m-d H:i:s', $base + $durationMins * 60);
 
                 $queue->addToQueueScheduled($orderId, $eqId, $priority, $start, $end);
-                $order->updateOrderStatus($orderId, 'in_queue');
+                $order->updateOrderStatus($orderId, 'payment_pending');
                 $order->updateEstimatedCompletion($orderId, $end);
                 $message .= ' - Queued and scheduled';
             }

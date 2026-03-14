@@ -209,7 +209,13 @@ foreach ($orders as $o) {
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-small btn-primary">View Details</a>
+                                    <?php if (in_array($o['status'], ['approved', 'payment_pending', 'in_queue'], true)): ?>
+                                        <a href="checkout/index.php?order_id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-primary">Pay Now</a>
+                                    <?php elseif (in_array($o['status'], ['payment_confirmed', 'results_available', 'completed'], true)): ?>
+                                        <a href="invoice.php?order_id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-secondary">View Invoice</a>
+                                    <?php else: ?>
+                                        <a href="#" class="btn btn-small btn-secondary">View Details</a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

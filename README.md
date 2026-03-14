@@ -1,4 +1,5 @@
 # GlobenTech - Laboratory Order Management System
+
 **CPSY 301-D School Project Prototype**
 
 This is a Phase 3 prototype for a Laboratory Order Management System designed to streamline the ordering, processing, and delivery of chemical compounds for GMJ Global Energy. This prototype demonstrates the login system, account management, and basic class structure as outlined in the project design document.
@@ -73,10 +74,14 @@ You need to create a MySQL database and import the schema.
 3. **Import the Schema**:
    - Click on the **globentech_db** database in the left sidebar
    - Go to **File → Run SQL file...**
-   - Navigate to your project folder and select: `mysql_schema.sql`
+   - Navigate to your project folder and select: `database/schema.sql`
    - The tables will be created automatically
 
-4. **Verify the Import**:
+4. **Run Migrations (required for existing databases)**:
+   - Execute files in `database/migrations/` in order (001, 002, 003, 004)
+   - This ensures order-type and payment gateway tables/columns exist
+
+5. **Verify the Import**:
    - Expand the **globentech_db** database in the left sidebar
    - You should see all the tables listed
 
@@ -92,14 +97,17 @@ You need to create a MySQL database and import the schema.
 For testing purposes, the following accounts are pre-configured:
 
 **Administrator:**
+
 - Email: `admin@globentech.com`
 - Password: `admin123`
 
 **Laboratory Technician:**
+
 - Email: `tech@globentech.com`
 - Password: `tech123`
 
 **Customer:**
+
 - Email: `customer@globentech.com`
 - Password: `customer123`
 
