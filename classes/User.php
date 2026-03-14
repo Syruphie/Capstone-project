@@ -135,7 +135,13 @@ class User {
     }
 
     public function changePassword($userId, $oldPassword, $newPassword) {
-        // Method signature for changing user password
+        $user = $this->getUserById($userId);
+        if (!$user || !password_verify($oldPassword, $user['password_hash'])) {
+            return false;
+        }
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        return $stmt->execute([$hash, (int) $userId]);
     }
 
     public function resetPassword($email) {

@@ -284,15 +284,53 @@ class Queue {
 
     // Queue Statistics Methods
     public function getQueueLength($queueType = null) {
-        // Method signature for getting current queue length
+        $sql = "SELECT COUNT(*) as cnt FROM queue q JOIN orders o ON q.order_id = o.id WHERE o.status NOT IN ('results_available', 'completed')";
+        if ($queueType) { $sql .= " AND q.queue_type = ?"; $stmt = $this->db->prepare($sql); $stmt->execute([$queueType]); }
+        else { $stmt = $this->db->query($sql); }
+        return (int) $stmt->fetch()['cnt'];
     }
 
-    public function getAverageWaitTime($queueType = null, $period = 'day') {
-        // Method signature for calculating average wait time
+    public function getAverageWaitTime($queueType = null, $startDate = null, $endDate = null) {
+        $sql = "SELECT AVG(TIMESTAMPDIFF(MINUTE, o.created_at, q.scheduled_start)) as avg_mins 
+                FROM queue q JOIN orders o ON q.order_id = o.id 
+                WHERE q.scheduled_start IS NOT NULL AND o.created_at IS NOT NULL";
+        $params = [];
+        if ($queueType) { $sql .= " AND q.queue_type = ?"; $params[] = $queueType; }
+        if ($startDate) { $sql .= " AND q.scheduled_start >= ?"; $params[] = $startDate; }
+        if ($endDate) { $sql .= " AND q.scheduled_start <= ?"; $params[] = $endDate; }
+        $stmt = $params ? $this->db->prepare($sql) : $this->db->query($sql);
+        $params ? $stmt->execute($params) : null;
+        $row = $stmt->fetch();
+        return $row && $row['avg_mins'] !== null ? round((float) $row['avg_mins'], 1) : 0;
     }
 
     public function getQueueStatistics($startDate = null, $endDate = null) {
-        // Method signature for retrieving queue statistics
+        $standardLen = $this->getQueueLength('standard');
+        $priorityLen = $this->getQueueLength('priority');
+        $avgWait = $this->getAverageWaitTime(null, $startDate, $endDate);
+        return [
+            'standard_queue_length' => $standardLen,
+            'priority_queue_length' => $priorityLen,
+            'total_in_queue' => $standardLen + $priorityLen,
+            'average_wait_minutes' => $avgWait,
+            'from' => $startDate,
+            'to' => $endDate,
+        ];
+    }
+
+    public function getQueueEntriesForReport($startDate = null, $endDate = null) {
+        $sql = "SELECT q.*, o.order_number, o.status as order_status, o.created_at as order_created, e.name as equipment_name 
+                FROM queue q 
+                JOIN orders o ON q.order_id = o.id 
+                LEFT JOIN equipment e ON q.equipment_id = e.id 
+                WHERE 1=1";
+        $params = [];
+        if ($startDate) { $sql .= " AND q.scheduled_start >= ?"; $params[] = $startDate; }
+        if ($endDate) { $sql .= " AND q.scheduled_end <= ?"; $params[] = $endDate; }
+        $sql .= " ORDER BY q.scheduled_start ASC";
+        $stmt = $params ? $this->db->prepare($sql) : $this->db->query($sql);
+        if ($params) $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     // Getters and Setters

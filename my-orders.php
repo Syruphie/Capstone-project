@@ -132,6 +132,10 @@ foreach ($orders as $o) {
             display: inline-block;
             margin-top: 15px;
         }
+        .orders-table-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -205,7 +209,7 @@ foreach ($orders as $o) {
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-small btn-secondary">View Details</a>
+                                    <a href="#" class="btn btn-small btn-primary">View Details</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -213,7 +217,7 @@ foreach ($orders as $o) {
                     </table>
                 </div>
  
-                <div style="margin-top: 20px; text-align: right;">
+                <div class="orders-table-footer">
                     <a href="create-order.php" class="btn btn-primary">Create New Order</a>
                 </div>
             <?php endif; ?>

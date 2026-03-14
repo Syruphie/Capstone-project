@@ -3,10 +3,10 @@ require_once 'config/database.php';
 require_once 'classes/User.php';
 require_once 'classes/Order.php';
 require_once 'classes/Sample.php';
+require_once 'classes/OrderType.php';
 
 $user = new User();
 
-// Check if user is logged in and is customer
 if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
     header('Location: login.php');
     exit;
@@ -15,34 +15,34 @@ if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
 $userId = $_SESSION['user_id'];
 $error = '';
 $success = '';
+$orderTypeModel = new OrderType();
+$orderTypes = $orderTypeModel->getAll(true); // active only
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
-   $priority = htmlspecialchars($_POST['priority'] ?? 'standard');
-$sampleType = htmlspecialchars($_POST['sample_type'] ?? '');
-$compoundName = htmlspecialchars(trim($_POST['compound_name'] ?? ''));
-$quantity = floatval($_POST['quantity'] ?? 0);
-$unit = htmlspecialchars(trim($_POST['unit'] ?? ''));
+    $priority = htmlspecialchars($_POST['priority'] ?? 'standard');
+    $orderTypeId = isset($_POST['order_type_id']) ? (int) $_POST['order_type_id'] : 0;
+    $compoundName = htmlspecialchars(trim($_POST['compound_name'] ?? ''));
+    $quantity = floatval($_POST['quantity'] ?? 0);
+    $unit = htmlspecialchars(trim($_POST['unit'] ?? ''));
 
-
-    // Basic validation
-    if (empty($sampleType) || empty($compoundName) || $quantity <= 0 || empty($unit)) {
-        $error = 'Please fill in all required fields';
+    if (empty($orderTypes)) {
+        $error = 'No analysis types are currently available. Please contact support.';
+    } elseif (!$orderTypeId || empty($compoundName) || $quantity <= 0 || empty($unit)) {
+        $error = 'Please fill in all required fields and select an analysis type from the catalogue.';
     } else {
         $order = new Order();
         $sample = new Sample();
 
-        // Create order
         $orderId = $order->createOrder($userId, $priority);
 
         if ($orderId) {
-            // Add sample to order
-            $sampleId = $sample->addSample($orderId, $sampleType, $compoundName, $quantity, $unit);
+            $sampleId = $sample->addSample($orderId, $orderTypeId, $compoundName, $quantity, $unit);
 
             if ($sampleId) {
                 $success = 'Order submitted successfully! Order ID: ' . $orderId;
             } else {
-                $error = 'Failed to add sample to order';
+                $error = 'Failed to add sample to order. Please ensure the selected analysis type is still available.';
             }
         } else {
             $error = 'Failed to create order';
@@ -110,28 +110,24 @@ $unit = htmlspecialchars(trim($_POST['unit'] ?? ''));
                 <div class="form-group">
                     <label for="priority">Priority Level *</label>
                     <select id="priority" name="priority" required>
-                        <option value="standard" <?php echo ($priority ?? '') === 'standard' ? 'selected' : ''; ?>>
-    Standard (Regular Queue)
-</option>
-<option value="priority" <?php echo ($priority ?? '') === 'priority' ? 'selected' : ''; ?>>
-    Priority (Night Shift - Additional Fee)
-</option>
-
+                        <option value="standard" <?php echo ($priority ?? '') === 'standard' ? 'selected' : ''; ?>>Standard (Regular Queue)</option>
+                        <option value="priority" <?php echo ($priority ?? '') === 'priority' ? 'selected' : ''; ?>>Priority (Night Shift - Additional Fee)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="sample_type">Sample Type *</label>
-                    <select id="sample_type" name="sample_type" required>
-                        <option value="">Select type...</option>
-                        <option value="ore" <?php echo ($sampleType ?? '') === 'ore' ? 'selected' : ''; ?>>
-    Ore (30 min prep time)
-</option>
-<option value="liquid" <?php echo ($sampleType ?? '') === 'liquid' ? 'selected' : ''; ?>>
-    Liquid (No prep needed)
-</option>
-
+                    <label for="order_type_id">Analysis Type (from catalogue) *</label>
+                    <select id="order_type_id" name="order_type_id" required>
+                        <option value="">Select analysis type...</option>
+                        <?php foreach ($orderTypes as $ot): ?>
+                        <option value="<?php echo (int) $ot['id']; ?>" data-cost="<?php echo number_format($ot['cost'], 2); ?>" <?php echo (isset($_POST['order_type_id']) && (int)$_POST['order_type_id'] === (int)$ot['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($ot['name']); ?> — $<?php echo number_format($ot['cost'], 2); ?>
+                        </option>
+                        <?php endforeach; ?>
                     </select>
+                    <?php if (empty($orderTypes)): ?>
+                    <p class="form-help" style="color:#856404;font-size:13px;margin-top:6px;">No analysis types available. An administrator must add types in the Order Catalogue.</p>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">

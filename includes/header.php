@@ -20,8 +20,8 @@
                     <a href="contact.php" class="<?php echo $currentPage === 'contact.php' ? 'active' : ''; ?>">Contact Us</a>
                 <?php elseif ($_SESSION['user_role'] === 'technician'): ?>
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
-                    <a href="#">Samples</a>
-                    <a href="#">Equipment</a>
+                    <a href="admin.php?tab=approvals" class="<?php echo $currentPage === 'admin.php' && $currentTab === 'approvals' ? 'active' : ''; ?>">Approvals</a>
+                    <a href="admin.php?tab=equipment" class="<?php echo $currentPage === 'admin.php' && $currentTab === 'equipment' ? 'active' : ''; ?>">Equipment</a>
                     <a href="calendar.php" class="<?php echo $currentPage === 'calendar.php' ? 'active' : ''; ?>">Calendar</a>
                 <?php elseif ($_SESSION['user_role'] === 'administrator'): ?>
                     <a href="dashboard.php" class="<?php echo $currentPage === 'dashboard.php' ? 'active' : ''; ?>">Dashboard</a>
@@ -40,6 +40,7 @@
                 <?php if (isset($_SESSION['user_name'])): ?>
                     <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                 <?php endif; ?>
+                <a href="account-settings.php" class="btn btn-small btn-secondary" style="margin-right:8px;">Account</a>
                 <a href="logout.php" class="btn btn-small">Logout</a>
             <?php endif; ?>
         </div>

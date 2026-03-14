@@ -46,10 +46,25 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_order_number (order_number)
 );
 
--- Samples table
+-- Order types (catalogue) – must exist before samples (FK). sample_type drives prep time (ore/liquid).
+CREATE TABLE IF NOT EXISTS order_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    sample_type ENUM('ore', 'liquid') NOT NULL DEFAULT 'ore',
+    cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_active (is_active)
+);
+
+-- Samples table (order_type_id links to Order Catalogue for revenue)
 CREATE TABLE IF NOT EXISTS samples (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
+    order_type_id INT NOT NULL,
+    unit_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     sample_type ENUM('ore', 'liquid') NOT NULL,
     compound_name VARCHAR(255) NOT NULL,
     quantity DECIMAL(10, 2) NOT NULL,
@@ -61,8 +76,10 @@ CREATE TABLE IF NOT EXISTS samples (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_type_id) REFERENCES order_types(id) ON DELETE RESTRICT,
     INDEX idx_order (order_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_order_type (order_type_id)
 );
 
 -- Equipment table
@@ -142,6 +159,12 @@ INSERT INTO users (full_name, email, password_hash, role) VALUES
 -- Insert default customer (password: customer123)
 INSERT INTO users (full_name, email, password_hash, role, company_name) VALUES
 ('Test Customer', 'customer@globentech.com', '$2y$12$hBiceBSwHp9Rcqk5mh1k0uPjWflxDNEn/JMOUYzVekFGW4pKTSMQu', 'customer', 'Test Company Inc.');
+
+-- Seed order types (sample_type: ore = 30 min prep, liquid = no prep)
+INSERT INTO order_types (name, description, sample_type, cost) VALUES
+('Gold Ore Analysis', 'Comprehensive gold content analysis', 'ore', 150.00),
+('Silver Ore Analysis', 'Silver content determination', 'ore', 120.00),
+('Water Quality Testing', 'Standard water analysis', 'liquid', 85.00);
 
 -- Insert sample equipment
 INSERT INTO equipment (name, equipment_type, processing_time_per_sample, warmup_time, break_interval, break_duration, daily_capacity) VALUES

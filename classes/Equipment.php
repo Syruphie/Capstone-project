@@ -23,8 +23,22 @@ class Equipment {
     }
 
     // Equipment Management Methods
-    public function addEquipment($name, $equipmentType, $processingTime, $warmupTime, $breakInterval, $breakDuration, $dailyCapacity) {
-        // Method signature for adding new equipment
+    public function addEquipment($name, $equipmentType, $processingTime, $warmupTime, $breakInterval, $breakDuration, $dailyCapacity, $isAvailable = true, $lastMaintenance = null) {
+        $stmt = $this->db->prepare(
+            "INSERT INTO equipment (name, equipment_type, processing_time_per_sample, warmup_time, break_interval, break_duration, daily_capacity, is_available, last_maintenance) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+        return $stmt->execute([
+            $name,
+            $equipmentType,
+            (int) $processingTime,
+            (int) $warmupTime,
+            (int) $breakInterval,
+            (int) $breakDuration,
+            (int) $dailyCapacity,
+            $isAvailable ? 1 : 0,
+            $lastMaintenance ?: null
+        ]) ? $this->db->lastInsertId() : false;
     }
 
     public function getEquipmentById($equipmentId) {
@@ -34,11 +48,24 @@ class Equipment {
     }
 
     public function updateEquipment($equipmentId, $data) {
-        // Method signature for updating equipment details
+        $allowed = ['name', 'equipment_type', 'processing_time_per_sample', 'warmup_time', 'break_interval', 'break_duration', 'daily_capacity', 'is_available', 'last_maintenance'];
+        $sets = [];
+        $params = [];
+        foreach ($allowed as $key) {
+            if (array_key_exists($key, $data)) {
+                $sets[] = "{$key} = ?";
+                $params[] = $key === 'is_available' ? ($data[$key] ? 1 : 0) : $data[$key];
+            }
+        }
+        if (empty($sets)) return false;
+        $params[] = (int) $equipmentId;
+        $stmt = $this->db->prepare("UPDATE equipment SET " . implode(', ', $sets) . " WHERE id = ?");
+        return $stmt->execute($params);
     }
 
     public function deleteEquipment($equipmentId) {
-        // Method signature for deleting equipment
+        $stmt = $this->db->prepare("DELETE FROM equipment WHERE id = ?");
+        return $stmt->execute([(int) $equipmentId]);
     }
 
     public function getAllEquipment($availableOnly = false) {
@@ -117,7 +144,11 @@ class Equipment {
     }
 
     public function getDelayHistory($equipmentId) {
-        // Method signature for retrieving delay history
+        $stmt = $this->db->prepare(
+            "SELECT * FROM equipment_delays WHERE equipment_id = ? ORDER BY delay_start DESC"
+        );
+        $stmt->execute([(int) $equipmentId]);
+        return $stmt->fetchAll();
     }
 
     public function calculateDelayImpact($equipmentId, $delayDuration) {
@@ -126,11 +157,40 @@ class Equipment {
 
     // Equipment Statistics Methods
     public function getUtilizationRate($equipmentId, $startDate, $endDate) {
-        // Method signature for calculating equipment utilization rate
+        $eq = $this->getEquipmentById($equipmentId);
+        if (!$eq || !$eq['daily_capacity']) return 0;
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(DISTINCT q.order_id) as used 
+             FROM queue q 
+             WHERE q.equipment_id = ? AND q.scheduled_start IS NOT NULL AND q.scheduled_end IS NOT NULL 
+             AND q.scheduled_start <= ? AND q.scheduled_end >= ?"
+        );
+        $stmt->execute([(int) $equipmentId, $endDate, $startDate]);
+        $used = (int) $stmt->fetch()['used'];
+        $days = max(1, (strtotime($endDate) - strtotime($startDate)) / 86400);
+        $capacity = (int) $eq['daily_capacity'] * $days;
+        return $capacity > 0 ? round(100 * $used / $capacity, 2) : 0;
     }
 
     public function getEquipmentStatistics($equipmentId) {
-        // Method signature for retrieving equipment statistics
+        $eq = $this->getEquipmentById($equipmentId);
+        if (!$eq) return null;
+        $delays = $this->getDelayHistory($equipmentId);
+        return [
+            'equipment' => $eq,
+            'delay_count' => count($delays),
+            'delays' => $delays,
+        ];
+    }
+
+    public function getAllEquipmentWithStats() {
+        $list = $this->getAllEquipment(false);
+        $result = [];
+        foreach ($list as $eq) {
+            $delays = $this->getDelayHistory($eq['id']);
+            $result[] = array_merge($eq, ['delay_count' => count($delays), 'delays' => $delays]);
+        }
+        return $result;
     }
 
     public function getAverageProcessingTime($equipmentId) {

@@ -79,6 +79,14 @@ class Order {
         return $stmt->execute([$estimatedCompletion, $orderId]);
     }
 
+    /** Set order total_cost to the sum of samples.unit_cost for this order (for revenue tracking). */
+    public function updateOrderTotalFromSamples($orderId) {
+        $stmt = $this->db->prepare(
+            "UPDATE orders SET total_cost = (SELECT COALESCE(SUM(unit_cost), 0) FROM samples WHERE order_id = ?) WHERE id = ?"
+        );
+        return $stmt->execute([$orderId, $orderId]);
+    }
+
     // Order Retrieval Methods
     public function getOrdersByCustomer($customerId, $limit = 50, $offset = 0) {
         $stmt = $this->db->prepare(
@@ -215,11 +223,45 @@ class Order {
 
     // Statistics Methods
     public function getOrderStatistics($startDate = null, $endDate = null) {
-        // Method signature for retrieving order statistics
+        $sql = "SELECT status, COUNT(*) as cnt FROM orders WHERE 1=1";
+        $params = [];
+        if ($startDate) { $sql .= " AND created_at >= ?"; $params[] = $startDate; }
+        if ($endDate) { $sql .= " AND created_at <= ?"; $params[] = $endDate; }
+        $sql .= " GROUP BY status";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $byStatus = $stmt->fetchAll();
+        $sql2 = "SELECT COUNT(*) as total FROM orders WHERE 1=1";
+        $params2 = [];
+        if ($startDate) { $sql2 .= " AND created_at >= ?"; $params2[] = $startDate; }
+        if ($endDate) { $sql2 .= " AND created_at <= ?"; $params2[] = $endDate; }
+        $stmt2 = $this->db->prepare($sql2);
+        $stmt2->execute($params2);
+        $total = (int) $stmt2->fetch()['total'];
+        return ['by_status' => $byStatus, 'total' => $total, 'from' => $startDate, 'to' => $endDate];
     }
 
     public function getRevenueByPeriod($startDate, $endDate) {
-        // Method signature for calculating revenue in a period
+        $stmt = $this->db->prepare(
+            "SELECT COALESCE(SUM(total_cost), 0) as revenue, COUNT(*) as order_count 
+             FROM orders 
+             WHERE status IN ('payment_confirmed', 'in_queue', 'preparation_in_progress', 'testing_in_progress', 'results_available', 'completed') 
+             AND created_at >= ? AND created_at <= ?"
+        );
+        $stmt->execute([$startDate, $endDate]);
+        return $stmt->fetch();
+    }
+
+    public function getOrdersForReport($startDate, $endDate) {
+        $stmt = $this->db->prepare(
+            "SELECT o.id, o.order_number, o.status, o.priority, o.total_cost, o.created_at, o.completed_at, u.full_name as customer_name 
+             FROM orders o 
+             LEFT JOIN users u ON o.customer_id = u.id 
+             WHERE o.created_at >= ? AND o.created_at <= ? 
+             ORDER BY o.created_at DESC"
+        );
+        $stmt->execute([$startDate, $endDate]);
+        return $stmt->fetchAll();
     }
 
     // Getters and Setters

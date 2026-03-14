@@ -4,6 +4,7 @@ require_once 'classes/User.php';
 require_once 'classes/Order.php';
 require_once 'classes/Queue.php';
 require_once 'classes/Equipment.php';
+require_once 'classes/Sample.php';
  
 $user = new User();
  
@@ -77,13 +78,13 @@ $equipment = new Equipment();
                     <div class="card-stats">
                         <span class="stat"><?php echo $completedCount; ?> Completed</span>
                     </div>
-                    <a href="my-orders.php" class="btn btn-secondary">View History</a>
+                    <a href="my-orders.php" class="btn btn-primary">View History</a>
                 </div>
  
                 <div class="dashboard-card">
                     <h2>Account Settings</h2>
                     <p>Update your profile and preferences</p>
-                    <a href="#" class="btn btn-secondary">Settings</a>
+                    <a href="account-settings.php" class="btn btn-primary">Settings</a>
                 </div>
  
                 <div class="dashboard-card full-width">
@@ -129,7 +130,7 @@ $equipment = new Equipment();
                             </table>
                             <?php if (count($customerOrders) > 5): ?>
                             <div style="margin-top: 15px;">
-                                <a href="my-orders.php" class="btn btn-secondary">View All Orders</a>
+                                <a href="my-orders.php" class="btn btn-primary">View All Orders</a>
                             </div>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -139,46 +140,39 @@ $equipment = new Equipment();
  
         <?php elseif ($userRole === 'technician'): ?>
             <!-- Technician Dashboard -->
+            <?php
+            $sample = new Sample();
+            $pendingCount = count($sample->getPendingSamples());
+            $equipmentList = $equipment->getAllEquipment(true);
+            $availableCount = count($equipmentList);
+            ?>
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h2>Pending Samples</h2>
-                    <p>Samples waiting for preparation or testing</p>
+                    <h2>Pending Approvals</h2>
+                    <p>Samples and orders waiting for approval</p>
                     <div class="card-stats">
-                        <span class="stat">0 Pending</span>
+                        <span class="stat"><?php echo $pendingCount; ?> Pending</span>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Samples</a>
+                    <a href="admin.php?tab=approvals" class="btn btn-primary">Review Approvals</a>
                 </div>
- 
+
                 <div class="dashboard-card">
-                    <h2>Equipment Status</h2>
-                    <p>Monitor laboratory equipment availability</p>
-                    <?php
-                    $equipmentList = $equipment->getAllEquipment(true);
-                    $availableCount = count($equipmentList);
-                    ?>
+                    <h2>Equipment</h2>
+                    <p>View equipment status and availability</p>
                     <div class="card-stats">
                         <span class="stat"><?php echo $availableCount; ?> Available</span>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Equipment</a>
+                    <a href="admin.php?tab=equipment" class="btn btn-primary">View Equipment</a>
                 </div>
- 
+
                 <div class="dashboard-card">
-                    <h2>Processing Queue</h2>
-                    <p>View and manage the sample processing queue</p>
-                    <?php
-                    $standardQueue = $queue->getStandardQueue();
-                    $queueCount = count($standardQueue);
-                    ?>
+                    <h2>Calendar &amp; Queue</h2>
+                    <p>View scheduled orders, queue, and reschedule or finish orders</p>
+                    <?php $queueCount = count($queue->getStandardQueue()); ?>
                     <div class="card-stats">
                         <span class="stat"><?php echo $queueCount; ?> in Queue</span>
                     </div>
-                    <a href="#" class="btn btn-secondary">View Queue</a>
-                </div>
- 
-                <div class="dashboard-card">
-                    <h2>Log Delay</h2>
-                    <p>Report equipment delays or issues</p>
-                    <a href="#" class="btn btn-warning">Log Delay</a>
+                    <a href="calendar.php" class="btn btn-primary">Open Calendar</a>
                 </div>
             </div>
  
@@ -198,19 +192,25 @@ $equipment = new Equipment();
                 <div class="dashboard-card">
                     <h2>User Management</h2>
                     <p>Manage user accounts and permissions</p>
-                    <a href="#" class="btn btn-secondary">Manage Users</a>
+                    <a href="admin.php?tab=users" class="btn btn-primary">Manage Users</a>
                 </div>
- 
+
                 <div class="dashboard-card">
                     <h2>Equipment Management</h2>
                     <p>Configure equipment settings and schedules</p>
-                    <a href="#" class="btn btn-secondary">Manage Equipment</a>
+                    <a href="admin.php?tab=equipment" class="btn btn-primary">Manage Equipment</a>
                 </div>
- 
+
+                <div class="dashboard-card">
+                    <h2>Order Catalogue</h2>
+                    <p>Create and manage order types for customers</p>
+                    <a href="admin.php?tab=catalogue" class="btn btn-primary">Manage Catalogue</a>
+                </div>
+
                 <div class="dashboard-card">
                     <h2>Reports & Analytics</h2>
                     <p>View system statistics and performance</p>
-                    <a href="#" class="btn btn-secondary">View Reports</a>
+                    <a href="admin.php?tab=reports" class="btn btn-primary">View Reports</a>
                 </div>
  
                 <div class="dashboard-card full-width">
