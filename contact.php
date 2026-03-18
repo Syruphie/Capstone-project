@@ -8,7 +8,7 @@ $user = new User();
 // Only logged-in customers can access
 if (!$user->isLoggedIn() || $user->getRole() !== 'customer') {
     header('Location: login.php');
-    exit;
+    exit; 
 }
 
 $dbUser = $user->getUserById($_SESSION['user_id']);

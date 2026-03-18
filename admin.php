@@ -834,7 +834,7 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
             }).catch(function() {
                 reportOutput.innerHTML = '<p class="empty-state">Request failed.</p>';
             });
-        }
+        } 
 
         function exportCsv() {
             if (!currentReportData) return;

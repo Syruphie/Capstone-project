@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // OPEN chatbot
     button.addEventListener("click", () => {
         windowBox.style.display = "flex";
-        button.style.display = "none";
+        button.style.display = "none"; 
         messages.innerHTML = "";
         botGreeting();
     });

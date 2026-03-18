@@ -67,7 +67,7 @@
 /* Messages */
 #chatbot-messages {
     flex: 1;
-    padding: 16px;
+    padding: 20px; 
     overflow-y: auto;
     font-size: 14px;
     background: #fafafa;
@@ -96,9 +96,10 @@
     display: flex;
     border-top: 1px solid #ddd;
     background: #ffffff;
-    padding: 10px;
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
+    padding: 12px;
+    gap: 10px; 
+    /* border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px; */ 
 }
 
 #chatbot-input {
@@ -185,7 +186,8 @@
     background: #f1f3f5;
     padding: 10px 14px;
     border-radius: 12px;
-    margin: 8px 0;
+    margin-top: 8px;  
+    margin-bottom: 12px; 
     max-width: 80%;
 
 }
@@ -193,7 +195,7 @@
 .chat-options {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px; 
     margin-top: 10px;
 }
 
@@ -201,8 +203,8 @@
     background: #667eea;
     color: white;
     border: none;
-    padding: 10px;
-    border-radius: 20px;
+    padding: 12px 16px;
+    border-radius: 25px; 
     cursor: pointer;
     font-size: 14px;
 }

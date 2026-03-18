@@ -8,8 +8,8 @@ if (!$user->isLoggedIn()) {
     exit;
 }
 
-$userId = $_SESSION['user_id'];
-$userRole = $user->getRole();
+$userId = $_SESSION['user_id']; 
+$userRole = $user->getRole(); 
 $profile = $user->getUserById($userId);
 $message = '';
 $error = '';
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_destroy();
             header('Location: login.php?deactivated=1');
             exit;
-        }
+        } 
         $error = 'Could not deactivate account.';
     } elseif (isset($_POST['change_role']) && $userRole === 'administrator') {
         $targetId = (int) ($_POST['user_id'] ?? 0);
