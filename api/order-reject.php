@@ -1,6 +1,11 @@
 <?php
 /**
- * POST: Reschedule a queue entry. Body: { "queue_id": 1, "scheduled_start": "...", "scheduled_end": "..." }
+ * POST: Cancel an already-scheduled analysis from the calendar / queue.
+ * This marks the order as rejected and notifies the customer with the provided reason.
+ * Accepts JSON:
+ *  - queue_id (int)
+ *  - order_id (int)
+ *  - rejection_reason (string)
  * Auth: admin or technician.
  */
 require_once __DIR__ . '/../config/database.php';
@@ -31,21 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $queueId = isset($input['queue_id']) ? (int) $input['queue_id'] : 0;
-$start = isset($input['scheduled_start']) ? trim($input['scheduled_start']) : '';
-$end = isset($input['scheduled_end']) ? trim($input['scheduled_end']) : '';
-$note = isset($input['message']) ? trim($input['message']) : '';
+$orderId = isset($input['order_id']) ? (int) $input['order_id'] : 0;
+$reason = isset($input['rejection_reason']) ? trim($input['rejection_reason']) : 'Order rejected';
 
-if ($queueId < 1 || $start === '' || $end === '') {
+if ($queueId < 1 || $orderId < 1) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Missing queue_id, scheduled_start, or scheduled_end']);
-    exit;
-}
-
-$startTs = strtotime($start);
-$endTs = strtotime($end);
-if ($startTs === false || $endTs === false || $endTs <= $startTs) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid dates']);
+    echo json_encode(['success' => false, 'error' => 'Missing or invalid queue_id or order_id']);
     exit;
 }
 
@@ -53,34 +49,30 @@ try {
     $queue = new Queue();
     $order = new Order();
     $email = new Email();
+
     $entry = $queue->getQueueById($queueId);
-    if (!$entry) {
+    if (!$entry || (int) $entry['order_id'] !== $orderId) {
         http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Queue entry not found']);
+        echo json_encode(['success' => false, 'error' => 'Queue entry not found for order']);
         exit;
     }
-    $orderId = (int) $entry['order_id'];
-    $equipmentId = isset($entry['equipment_id']) ? (int) $entry['equipment_id'] : 0;
 
-    $newStartStr = date('Y-m-d H:i:s', $startTs);
-    $newEndStr = date('Y-m-d H:i:s', $endTs);
-
-    $queue->updateSchedule($queueId, $newStartStr, $newEndStr);
-    if ($equipmentId > 0) {
-        $queue->recalculateScheduleForEquipment($equipmentId);
-    }
-    $order->updateEstimatedCompletion($orderId, $newEndStr);
-
-    // Notify customer about schedule change (best-effort)
     $orderData = $order->getOrderWithCustomer($orderId);
+
+    if (!$order->rejectOrder($orderId, $reason)) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Failed to reject order']);
+        exit;
+    }
+
+    $queue->removeFromQueue($queueId);
+
     if ($orderData && !empty($orderData['customer_email'])) {
-        $email->sendOrderScheduleUpdate(
+        $email->sendOrderRejectionNotification(
             $orderData['customer_email'],
             $orderData['customer_name'],
             $orderData['order_number'],
-            date('Y-m-d H:i', $startTs),
-            date('Y-m-d H:i', $endTs),
-            $note
+            $reason
         );
     }
 
@@ -89,3 +81,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
+

@@ -66,6 +66,7 @@ try {
                 'equipment_name' => $r['equipment_name'] ?? null,
                 'scheduled_start' => $r['scheduled_start'],
                 'scheduled_end' => $r['scheduled_end'],
+                'duration_minutes' => isset($r['duration_minutes']) ? (int) $r['duration_minutes'] : null,
                 'estimated_completion' => $r['estimated_completion'],
                 'position' => (int) $r['position'],
                 'queue_type' => $r['queue_type'],

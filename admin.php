@@ -262,8 +262,22 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                             </span>
                         </td>
                         <td class="actions">
-                            <button class="btn btn-xs btn-secondary">Edit</button>
-                            <button class="btn btn-xs btn-warning">Delay</button>
+                            <button
+                                type="button"
+                                class="btn btn-xs btn-secondary btn-edit-equipment"
+                                <?php echo $userRole === 'administrator' ? '' : 'disabled'; ?>
+                                data-id="<?php echo (int) $eq['id']; ?>"
+                                data-name="<?php echo htmlspecialchars($eq['name'], ENT_QUOTES); ?>"
+                                data-equipment_type="<?php echo htmlspecialchars($eq['equipment_type'], ENT_QUOTES); ?>"
+                                data-processing_time_per_sample="<?php echo (int) $eq['processing_time_per_sample']; ?>"
+                                data-warmup_time="<?php echo (int) $eq['warmup_time']; ?>"
+                                data-break_interval="<?php echo (int) $eq['break_interval']; ?>"
+                                data-break_duration="<?php echo (int) $eq['break_duration']; ?>"
+                                data-daily_capacity="<?php echo (int) $eq['daily_capacity']; ?>"
+                                data-is_available="<?php echo !empty($eq['is_available']) ? '1' : '0'; ?>"
+                                data-last_maintenance="<?php echo !empty($eq['last_maintenance']) ? htmlspecialchars(substr($eq['last_maintenance'], 0, 10), ENT_QUOTES) : ''; ?>"
+                            >Edit</button>
+                            <button type="button" class="btn btn-xs btn-warning" disabled>Delay</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -320,6 +334,59 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="addEquipmentCancel">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add Equipment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Equipment Modal -->
+    <div class="modal-overlay" id="editEquipmentModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="editEquipmentModalTitle">
+            <h2 id="editEquipmentModalTitle">Edit Equipment</h2>
+            <form id="editEquipmentForm">
+                <input type="hidden" id="eqe_id" name="id" value="">
+                <div class="form-group">
+                    <label for="eqe_name">Name *</label>
+                    <input type="text" id="eqe_name" name="name" required maxlength="255" placeholder="e.g. ICP Spectrometer">
+                </div>
+                <div class="form-group">
+                    <label for="eqe_type">Equipment Type *</label>
+                    <input type="text" id="eqe_type" name="equipment_type" required maxlength="100" placeholder="e.g. ICP, XRF">
+                </div>
+                <div class="form-group">
+                    <label for="eqe_processing">Processing Time per Sample (min) *</label>
+                    <input type="number" id="eqe_processing" name="processing_time_per_sample" required min="0" value="2">
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eqe_warmup">Warmup Time (min)</label>
+                        <input type="number" id="eqe_warmup" name="warmup_time" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eqe_capacity">Daily Capacity</label>
+                        <input type="number" id="eqe_capacity" name="daily_capacity" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eqe_break_interval">Break Interval (samples)</label>
+                        <input type="number" id="eqe_break_interval" name="break_interval" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eqe_break_duration">Break Duration (min)</label>
+                        <input type="number" id="eqe_break_duration" name="break_duration" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eqe_last_maintenance">Last Maintenance (optional)</label>
+                    <input type="date" id="eqe_last_maintenance" name="last_maintenance">
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label><input type="checkbox" name="is_available" id="eqe_available" checked> Available</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="editEquipmentCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -641,6 +708,8 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     <?php if ($currentTab === 'equipment'): ?>
     <script>
     (function() {
+        var canEdit = <?php echo $userRole === 'administrator' ? 'true' : 'false'; ?>;
+
         var addBtn = document.querySelector('.add-equipment-btn');
         var modal = document.getElementById('addEquipmentModal');
         var form = document.getElementById('addEquipmentForm');
@@ -648,11 +717,16 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
         if (!addBtn || !modal || !form) return;
         function openModal() { modal.setAttribute('aria-hidden', 'false'); }
         function closeModal() { modal.setAttribute('aria-hidden', 'true'); }
-        addBtn.addEventListener('click', openModal);
+        if (!canEdit) {
+            addBtn.disabled = true;
+        } else {
+            addBtn.addEventListener('click', openModal);
+        }
         cancelBtn.addEventListener('click', closeModal);
         modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            if (!canEdit) return;
             var fd = new FormData(form);
             var payload = {
                 name: fd.get('name') || '',
@@ -679,6 +753,78 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                     window.location.reload();
                 } else {
                     alert(res.error || 'Failed to add equipment');
+                }
+            })
+            .catch(function() { alert('Request failed'); })
+            .then(function() { submitBtn.disabled = false; });
+        });
+
+        // Edit equipment
+        var editModal = document.getElementById('editEquipmentModal');
+        var editForm = document.getElementById('editEquipmentForm');
+        var editCancel = document.getElementById('editEquipmentCancel');
+        var table = document.querySelector('.admin-table');
+        if (!editModal || !editForm || !table) return;
+
+        function openEditModal(btn) {
+            if (!btn) return;
+            document.getElementById('eqe_id').value = btn.dataset.id || '';
+            document.getElementById('eqe_name').value = btn.dataset.name || '';
+            document.getElementById('eqe_type').value = btn.dataset.equipment_type || '';
+            document.getElementById('eqe_processing').value = btn.dataset.processing_time_per_sample || '0';
+            document.getElementById('eqe_warmup').value = btn.dataset.warmup_time || '0';
+            document.getElementById('eqe_break_interval').value = btn.dataset.break_interval || '0';
+            document.getElementById('eqe_break_duration').value = btn.dataset.break_duration || '0';
+            document.getElementById('eqe_capacity').value = btn.dataset.daily_capacity || '0';
+            document.getElementById('eqe_available').checked = (btn.dataset.is_available || '0') === '1';
+            document.getElementById('eqe_last_maintenance').value = btn.dataset.last_maintenance || '';
+            editModal.setAttribute('aria-hidden', 'false');
+        }
+        function closeEditModal() { editModal.setAttribute('aria-hidden', 'true'); }
+        editCancel.addEventListener('click', closeEditModal);
+        editModal.addEventListener('click', function(e) { if (e.target === editModal) closeEditModal(); });
+
+        table.addEventListener('click', function(e) {
+            var editBtn = e.target.closest('.btn-edit-equipment');
+            if (!editBtn) return;
+            if (!canEdit) return;
+            openEditModal(editBtn);
+        });
+
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!canEdit) return;
+            var fd = new FormData(editForm);
+            var id = parseInt(fd.get('id'), 10) || 0;
+            if (!id) { alert('Missing equipment id'); return; }
+
+            var payload = {
+                id: id,
+                name: (fd.get('name') || '').trim(),
+                equipment_type: (fd.get('equipment_type') || '').trim(),
+                processing_time_per_sample: parseInt(fd.get('processing_time_per_sample'), 10) || 0,
+                warmup_time: parseInt(fd.get('warmup_time'), 10) || 0,
+                break_interval: parseInt(fd.get('break_interval'), 10) || 0,
+                break_duration: parseInt(fd.get('break_duration'), 10) || 0,
+                daily_capacity: parseInt(fd.get('daily_capacity'), 10) || 0,
+                is_available: fd.get('is_available') === 'on',
+                last_maintenance: fd.get('last_maintenance') || null
+            };
+
+            var submitBtn = editForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            fetch('api/equipment-update.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success) {
+                    closeEditModal();
+                    window.location.reload();
+                } else {
+                    alert(res.error || 'Failed to update equipment');
                 }
             })
             .catch(function() { alert('Request failed'); })

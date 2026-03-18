@@ -26,6 +26,7 @@
     const editModal = document.getElementById('editModal');
     const editForm = document.getElementById('editForm');
     const editQueueId = document.getElementById('editQueueId');
+    const editOrderId = document.getElementById('editOrderId');
     const editStart = document.getElementById('editStart');
     const editEnd = document.getElementById('editEnd');
     const btnCancelEdit = document.getElementById('btnCancelEdit');
@@ -33,6 +34,8 @@
     const finishMessageInEdit = document.getElementById('finishMessageInEdit');
     const finishAttachmentInEdit = document.getElementById('finishAttachmentInEdit');
     const btnFinishOrderInEdit = document.getElementById('btnFinishOrderInEdit');
+    const cancelReasonInEdit = document.getElementById('cancelReasonInEdit');
+    const btnCancelAnalysisInEdit = document.getElementById('btnCancelAnalysisInEdit');
 
     function setStatus(text) {
         if (statusEl) statusEl.textContent = text;
@@ -80,18 +83,22 @@
                 const comp = r.estimated_completion
                     ? new Date(r.estimated_completion).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
                     : '—';
+                const remaining = formatRemainingTime(r);
                 const pos = i + 1;
                 html += '<div class="queue-item queue-status-' + sg + '" draggable="true" data-queue-id="' + r.queue_id + '" data-position="' + pos + '" data-order-number="' + r.order_number + '">';
                 html += '<span class="queue-item-handle" aria-hidden="true">⋮⋮</span>';
                 html += '<div class="queue-item-main">';
                 html += '<div class="queue-item-order">' + escapeHtml(r.order_number) + '</div>';
-                html += '<div class="queue-item-meta"><span>Sample: ' + escapeHtml(types) + '</span></div>';
+                html += '<div class="queue-item-meta"><span>Sample: ' + escapeHtml(types) + '</span>';
+                if (remaining) {
+                    html += '<span>' + escapeHtml(remaining) + '</span>';
+                }
+                html += '</div>';
                 html += '</div>';
                 html += '<div class="queue-item-equipment">' + escapeHtml(eq) + '</div>';
                 html += '<div class="queue-item-completion">' + escapeHtml(comp) + '</div>';
                 html += '<div class="queue-item-actions">';
                 html += '<button type="button" class="btn btn-small btn-secondary btn-edit">Edit</button>';
-                html += '<button type="button" class="btn btn-small btn-primary btn-finish">Finish</button>';
                 html += '</div>';
                 html += '</div>';
             });
@@ -114,7 +121,7 @@
                 openEditModal(entry);
             });
         });
-        queueListEl.querySelectorAll('.btn-finish').forEach(function (btn) {
+        queueListEl.querySelectorAll('.btn-edit').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 const item = btn.closest('.queue-item');
                 if (!item) return;
@@ -131,6 +138,26 @@
         const div = document.createElement('div');
         div.textContent = s;
         return div.innerHTML;
+    }
+
+    function formatRemainingTime(entry) {
+        if (!entry || !entry.scheduled_start || !entry.scheduled_end) return '';
+        const start = new Date(entry.scheduled_start);
+        const end = new Date(entry.scheduled_end);
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) return '';
+        const now = new Date();
+        const totalMs = end - start;
+        const remainingMs = end - now;
+        const totalMins = Math.round(totalMs / 60000);
+        if (remainingMs <= 0) {
+            return 'Finished (' + totalMins + ' min)';
+        }
+        if (now < start) {
+            const untilStart = Math.round((start - now) / 60000);
+            return 'Starts in ' + untilStart + ' min';
+        }
+        const remMins = Math.round(remainingMs / 60000);
+        return 'Remaining ' + remMins + ' min';
     }
 
     function attachDragDrop(listEl) {
@@ -242,11 +269,13 @@
     function openEditModal(entry) {
         if (!entry || !editModal || !editForm) return;
         editQueueId.value = entry.queue_id;
+        if (editOrderId) editOrderId.value = entry.order_id;
         editStart.value = toDateTimeInput(entry.scheduled_start);
         editEnd.value = toDateTimeInput(entry.scheduled_end);
         if (editMessage) editMessage.value = '';
         if (finishMessageInEdit) finishMessageInEdit.value = '';
         if (finishAttachmentInEdit) finishAttachmentInEdit.value = '';
+        if (cancelReasonInEdit) cancelReasonInEdit.value = '';
         editModal.setAttribute('aria-hidden', 'false');
     }
 
@@ -350,6 +379,51 @@
     if (editModal) {
         editModal.addEventListener('click', function (e) {
             if (e.target === editModal) closeEditModal();
+        });
+    }
+
+    function cancelAnalysisFromEdit() {
+        if (!editQueueId || !editQueueId.value || !editOrderId || !editOrderId.value) {
+            setStatus('Cannot cancel: no order selected.');
+            return;
+        }
+        const confirmed = window.confirm('Are you sure you want to cancel this analysis and notify the customer?');
+        if (!confirmed) return;
+
+        const qid = parseInt(editQueueId.value, 10);
+        const oid = parseInt(editOrderId.value, 10);
+        const reason = (cancelReasonInEdit && cancelReasonInEdit.value.trim()) || 'Analysis cancelled';
+        if (!qid || !oid) return;
+
+        if (btnCancelAnalysisInEdit) btnCancelAnalysisInEdit.disabled = true;
+        setStatus('Cancelling analysis…');
+
+        fetch(apiBase + '/order-reject.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ queue_id: qid, order_id: oid, rejection_reason: reason })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+                if (btnCancelAnalysisInEdit) btnCancelAnalysisInEdit.disabled = false;
+                if (j.success) {
+                    closeEditModal();
+                    load();
+                    setStatus('Analysis cancelled and customer notified.');
+                } else {
+                    setStatus('Cancellation failed: ' + (j.error || 'Unknown'));
+                }
+            })
+            .catch(function () {
+                if (btnCancelAnalysisInEdit) btnCancelAnalysisInEdit.disabled = false;
+                setStatus('Cancellation failed.');
+            });
+    }
+
+    if (btnCancelAnalysisInEdit) {
+        btnCancelAnalysisInEdit.addEventListener('click', function (e) {
+            e.preventDefault();
+            cancelAnalysisFromEdit();
         });
     }
 

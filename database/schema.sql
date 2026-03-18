@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS orders (
     rejection_reason TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
     FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_customer (customer_id),
@@ -45,10 +46,25 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_order_number (order_number)
 );
 
+-- Order catalogue (order types)
+CREATE TABLE IF NOT EXISTS order_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    sample_type ENUM('ore', 'liquid') NOT NULL DEFAULT 'ore',
+    cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_active (is_active)
+);
+
 -- Samples table
 CREATE TABLE IF NOT EXISTS samples (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
+    order_type_id INT NOT NULL,
+    unit_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     sample_type ENUM('ore', 'liquid') NOT NULL,
     compound_name VARCHAR(255) NOT NULL,
     quantity DECIMAL(10, 2) NOT NULL,
@@ -60,7 +76,9 @@ CREATE TABLE IF NOT EXISTS samples (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_type_id) REFERENCES order_types(id) ON DELETE RESTRICT,
     INDEX idx_order (order_id),
+    INDEX idx_order_type (order_type_id),
     INDEX idx_status (status)
 );
 
@@ -252,3 +270,9 @@ INSERT INTO equipment (name, equipment_type, processing_time_per_sample, warmup_
 ('ICP Spectrometer', 'ICP', 2, 10, 20, 20, 200),
 ('XRF Analyzer', 'XRF', 3, 15, 30, 15, 150),
 ('Mass Spectrometer', 'MS', 5, 20, 25, 25, 100);
+
+-- Insert default order types
+INSERT IGNORE INTO order_types (name, description, sample_type, cost) VALUES
+('Gold Ore Analysis', 'Comprehensive gold content analysis', 'ore', 150.00),
+('Silver Ore Analysis', 'Silver content determination', 'ore', 120.00),
+('Water Quality Testing', 'Standard water analysis', 'liquid', 85.00);
