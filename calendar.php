@@ -62,6 +62,7 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
         <div class="modal modal-wide" role="dialog" aria-labelledby="editModalTitle">
             <h2 id="editModalTitle">Edit order</h2>
             <input type="hidden" id="editQueueId" name="queue_id">
+            <input type="hidden" id="editOrderId" name="order_id">
             <form id="editForm">
                 <div class="form-group">
                     <label for="editStart">Scheduled start</label>
@@ -94,6 +95,18 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-primary" id="btnFinishOrderInEdit">Finish order</button>
+                </div>
+            </div>
+            <div class="edit-modal-divider"></div>
+            <div class="edit-modal-finish-section">
+                <h3 class="edit-modal-finish-title">Cancel analysis</h3>
+                <p class="edit-modal-finish-desc">Cancel this analysis and notify the customer with a reason.</p>
+                <div class="form-group">
+                    <label for="cancelReasonInEdit">Cancellation reason (sent to customer)</label>
+                    <textarea id="cancelReasonInEdit" rows="3" class="form-control" placeholder="Explain why this analysis is being cancelled. This message will be emailed to the customer."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" id="btnCancelAnalysisInEdit">Cancel analysis</button>
                 </div>
             </div>
         </div>

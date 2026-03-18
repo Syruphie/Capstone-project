@@ -205,10 +205,22 @@ class Queue {
      */
     public function getCalendarData() {
         $stmt = $this->db->prepare(
-            "SELECT q.id as queue_id, q.order_id, q.equipment_id, q.position, q.scheduled_start, q.scheduled_end,
-                    q.queue_type, o.order_number, o.status as order_status, o.priority, o.estimated_completion,
+            "SELECT q.id as queue_id,
+                    q.order_id,
+                    q.equipment_id,
+                    q.position,
+                    q.scheduled_start,
+                    q.scheduled_end,
+                    TIMESTAMPDIFF(MINUTE, q.scheduled_start, q.scheduled_end) AS duration_minutes,
+                    q.queue_type,
+                    o.order_number,
+                    o.status as order_status,
+                    o.priority,
+                    o.estimated_completion,
                     e.name as equipment_name,
-                    (SELECT GROUP_CONCAT(DISTINCT s.sample_type ORDER BY s.sample_type) FROM samples s WHERE s.order_id = o.id) as sample_types
+                    (SELECT GROUP_CONCAT(DISTINCT s.sample_type ORDER BY s.sample_type)
+                       FROM samples s
+                      WHERE s.order_id = o.id) as sample_types
              FROM queue q
              JOIN orders o ON q.order_id = o.id
              LEFT JOIN equipment e ON q.equipment_id = e.id
@@ -232,7 +244,78 @@ class Queue {
     }
 
     public function recalculateSchedule($queueType, $startingPosition = 1) {
-        // Method signature for recalculating schedule for all queue entries
+        // Deprecated placeholder – use recalculateScheduleForEquipment instead.
+        return false;
+    }
+
+    /**
+     * Recalculate schedule for all queue entries on a given equipment so that:
+     * - each entry keeps its original duration (based on current scheduled_start/end)
+     * - entries are processed strictly one after another with no overlap
+     * - later entries start when the previous one ends
+     */
+    public function recalculateScheduleForEquipment($equipmentId) {
+        $equipmentId = (int) $equipmentId;
+        if ($equipmentId <= 0) {
+            return false;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT id, scheduled_start, scheduled_end
+               FROM queue
+              WHERE equipment_id = ?
+                AND scheduled_start IS NOT NULL
+                AND scheduled_end IS NOT NULL
+              ORDER BY position ASC"
+        );
+        $stmt->execute([$equipmentId]);
+        $entries = $stmt->fetchAll();
+
+        if (!$entries) {
+            return true;
+        }
+
+        $this->db->beginTransaction();
+        try {
+            $prevEnd = null;
+            foreach ($entries as $row) {
+                $qid = (int) $row['id'];
+                $start = $row['scheduled_start'];
+                $end = $row['scheduled_end'];
+
+                $startTs = strtotime($start);
+                $endTs = strtotime($end);
+                if ($startTs === false || $endTs === false || $endTs <= $startTs) {
+                    continue;
+                }
+                $duration = $endTs - $startTs;
+
+                if ($prevEnd === null) {
+                    $newStartTs = $startTs;
+                } else {
+                    $newStartTs = $prevEnd;
+                }
+                $newEndTs = $newStartTs + $duration;
+
+                $newStart = date('Y-m-d H:i:s', $newStartTs);
+                $newEnd = date('Y-m-d H:i:s', $newEndTs);
+
+                $upd = $this->db->prepare(
+                    "UPDATE queue
+                        SET scheduled_start = ?, scheduled_end = ?, updated_at = NOW()
+                      WHERE id = ?"
+                );
+                $upd->execute([$newStart, $newEnd, $qid]);
+
+                $prevEnd = $newEndTs;
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
     }
 
     public function getEstimatedWaitTime($queueId) {

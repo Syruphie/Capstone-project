@@ -45,6 +45,10 @@ try {
         echo json_encode(['success' => false, 'error' => 'Reorder failed']);
         exit;
     }
+    $entry = $queue->getQueueById($queueId);
+    if ($entry && !empty($entry['equipment_id'])) {
+        $queue->recalculateScheduleForEquipment((int) $entry['equipment_id']);
+    }
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
     http_response_code(500);
