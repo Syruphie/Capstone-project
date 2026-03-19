@@ -30,6 +30,7 @@ class QueuePositionService
 {
     private QueueRepository $queueRepository;
 
+
     public function __construct(QueueRepository $queueRepository)
     {
         $this->queueRepository = $queueRepository;

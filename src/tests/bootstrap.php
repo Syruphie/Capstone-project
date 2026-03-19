@@ -13,7 +13,25 @@ require_once __DIR__ . '/../classes/Queue/Service/QueuePositionService.php';
 require_once __DIR__ . '/../classes/Queue/Service/QueueSchedulingService.php';
 require_once __DIR__ . '/../classes/Queue/Service/QueueProcessingService.php';
 require_once __DIR__ . '/../classes/Queue/Service/QueueStatisticsService.php';
+
+require_once __DIR__ . '/../classes/User/Entity/User.php';
+require_once __DIR__ . '/../classes/User/Support/UserRole.php';
+require_once __DIR__ . '/../classes/User/Support/UserMapper.php';
+require_once __DIR__ . '/../classes/User/Support/PasswordVerifier.php';
+require_once __DIR__ . '/../classes/User/Repository/UserRepository.php';
+require_once __DIR__ . '/../classes/User/Service/UserService.php';
+require_once __DIR__ . '/../classes/User/Service/AuthenticationService.php';
+require_once __DIR__ . '/../classes/User/Service/PasswordService.php';
+require_once __DIR__ . '/../classes/User/Service/UserRoleService.php';
+require_once __DIR__ . '/../classes/User/Service/UserSessionService.php';
+
 require_once __DIR__ . '/../classes/Support/DateRangeValidator.php';
+
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_strict_mode', '1');
+    session_start();
+}
 
 function getTestDb(): PDO
 {
@@ -26,7 +44,7 @@ function getTestDb(): PDO
     $host = '127.0.0.1';
     $db = 'capstone_test';
     $user = 'root';
-    $pass = '';
+    $pass = 'Patricks8148!';
     $charset = 'utf8mb4';
 
     $dsn = "mysql:host={$host};dbname={$db};charset={$charset}";
@@ -42,6 +60,11 @@ function getTestDb(): PDO
 function makeQueueRepository(): QueueRepository
 {
     return new QueueRepository(getTestDb());
+}
+
+function makeUserRepository(): UserRepository
+{
+    return new UserRepository(getTestDb());
 }
 
 function assertTrue(bool $condition, string $message): void
@@ -70,6 +93,15 @@ function assertNotNull(mixed $value, string $message): void
 {
     if ($value === null) {
         throw new RuntimeException("Assertion failed: {$message}");
+    }
+}
+
+function assertNull(mixed $value, string $message): void
+{
+    if ($value !== null) {
+        throw new RuntimeException(
+            "Assertion failed: {$message}\nActual: " . var_export($value, true)
+        );
     }
 }
 
