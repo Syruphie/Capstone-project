@@ -27,6 +27,17 @@ require_once __DIR__ . '/../classes/User/Service/UserSessionService.php';
 
 require_once __DIR__ . '/../classes/Support/DateRangeValidator.php';
 
+require_once __DIR__ . '/../classes/Order/Entity/Order.php';
+require_once __DIR__ . '/../classes/Order/Support/OrderStatus.php';
+require_once __DIR__ . '/../classes/Order/Support/OrderPriority.php';
+require_once __DIR__ . '/../classes/Order/Support/OrderMapper.php';
+require_once __DIR__ . '/../classes/Order/Support/ValidateOrderStatus.php';
+require_once __DIR__ . '/../classes/Order/Repository/OrderRepository.php';
+require_once __DIR__ . '/../classes/Order/Service/OrderService.php';
+require_once __DIR__ . '/../classes/Order/Service/OrderApprovalService.php';
+require_once __DIR__ . '/../classes/Order/Service/OrderHistoryService.php';
+require_once __DIR__ . '/../classes/Order/Service/OrderReportingService.php';
+
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     ini_set('session.cookie_httponly', '1');
     ini_set('session.use_strict_mode', '1');
@@ -65,6 +76,11 @@ function makeQueueRepository(): QueueRepository
 function makeUserRepository(): UserRepository
 {
     return new UserRepository(getTestDb());
+}
+
+function makeOrderRepository(): OrderRepository
+{
+    return new OrderRepository(getTestDb());
 }
 
 function assertTrue(bool $condition, string $message): void

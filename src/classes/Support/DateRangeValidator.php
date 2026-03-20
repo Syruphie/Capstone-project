@@ -6,8 +6,12 @@ class DateRangeValidator
     /**
      * @throws Exception
      */
-    public static function validate(string $startDate, string $endDate): void
+    public static function validate(?string $startDate, ?string $endDate): void
     {
+        if (!$startDate || !$endDate) {
+            throw new InvalidArgumentException("Invalid date range: {$startDate} - {$endDate}");
+        }
+
         $from = new DateTime($startDate);
         $to = new DateTime($endDate);
 
