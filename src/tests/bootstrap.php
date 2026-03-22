@@ -4,6 +4,7 @@ declare(strict_types=1);
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
+/* Queue */
 require_once __DIR__ . '/../classes/Queue/Entity/QueueEntry.php';
 require_once __DIR__ . '/../classes/Queue/Support/QueueType.php';
 require_once __DIR__ . '/../classes/Queue/Support/QueueMapper.php';
@@ -14,6 +15,7 @@ require_once __DIR__ . '/../classes/Queue/Service/QueueSchedulingService.php';
 require_once __DIR__ . '/../classes/Queue/Service/QueueProcessingService.php';
 require_once __DIR__ . '/../classes/Queue/Service/QueueStatisticsService.php';
 
+/* User */
 require_once __DIR__ . '/../classes/User/Entity/User.php';
 require_once __DIR__ . '/../classes/User/Support/UserRole.php';
 require_once __DIR__ . '/../classes/User/Support/UserMapper.php';
@@ -25,8 +27,10 @@ require_once __DIR__ . '/../classes/User/Service/PasswordService.php';
 require_once __DIR__ . '/../classes/User/Service/UserRoleService.php';
 require_once __DIR__ . '/../classes/User/Service/UserSessionService.php';
 
+/* Support */
 require_once __DIR__ . '/../classes/Support/DateRangeValidator.php';
 
+/* Order */
 require_once __DIR__ . '/../classes/Order/Entity/Order.php';
 require_once __DIR__ . '/../classes/Order/Support/OrderStatus.php';
 require_once __DIR__ . '/../classes/Order/Support/OrderPriority.php';
@@ -37,6 +41,20 @@ require_once __DIR__ . '/../classes/Order/Service/OrderService.php';
 require_once __DIR__ . '/../classes/Order/Service/OrderApprovalService.php';
 require_once __DIR__ . '/../classes/Order/Service/OrderHistoryService.php';
 require_once __DIR__ . '/../classes/Order/Service/OrderReportingService.php';
+
+/* Sample */
+require_once __DIR__ . '/../classes/Sample/Entity/Sample.php';
+require_once __DIR__ . '/../classes/Sample/Support/SampleStatus.php';
+require_once __DIR__ . '/../classes/Sample/Support/SampleType.php';
+require_once __DIR__ . '/../classes/Sample/Support/SampleMapper.php';
+require_once __DIR__ . '/../classes/Sample/Support/ValidateSampleStatus.php';
+require_once __DIR__ . '/../classes/Sample/Support/ValidateSampleType.php';
+require_once __DIR__ . '/../classes/Sample/Repository/SampleRepository.php';
+require_once __DIR__ . '/../classes/Sample/Service/SampleService.php';
+require_once __DIR__ . '/../classes/Sample/Service/SamplePreparationService.php';
+require_once __DIR__ . '/../classes/Sample/Service/SampleTestingService.php';
+require_once __DIR__ . '/../classes/Sample/Service/SampleTrackingService.php';
+require_once __DIR__ . '/../classes/Sample/Service/SampleReportingService.php';
 
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     ini_set('session.cookie_httponly', '1');
@@ -83,6 +101,11 @@ function makeOrderRepository(): OrderRepository
     return new OrderRepository(getTestDb());
 }
 
+function makeSampleRepository(): SampleRepository
+{
+    return new SampleRepository(getTestDb());
+}
+
 function assertTrue(bool $condition, string $message): void
 {
     if (!$condition) {
@@ -119,6 +142,11 @@ function assertNull(mixed $value, string $message): void
             "Assertion failed: {$message}\nActual: " . var_export($value, true)
         );
     }
+}
+
+function assertCountSame(int $expected, array $actual, string $message): void
+{
+    assertSame($expected, count($actual), $message);
 }
 
 function printPass(string $message): void
