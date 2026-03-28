@@ -23,6 +23,11 @@ class InvoiceAction
             $invoice = $payment->getInvoiceByOrderAndCustomer($orderId, $customerId);
 
             if (!$invoice) {
+                $payment->getPaymentStatusForOrder($orderId, $customerId, true);
+                $invoice = $payment->getInvoiceByOrderAndCustomer($orderId, $customerId);
+            }
+
+            if (!$invoice) {
                 JsonResponse::send(['success' => true, 'found' => false]);
                 return;
             }

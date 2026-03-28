@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# Allow existing files/directories to be served as-is (api.php, css, js, vendor assets, etc.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Silence missing favicon requests.
+RewriteRule ^favicon\.ico$ - [R=204,L]
+
+# Root URL maps to the canonical page entrypoint.
+RewriteRule ^$ public/pages/index.php [L]
+
+# Legacy /<page>.php URLs map to public/pages/<page>.php when present.
+RewriteCond %{DOCUMENT_ROOT}/public/pages/$1 -f
+RewriteRule ^([A-Za-z0-9\-]+\.php)$ public/pages/$1 [L]
+

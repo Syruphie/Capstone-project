@@ -57,10 +57,8 @@ class PaymentProviderService
         return \Stripe\PaymentIntent::create([
             'amount' => $amountCents,
             'currency' => strtolower($currency),
-            'automatic_payment_methods' => [
-                'enabled' => true,
-                'allow_redirects' => 'never'
-            ],
+            // Card-only avoids automatic-method secure-context restrictions in local HTTP dev.
+            'payment_method_types' => ['card'],
             'receipt_email' => $email,
             'metadata' => [
                 'order_id' => (string)$orderId,

@@ -87,3 +87,8 @@ assertNotNull($order, 'order should exist after sync');
 assertSame(OrderStatus::PAYMENT_CONFIRMED, $order->getStatus(), 'refresh path should sync order status to payment_confirmed');
 printPass('refresh sync updates order status to payment_confirmed');
 
+$invoice = $invoiceRepository->getLatestByOrderAndCustomer(1, 1);
+assertNotNull($invoice, 'invoice should be generated for succeeded payment during refresh sync');
+assertSame('succeeded', $invoice['payment_status'], 'invoice should be tied to succeeded payment');
+printPass('refresh sync backfills invoice for succeeded payment');
+

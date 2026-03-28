@@ -118,6 +118,22 @@ class PaymentService
             $payment = $this->paymentRepository->getLatestByOrderAndCustomer($orderId, $customerId);
         }
 
+        if ($payment) {
+            $this->ensureInvoiceForSucceededPayment($payment);
+        }
+
         return $payment;
+    }
+
+    private function ensureInvoiceForSucceededPayment(array $payment): void
+    {
+        $paymentId = isset($payment['id']) ? (int)$payment['id'] : 0;
+        $status = (string)($payment['status'] ?? '');
+
+        if ($paymentId <= 0 || $status !== 'succeeded') {
+            return;
+        }
+
+        $this->invoiceService->generateInvoiceForPayment($paymentId, $this->paymentReceiptService);
     }
 }

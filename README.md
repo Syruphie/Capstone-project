@@ -87,10 +87,25 @@ You need to create a MySQL database and import the schema.
 
 ## Running Locally
 
-1. Open Laragon and click **Start All**
-2. Navigate to http://localhost/project-phase-3 in your browser (adjust the folder name if different)
-3. The website should now be running locally
-4. To view emails sent by the application, open http://localhost:8025
+### PHP built-in server (recommended for quick local runs)
+
+Run from the project root:
+
+```bash
+php -S 127.0.0.1:8000 dev-router.php
+```
+
+Then open:
+
+- `http://127.0.0.1:8000/`
+- `http://127.0.0.1:8000/login.php`
+- `http://127.0.0.1:8000/dashboard.php`
+
+### Apache / Nginx routing parity
+
+- Apache rewrite rules are provided in `.htaccess`.
+- Nginx rewrite rules are provided in `docs/nginx-routing.conf`.
+- Both map legacy `/*.php` page URLs to `public/pages/*.php` while keeping `api.php` and static assets directly reachable.
 
 ## Default Credentials
 

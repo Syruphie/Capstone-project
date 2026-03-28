@@ -11,12 +11,20 @@ class CreatePaymentIntentAction
         ApiAuth::requireUser();
 
         $input = json_decode(file_get_contents('php://input'), true);
-        $email = $input['email'] ?? '';
         $orderId = isset($input['order_id']) ? (int)$input['order_id'] : 0;
         $customerId = (int)($_SESSION['user_id'] ?? 0);
 
-        if ($email === '' || $orderId <= 0 || $customerId <= 0) {
+        if ($orderId <= 0 || $customerId <= 0) {
             JsonResponse::send(['success' => false, 'error' => 'Missing required fields'], 400);
+            return;
+        }
+
+        $user = new FrontendUser();
+        $customer = $user->getUserById($customerId);
+        $email = (string)($customer['email'] ?? '');
+
+        if ($email === '') {
+            JsonResponse::send(['success' => false, 'error' => 'Unable to resolve customer email'], 400);
             return;
         }
 
