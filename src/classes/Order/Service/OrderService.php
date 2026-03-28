@@ -42,7 +42,7 @@ class OrderService
         $order = new Order();
         $order->setCustomerId($customerId);
         $order->setOrderNumber($this->generateOrderNumber());
-        $order->setStatus(OrderStatus::DRAFT);
+        $order->setStatus(OrderStatus::SUBMITTED);
         $order->setPriority($priority);
         $order->setTotalCost(0.0);
 

@@ -3,7 +3,7 @@
 ## 1) Stripe Sandbox Validation
 
 - [ ] Configure `.env` with sandbox keys (`STRIPE_PUBLIC_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`)
-- [ ] Confirm webhook endpoint is reachable: `/api/payment-webhook.php`
+- [ ] Confirm webhook endpoint is reachable: `/api.php?endpoint=payment-webhook`
 - [ ] Send test webhook events from Stripe CLI/dashboard
 - [ ] Validate idempotent event handling (`payment_events.provider_event_id` unique)
 
@@ -12,7 +12,7 @@
 - [ ] Create customer order
 - [ ] Approve order in admin panel (status should become `payment_pending`)
 - [ ] Open checkout for order and complete payment with sandbox card
-- [ ] Verify polling endpoint updates (`/api/payment-status.php?order_id=...`)
+- [ ] Verify polling endpoint updates (`/api.php?endpoint=payment-status&order_id=...`)
 - [ ] Confirm order transitions to `payment_confirmed`
 - [ ] Confirm invoice row created and viewable at `/invoice.php?order_id=...`
 - [ ] Confirm receipt email sent to customer

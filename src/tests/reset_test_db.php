@@ -11,8 +11,18 @@ $_SESSION = [];
 
 $db->exec('SET FOREIGN_KEY_CHECKS = 0');
 
+$tableExists = static function (PDO $db, string $table): bool {
+    $stmt = $db->prepare('SHOW TABLES LIKE ?');
+    $stmt->execute([$table]);
+
+    return (bool)$stmt->fetchColumn();
+};
+
 $db->exec('TRUNCATE TABLE samples');
 $db->exec('TRUNCATE TABLE queue');
+if ($tableExists($db, 'equipment_delays')) {
+    $db->exec('TRUNCATE TABLE equipment_delays');
+}
 $db->exec('TRUNCATE TABLE accounting_sync');
 $db->exec('TRUNCATE TABLE notifications');
 $db->exec('TRUNCATE TABLE invoices');

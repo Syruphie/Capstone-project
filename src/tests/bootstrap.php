@@ -70,9 +70,34 @@ require_once __DIR__ . '/../classes/Payment/Repository/InvoiceRepository.php';
 require_once __DIR__ . '/../classes/Payment/Repository/NotificationRepository.php';
 require_once __DIR__ . '/../classes/Payment/Repository/AccountingSyncRepository.php';
 require_once __DIR__ . '/../classes/Payment/Service/PaymentStatusService.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentProviderService.php';
 require_once __DIR__ . '/../classes/Payment/Service/PaymentNotificationService.php';
 require_once __DIR__ . '/../classes/Payment/Service/InvoiceService.php';
 require_once __DIR__ . '/../classes/Payment/Service/PaymentReceiptService.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentService.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentWebhookService.php';
+
+/* OrderType */
+require_once __DIR__ . '/../classes/OrderType/Support/OrderTypeSampleType.php';
+require_once __DIR__ . '/../classes/OrderType/Entity/OrderType.php';
+require_once __DIR__ . '/../classes/OrderType/Support/OrderTypeMapper.php';
+require_once __DIR__ . '/../classes/OrderType/Repository/OrderTypeRepository.php';
+require_once __DIR__ . '/../classes/OrderType/Service/OrderTypeService.php';
+
+/* Equipment */
+require_once __DIR__ . '/../classes/Equipment/Entity/Equipment.php';
+require_once __DIR__ . '/../classes/Equipment/Entity/EquipmentDelay.php';
+require_once __DIR__ . '/../classes/Equipment/Support/EquipmentMapper.php';
+require_once __DIR__ . '/../classes/Equipment/Repository/EquipmentRepository.php';
+require_once __DIR__ . '/../classes/Equipment/Repository/EquipmentDelayRepository.php';
+require_once __DIR__ . '/../classes/Equipment/Service/EquipmentService.php';
+
+/* Email */
+require_once __DIR__ . '/../classes/Email/Entity/EmailMessage.php';
+require_once __DIR__ . '/../classes/Email/Support/EmailTemplate.php';
+require_once __DIR__ . '/../classes/Email/Support/EmailTemplateRenderer.php';
+require_once __DIR__ . '/../classes/Email/Repository/EmailTransportRepository.php';
+require_once __DIR__ . '/../classes/Email/Service/EmailService.php';
 
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     ini_set('session.cookie_httponly', '1');
@@ -147,6 +172,21 @@ function makeNotificationRepository(): NotificationRepository
 function makeAccountingSyncRepository(): AccountingSyncRepository
 {
     return new AccountingSyncRepository(getTestDb());
+}
+
+function makeOrderTypeRepository(): OrderTypeRepository
+{
+    return new OrderTypeRepository(getTestDb());
+}
+
+function makeEquipmentRepository(): EquipmentRepository
+{
+    return new EquipmentRepository(getTestDb());
+}
+
+function makeEquipmentDelayRepository(): EquipmentDelayRepository
+{
+    return new EquipmentDelayRepository(getTestDb());
 }
 
 function assertTrue(bool $condition, string $message): void

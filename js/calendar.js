@@ -12,7 +12,7 @@
         return 'pending';
     }
 
-    const apiBase = 'api';
+    const apiBase = 'api.php';
     const pollInterval = 15000;
     let pollTimer = null;
     let currentData = null;
@@ -39,7 +39,7 @@
     }
 
     function fetchCalendar() {
-        return fetch(apiBase + '/calendar-data.php')
+        return fetch(apiBase + '?endpoint=calendar-data')
             .then(function (r) {
                 if (!r.ok) throw new Error('Fetch failed');
                 return r.json();
@@ -190,7 +190,7 @@
         if (idx < 0) return;
         const newPos = idx + 1;
 
-        fetch(apiBase + '/calendar-reorder.php', {
+        fetch(apiBase + '?endpoint=calendar-reorder', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ queue_id: parseInt(queueId, 10), new_position: newPos })
@@ -282,7 +282,7 @@
             const message = editMessage ? editMessage.value.trim() : '';
             if (!qid || !start || !end) return;
 
-            fetch(apiBase + '/calendar-reschedule.php', {
+            fetch(apiBase + '?endpoint=calendar-reschedule', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ queue_id: qid, scheduled_start: start, scheduled_end: end, message: message })
@@ -320,7 +320,7 @@
         if (btnFinishOrderInEdit) btnFinishOrderInEdit.disabled = true;
         setStatus('Finishing order…');
 
-        fetch(apiBase + '/order-complete.php', { method: 'POST', body: formData })
+        fetch(apiBase + '?endpoint=order-complete', { method: 'POST', body: formData })
             .then(function (r) { return r.json(); })
             .then(function (j) {
                 if (btnFinishOrderInEdit) btnFinishOrderInEdit.disabled = false;

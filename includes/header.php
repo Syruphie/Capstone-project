@@ -76,11 +76,7 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="chatbot/chat.css">
-<script src="chatbot/chat.js"></script>
+<link rel="stylesheet" href="css/chat.css">
+<script src="js/chatbot.js"></script>
 
 <!-- ================= CHATBOT END ================= -->
-
-
-
-
