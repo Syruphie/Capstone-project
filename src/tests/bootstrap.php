@@ -56,6 +56,24 @@ require_once __DIR__ . '/../classes/Sample/Service/SampleTestingService.php';
 require_once __DIR__ . '/../classes/Sample/Service/SampleTrackingService.php';
 require_once __DIR__ . '/../classes/Sample/Service/SampleReportingService.php';
 
+/* Payment */
+require_once __DIR__ . '/../classes/Payment/Support/PaymentProvider.php';
+require_once __DIR__ . '/../classes/Payment/Support/PaymentStatus.php';
+require_once __DIR__ . '/../classes/Payment/Support/PaymentMapper.php';
+require_once __DIR__ . '/../classes/Payment/Support/InvoiceMapper.php';
+require_once __DIR__ . '/../classes/Payment/Entity/Payment.php';
+require_once __DIR__ . '/../classes/Payment/Entity/Invoice.php';
+require_once __DIR__ . '/../classes/Payment/Entity/PaymentEvent.php';
+require_once __DIR__ . '/../classes/Payment/Repository/PaymentRepository.php';
+require_once __DIR__ . '/../classes/Payment/Repository/PaymentEventRepository.php';
+require_once __DIR__ . '/../classes/Payment/Repository/InvoiceRepository.php';
+require_once __DIR__ . '/../classes/Payment/Repository/NotificationRepository.php';
+require_once __DIR__ . '/../classes/Payment/Repository/AccountingSyncRepository.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentStatusService.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentNotificationService.php';
+require_once __DIR__ . '/../classes/Payment/Service/InvoiceService.php';
+require_once __DIR__ . '/../classes/Payment/Service/PaymentReceiptService.php';
+
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     ini_set('session.cookie_httponly', '1');
     ini_set('session.use_strict_mode', '1');
@@ -104,6 +122,31 @@ function makeOrderRepository(): OrderRepository
 function makeSampleRepository(): SampleRepository
 {
     return new SampleRepository(getTestDb());
+}
+
+function makePaymentRepository(): PaymentRepository
+{
+    return new PaymentRepository(getTestDb());
+}
+
+function makePaymentEventRepository(): PaymentEventRepository
+{
+    return new PaymentEventRepository(getTestDb());
+}
+
+function makeInvoiceRepository(): InvoiceRepository
+{
+    return new InvoiceRepository(getTestDb());
+}
+
+function makeNotificationRepository(): NotificationRepository
+{
+    return new NotificationRepository(getTestDb());
+}
+
+function makeAccountingSyncRepository(): AccountingSyncRepository
+{
+    return new AccountingSyncRepository(getTestDb());
 }
 
 function assertTrue(bool $condition, string $message): void

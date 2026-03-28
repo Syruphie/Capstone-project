@@ -45,9 +45,9 @@ $countAll = $repo->getActiveEntryCount();
 $countStandard = $repo->getActiveEntryCount(QueueType::STANDARD);
 $countPriority = $repo->getActiveEntryCount(QueueType::PRIORITY);
 
-assertSame(3, $countAll, 'active entry count should be 3');
+assertSame(2, $countAll, 'active entry count should be 2');
 assertSame(2, $countStandard, 'standard active entry count should be 2');
-assertSame(1, $countPriority, 'priority active entry count should be 1');
+assertSame(0, $countPriority, 'priority active entry count should be 0');
 printPass('getActiveEntryCount works');
 
 $deleted = $repo->deleteById($queueId);

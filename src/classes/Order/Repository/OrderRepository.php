@@ -470,4 +470,11 @@ class OrderRepository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getOrderStatus(int $orderId): string
+    {
+        $stmt = $this->db->prepare("SELECT status FROM orders WHERE id = ? LIMIT 1");
+        $stmt->execute([$orderId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

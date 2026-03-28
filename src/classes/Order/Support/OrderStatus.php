@@ -21,6 +21,7 @@ class OrderStatus
     public const SUBMITTED = 'submitted';
     public const APPROVED = 'approved';
     public const REJECTED = 'rejected';
+    public const PENDING_APPROVAL = 'pending_approval';
     public const PAYMENT_CONFIRMED = 'payment_confirmed';
     public const IN_QUEUE = 'in_queue';
     public const PREPARATION_IN_PROGRESS = 'preparation_in_progress';
@@ -35,6 +36,7 @@ class OrderStatus
             self::SUBMITTED,
             self::APPROVED,
             self::REJECTED,
+            self::PENDING_APPROVAL,
             self::PAYMENT_CONFIRMED,
             self::IN_QUEUE,
             self::PREPARATION_IN_PROGRESS,

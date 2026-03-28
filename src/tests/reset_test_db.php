@@ -13,6 +13,11 @@ $db->exec('SET FOREIGN_KEY_CHECKS = 0');
 
 $db->exec('TRUNCATE TABLE samples');
 $db->exec('TRUNCATE TABLE queue');
+$db->exec('TRUNCATE TABLE accounting_sync');
+$db->exec('TRUNCATE TABLE notifications');
+$db->exec('TRUNCATE TABLE invoices');
+$db->exec('TRUNCATE TABLE payment_events');
+$db->exec('TRUNCATE TABLE payments');
 $db->exec('TRUNCATE TABLE orders');
 $db->exec('TRUNCATE TABLE order_types');
 $db->exec('TRUNCATE TABLE equipment');
