@@ -1,17 +1,34 @@
 RewriteEngine On
 
-# Allow existing files/directories to be served as-is (api.php, css, js, vendor assets, etc.)
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
+# Avoid exposing folder listings (css/, frontend/, etc.)
+Options -Indexes
+
+# Allow existing files to be served as-is (api.php, css, js, vendor assets, etc.).
+RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
 # Silence missing favicon requests.
 RewriteRule ^favicon\.ico$ - [R=204,L]
 
+# Legacy flat *.php URLs -> organized routes (301 so bookmarks update).
+RewriteRule ^login\.php$ auth/login.php [R=301,L]
+RewriteRule ^register\.php$ auth/register.php [R=301,L]
+RewriteRule ^verify-email\.php$ auth/verify-email.php [R=301,L]
+RewriteRule ^logout\.php$ auth/logout.php [R=301,L]
+RewriteRule ^account-settings\.php$ account/settings.php [R=301,L]
+RewriteRule ^dashboard\.php$ dashboard/index.php [R=301,L]
+RewriteRule ^my-orders\.php$ orders/my-orders.php [R=301,L]
+RewriteRule ^order-history\.php$ orders/order-history.php [R=301,L]
+RewriteRule ^create-order\.php$ orders/create-order.php [R=301,L]
+RewriteRule ^checkout\.php$ orders/checkout.php [R=301,L]
+RewriteRule ^invoice\.php$ orders/invoice.php [R=301,L]
+RewriteRule ^catalog\.php$ catalog/index.php [R=301,L]
+RewriteRule ^contact\.php$ contact/index.php [R=301,L]
+RewriteRule ^calendar\.php$ calendar/index.php [R=301,L]
+RewriteRule ^create-event\.php$ calendar/create-event.php [R=301,L]
+
 # Root URL maps to the canonical page entrypoint.
 RewriteRule ^$ public/pages/index.php [L]
 
-# Legacy /<page>.php URLs map to public/pages/<page>.php when present.
-RewriteCond %{DOCUMENT_ROOT}/public/pages/$1 -f
-RewriteRule ^([A-Za-z0-9\-]+\.php)$ public/pages/$1 [L]
-
+# Any routable *.php path (including nested, e.g. admin/approvals.php) under this app.
+RewriteRule ^([A-Za-z0-9_\-/]+\.php)$ public/pages/$1 [L]

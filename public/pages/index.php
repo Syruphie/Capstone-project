@@ -1,42 +1,68 @@
 <?php
-require_once 'config/database.php';
-require_once 'src/classes/Frontend/bootstrap.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/bootstrap_paths.php';
 
 $user = new FrontendUser();
 
-// Redirect if already logged in
 if ($user->isLoggedIn()) {
-    header('Location: dashboard.php');
+    header('Location: ' . app_path('dashboard/index.php'));
     exit;
 }
+
+$publicHeaderVariant = 'home';
+$isLoggedIn = false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <?php include PAGE_PARTIALS . '/html-base.php'; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo APP_NAME; ?> - Laboratory Order Management System</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(app_path('css/style.css')); ?>">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars(app_path('css/landing.css')); ?>">
 </head>
 <body class="landing-page">
+<?php /** @var string $publicHeaderVariant 'home'|'catalog' */
+$publicHeaderVariant = $publicHeaderVariant ?? 'home';
+$isLoggedIn = $isLoggedIn ?? false;
+$headerClass = $publicHeaderVariant === 'catalog' ? 'landing-header scrolled' : 'landing-header';
+$stroke = $publicHeaderVariant === 'catalog' ? 'currentColor' : '#fff';
+?>
     <!-- Header -->
-    <header class="landing-header">
+    <header class="<?php echo htmlspecialchars($headerClass, ENT_QUOTES, 'UTF-8'); ?>">
         <div class="landing-header-content">
             <div class="landing-logo">
-                <a href="index.php">
+                <a href="<?php echo htmlspecialchars(app_path('index.php')); ?>">
                     <span class="logo-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 3V10L6 14V21H18V14L15 10V3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 3H15" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M6 14H18" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="10" cy="17" r="1" fill="#fff"/>
-                            <circle cx="14" cy="17" r="1" fill="#fff"/>
+                            <path d="M9 3V10L6 14V21H18V14L15 10V3" stroke="<?php echo $stroke; ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 3H15" stroke="<?php echo $stroke; ?>" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M6 14H18" stroke="<?php echo $stroke; ?>" stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="10" cy="17" r="1" fill="<?php echo $stroke === 'currentColor' ? 'currentColor' : '#fff'; ?>"/>
+                            <circle cx="14" cy="17" r="1" fill="<?php echo $stroke === 'currentColor' ? 'currentColor' : '#fff'; ?>"/>
                         </svg>
                     </span>
                     <?php echo APP_NAME; ?>
                 </a>
             </div>
+            <?php if ($publicHeaderVariant === 'catalog'): ?>
+            <nav class="landing-nav">
+                <a href="<?php echo htmlspecialchars(app_path('index.php') . '#features'); ?>">Features</a>
+                <a href="<?php echo htmlspecialchars(app_path('index.php') . '#services'); ?>">Services</a>
+                <a href="<?php echo htmlspecialchars(app_path('catalog/index.php')); ?>" class="active">Catalog</a>
+                <a href="<?php echo htmlspecialchars(app_path('index.php') . '#about'); ?>">About</a>
+            </nav>
+            <div class="landing-header-actions">
+                <?php if ($isLoggedIn): ?>
+                    <a href="<?php echo htmlspecialchars(app_path('dashboard/index.php')); ?>" class="btn btn-white">Dashboard</a>
+                <?php else: ?>
+                    <a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>" class="btn btn-outline-white">Log In</a>
+                    <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-white">Get Started</a>
+                <?php endif; ?>
+            </div>
+            <?php else: ?>
             <nav class="landing-nav">
                 <a href="#features">Features</a>
                 <a href="#services">Services</a>
@@ -44,9 +70,10 @@ if ($user->isLoggedIn()) {
                 <a href="#about">About</a>
             </nav>
             <div class="landing-header-actions">
-                <a href="login.php" class="btn btn-outline-white">Log In</a>
-                <a href="register.php" class="btn btn-white">Get Started</a>
+                <a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>" class="btn btn-outline-white">Log In</a>
+                <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-white">Get Started</a>
             </div>
+            <?php endif; ?>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <span></span>
                 <span></span>
@@ -54,20 +81,35 @@ if ($user->isLoggedIn()) {
             </button>
         </div>
     </header>
-
+<?php /** @var string $publicHeaderVariant 'home'|'catalog' */
+$publicHeaderVariant = $publicHeaderVariant ?? 'home';
+$isLoggedIn = $isLoggedIn ?? false;
+?>
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
         <nav class="mobile-nav">
+            <?php if ($publicHeaderVariant === 'catalog'): ?>
+            <a href="<?php echo htmlspecialchars(app_path('index.php') . '#features'); ?>">Features</a>
+            <a href="<?php echo htmlspecialchars(app_path('index.php') . '#services'); ?>">Services</a>
+            <a href="<?php echo htmlspecialchars(app_path('catalog/index.php')); ?>">Catalog</a>
+            <a href="<?php echo htmlspecialchars(app_path('index.php') . '#about'); ?>">About</a>
+            <?php if ($isLoggedIn): ?>
+                <a href="<?php echo htmlspecialchars(app_path('dashboard/index.php')); ?>" class="btn btn-primary">Dashboard</a>
+            <?php else: ?>
+                <a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>" class="btn btn-outline">Log In</a>
+                <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-white">Get Started</a>
+            <?php endif; ?>
+            <?php else: ?>
             <a href="#features">Features</a>
             <a href="#services">Services</a>
             <a href="#how-it-works">How It Works</a>
             <a href="#about">About</a>
-            <a href="login.php" class="btn btn-outline">Log In</a>
-            <a href="register.php" class="btn btn-white">Get Started</a>
+            <a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>" class="btn btn-outline">Log In</a>
+            <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-white">Get Started</a>
+            <?php endif; ?>
         </nav>
     </div>
-
-    <!-- Hero Section -->
+<!-- Hero Section -->
     <section class="hero">
         <div class="hero-background">
             <div class="hero-shape hero-shape-1"></div>
@@ -83,7 +125,7 @@ if ($user->isLoggedIn()) {
                 Built for efficiency, designed for simplicity.
             </p>
             <div class="hero-actions">
-                <a href="register.php" class="btn btn-primary btn-large">
+                <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-primary btn-large">
                     Start Free Trial
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -141,8 +183,7 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </section>
-
-    <!-- Trusted By Section -->
+<!-- Trusted By Section -->
     <section class="trusted-section">
         <div class="container">
             <p class="trusted-label">Trusted by leading organizations</p>
@@ -154,8 +195,7 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </section>
-
-    <!-- Features Section -->
+<!-- Features Section -->
     <section class="features-section" id="features">
         <div class="container">
             <div class="section-header">
@@ -231,8 +271,7 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </section>
-
-    <!-- How It Works Section -->
+<!-- How It Works Section -->
     <section class="how-it-works-section" id="how-it-works">
         <div class="container">
             <div class="section-header">
@@ -275,8 +314,7 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </section>
-
-    <!-- Services/Products Section -->
+<!-- Services/Products Section -->
     <section class="services-section" id="services">
         <div class="container">
             <div class="section-header">
@@ -419,12 +457,11 @@ if ($user->isLoggedIn()) {
                 </div>
             </div>
             <div class="services-cta">
-                <a href="catalog.php" class="btn btn-primary btn-large">View Full Catalog</a>
+                <a href="<?php echo htmlspecialchars(app_path('catalog/index.php')); ?>" class="btn btn-primary btn-large">View Full Catalog</a>
             </div>
         </div>
     </section>
-
-    <!-- About Section -->
+<!-- About Section -->
     <section class="about-section" id="about">
         <div class="container">
             <div class="about-grid">
@@ -458,7 +495,7 @@ if ($user->isLoggedIn()) {
                             Professional support team
                         </li>
                     </ul>
-                    <a href="register.php" class="btn btn-primary">Get Started Today</a>
+                    <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-primary">Get Started Today</a>
                 </div>
                 <div class="about-image">
                     <div class="about-card">
@@ -476,28 +513,39 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </section>
-
-    <!-- CTA Section -->
+<!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
                 <h2>Ready to streamline your lab operations?</h2>
                 <p>Join organizations that trust GlobenTech for their laboratory order management needs.</p>
                 <div class="cta-actions">
-                    <a href="register.php" class="btn btn-white btn-large">Create Free Account</a>
-                    <a href="login.php" class="btn btn-outline-white btn-large">Sign In</a>
+                    <a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>" class="btn btn-white btn-large">Create Free Account</a>
+                    <a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>" class="btn btn-outline-white btn-large">Sign In</a>
                 </div>
             </div>
         </div>
     </section>
+<?php $landingLinkPrefix = ''; ?>
+<?php
 
+/** @var string $landingLinkPrefix '' on index (hash-only links); 'index.php' from catalog */
+$landingLinkPrefix = $landingLinkPrefix ?? '';
+$fl = static function (string $hash) use ($landingLinkPrefix): string {
+    if ($landingLinkPrefix === '') {
+        return $hash;
+    }
+
+    return app_path('index.php') . $hash;
+};
+?>
     <!-- Footer -->
     <footer class="landing-footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
                     <div class="landing-logo">
-                        <a href="index.php">
+                        <a href="<?php echo htmlspecialchars(app_path('index.php')); ?>">
                             <span class="logo-icon">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 3V10L6 14V21H18V14L15 10V3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -513,17 +561,17 @@ if ($user->isLoggedIn()) {
                 <div class="footer-links">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="catalog.php">Product Catalog</a></li>
-                        <li><a href="#about">About</a></li>
+                        <li><a href="<?php echo htmlspecialchars($fl('#features')); ?>">Features</a></li>
+                        <li><a href="<?php echo htmlspecialchars($fl('#services')); ?>">Services</a></li>
+                        <li><a href="<?php echo htmlspecialchars(app_path('catalog/index.php')); ?>">Product Catalog</a></li>
+                        <li><a href="<?php echo htmlspecialchars($fl('#about')); ?>">About</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
                     <h4>Account</h4>
                     <ul>
-                        <li><a href="login.php">Login</a></li>
-                        <li><a href="register.php">Register</a></li>
+                        <li><a href="<?php echo htmlspecialchars(app_path('auth/login.php')); ?>">Login</a></li>
+                        <li><a href="<?php echo htmlspecialchars(app_path('auth/register.php')); ?>">Register</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
@@ -541,49 +589,6 @@ if ($user->isLoggedIn()) {
             </div>
         </div>
     </footer>
-
-    <script>
-        // Mobile menu toggle
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuBtn.addEventListener('click', function() {
-            mobileMenuBtn.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.mobile-nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuBtn.classList.remove('active');
-                mobileMenu.classList.remove('active');
-            });
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Header scroll effect
-        const header = document.querySelector('.landing-header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-    </script>
+    <script type="module" src="<?php echo htmlspecialchars(app_path('frontend/src/pages/landing/landing.js')); ?>"></script>
 </body>
 </html>
-

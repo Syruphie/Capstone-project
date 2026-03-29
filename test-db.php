@@ -1,36 +1,32 @@
 <?php
+/**
+ * Quick DB connectivity check — uses the same config as the application.
+ */
+declare(strict_types=1);
+
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 
 echo "Testing database connection...<br>";
 
+require_once __DIR__ . '/config/database.php';
+
 try {
-    $pdo = new PDO(
-        "mysql:host=localhost;dbname=globentech_db;charset=utf8mb4",
-        "root",
-        "",
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        ]
-    );
+    $pdo = Database::getInstance()->getConnection();
     echo "✅ Database connection successful!<br>";
-    
-    // Test if users table exists
-    $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+
+    $stmt = $pdo->query('SELECT COUNT(*) FROM users');
     $count = $stmt->fetchColumn();
     echo "✅ Users table exists with {$count} users<br>";
-    
-    // Try to get a user
+
     $stmt = $pdo->query("SELECT * FROM users WHERE email = 'admin@globentech.com'");
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($user) {
-        echo "✅ Test user found: " . $user['full_name'] . "<br>";
+        echo '✅ Test user found: ' . htmlspecialchars((string) ($user['full_name'] ?? ''), ENT_QUOTES, 'UTF-8') . '<br>';
     } else {
-        echo "❌ Test user NOT found - database may not be imported correctly<br>";
+        echo '❌ Test user NOT found - database may not be imported correctly<br>';
     }
-    
-} catch (PDOException $e) {
-    echo "❌ Database connection failed: " . $e->getMessage();
+} catch (Throwable $e) {
+    echo '❌ Error: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
 }
-?>
