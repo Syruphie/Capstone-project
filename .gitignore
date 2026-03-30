@@ -29,3 +29,9 @@ error_log
 
 # Extensions
 .VSCodeCounter
+
+# Local one-off maintenance/debug scripts
+/fix-*
+/fix_completed_at.py
+/test-dev-email.php
+/public/pages/test-dev-email.php
