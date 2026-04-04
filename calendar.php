@@ -19,9 +19,9 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar & Queue - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/admin.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/calendar.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -100,6 +100,7 @@ if (!in_array($role, ['administrator', 'technician'], true)) {
     </div>
 
     <?php include 'includes/footer.php'; ?>
-    <script src="js/calendar.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <script src="js/calendar.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

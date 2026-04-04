@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Email - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
     <style>
         .pin-input {
             letter-spacing: 10px;
@@ -175,6 +175,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

@@ -16,8 +16,8 @@ if ($user->isLoggedIn()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo APP_NAME; ?> - Laboratory Order Management System</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/landing.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body class="landing-page">
     <!-- Header -->
@@ -47,7 +47,18 @@ if ($user->isLoggedIn()) {
                 <a href="login.php" class="btn btn-outline-white">Log In</a>
                 <a href="register.php" class="btn btn-white">Get Started</a>
             </div>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <button
+                type="button"
+                class="nav-toggle landing-nav-toggle"
+                id="landingNavToggle"
+                data-menu-toggle
+                data-menu-target="landingNavPanel"
+                data-menu-active-class="is-open"
+                data-menu-body-class="landing-menu-open"
+                aria-expanded="false"
+                aria-controls="landingNavPanel"
+                aria-label="Toggle navigation"
+            >
                 <span></span>
                 <span></span>
                 <span></span>
@@ -56,7 +67,7 @@ if ($user->isLoggedIn()) {
     </header>
 
     <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu landing-nav-panel" id="landingNavPanel" data-menu-panel>
         <nav class="mobile-nav">
             <a href="#features">Features</a>
             <a href="#services">Services</a>
@@ -542,24 +553,8 @@ if ($user->isLoggedIn()) {
         </div>
     </footer>
 
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
     <script>
-        // Mobile menu toggle
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuBtn.addEventListener('click', function() {
-            mobileMenuBtn.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.mobile-nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuBtn.classList.remove('active');
-                mobileMenu.classList.remove('active');
-            });
-        });
-
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

@@ -14,6 +14,12 @@ if ($user->isLoggedIn()) {
     exit;
 }
 
+if (isset($_GET['error'])) {
+    if ($_GET['error'] === 'login_failed') {
+        $error = 'Login failed. Please try again.';
+    }
+}
+
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
@@ -33,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="login-container">
@@ -99,6 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

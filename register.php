@@ -29,15 +29,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     $companyName = filter_input(INPUT_POST, 'company_name', FILTER_SANITIZE_STRING);
     $address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
 
+    // Offensive-word list (server-side mirror of client check)
+    $offensiveWords = ['fuck','fucking','shit','bitch','bastard','cunt','dick',
+        'pussy','nigger','nigga','faggot','fag','retard','whore','slut',
+        'piss','cock','asshole','motherfucker','wanker','twat','prick'];
+    $hasOffensive = function(string $text) use ($offensiveWords): bool {
+        foreach ($offensiveWords as $word) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $text)) return true;
+        }
+        return false;
+    };
+
     // Validation
     if (empty($fullName) || empty($email) || empty($password)) {
         $error = 'Please fill in all required fields';
+    } elseif (strlen($fullName) > 20) {
+        $error = 'Full name must be 20 characters or less';
+    } elseif (strlen($email) > 30) {
+        $error = 'Email address must be 30 characters or less';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Please enter a valid email address (must contain @)';
+    } elseif (!empty($phone) && !preg_match('/^[0-9]{1,15}$/', $phone)) {
+        $error = 'Phone number must contain digits only (max 15)';
+    } elseif (!empty($companyName) && strlen($companyName) > 35) {
+        $error = 'Company name must be 35 characters or less';
+    } elseif (!empty($address) && strlen($address) > 45) {
+        $error = 'Address must be 45 characters or less';
     } elseif ($password !== $confirmPassword) {
         $error = 'Passwords do not match';
     } elseif (strlen($password) < 6) {
         $error = 'Password must be at least 6 characters long';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format';
+    } elseif (strlen($password) > 35) {
+        $error = 'Password must be 35 characters or less';
+    } elseif ($hasOffensive($fullName) ||
+              (!empty($companyName) && $hasOffensive($companyName)) ||
+              (!empty($address) && $hasOffensive($address))) {
+        $error = 'Offensive or inappropriate language is not allowed';
     } else {
         // Check if email already exists
         $db = Database::getInstance()->getConnection();
@@ -79,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <div class="login-container">
@@ -112,7 +139,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         id="full_name" 
                         name="full_name" 
                         required 
-                        placeholder="Enter your full name"
+                        maxlength="20"
+                        placeholder="Enter your full name (max 20 chars)"
                         value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>"
                     >
                 </div>
@@ -124,7 +152,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         id="email" 
                         name="email" 
                         required 
-                        placeholder="Enter your email"
+                        maxlength="30"
+                        placeholder="Enter your email (must contain @)"
                         value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
                     >
                 </div>
@@ -135,7 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         type="tel" 
                         id="phone" 
                         name="phone" 
-                        placeholder="Enter your phone number"
+                        maxlength="15"
+                        pattern="[0-9]{1,15}"
+                        inputmode="numeric"
+                        placeholder="Digits only, max 15"
                         value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
                     >
                 </div>
@@ -146,7 +178,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         type="text" 
                         id="company_name" 
                         name="company_name" 
-                        placeholder="Enter your company name"
+                        maxlength="35"
+                        placeholder="Enter your company name (max 35 chars)"
                         value="<?php echo isset($_POST['company_name']) ? htmlspecialchars($_POST['company_name']) : ''; ?>"
                     >
                 </div>
@@ -157,7 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         id="address" 
                         name="address" 
                         rows="3" 
-                        placeholder="Enter your address"
+                        maxlength="45"
+                        placeholder="Enter your address (max 45 chars)"
                     ><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
                 </div>
 
@@ -168,7 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         id="password" 
                         name="password" 
                         required 
-                        placeholder="Enter password (min. 6 characters)"
+                        maxlength="35"
+                        placeholder="Enter password (6–35 characters)"
                     >
                 </div>
 
@@ -179,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                         id="confirm_password" 
                         name="confirm_password" 
                         required 
+                        maxlength="35"
                         placeholder="Confirm your password"
                     >
                 </div>
@@ -193,6 +229,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

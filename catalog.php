@@ -162,9 +162,9 @@ $liquidServices = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Catalog - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/landing.css">
-    <link rel="stylesheet" href="css/catalog.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/landing.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/catalog.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body class="landing-page catalog-page">
     <!-- Header -->

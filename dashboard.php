@@ -28,7 +28,7 @@ $equipment = new Equipment();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -92,7 +92,7 @@ $equipment = new Equipment();
                         <?php if (empty($customerOrders)): ?>
                             <p>No orders yet. <a href="create-order.php">Create your first order</a></p>
                         <?php else: ?>
-                            <table class="dashboard-table">
+                            <table class="dashboard-table customer-recent-table">
                                 <thead>
                                     <tr>
                                         <th>Order #</th>
@@ -280,6 +280,7 @@ fetch("get_calendar_events.php")
 .then(events => {
     let calendar = document.getElementById("calendar");
 
+<<<<<<< Updated upstream
     if (!events.length) {
         calendar.innerHTML = "<p>No calendar events available.</p>";
         return;
@@ -301,5 +302,8 @@ fetch("get_calendar_events.php")
 </script>
 
     <script src="js/main.js"></script>
+=======
+<script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
+>>>>>>> Stashed changes
 </body>
 </html>

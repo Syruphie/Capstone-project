@@ -47,6 +47,57 @@
     padding: 0;
 }
 
+<<<<<<< Updated upstream
+=======
+@media (max-width: 768px) {
+    #chatbot-button {
+        bottom: 16px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+    }
+
+    #chatbot-window {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        height: min(520px, calc(100vh - 120px));
+        bottom: 76px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 420px) {
+    #chatbot-button {
+        bottom: 12px;
+        right: 12px;
+    }
+
+    #chatbot-window {
+        right: 8px;
+        left: 8px;
+        bottom: 70px;
+        border-radius: 14px;
+    }
+
+    #chatbot-header {
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        padding: 14px;
+    }
+
+    #chatbot-messages {
+        padding: 14px;
+    }
+
+    #chatbot-input-area {
+        padding: 10px;
+        gap: 8px;
+    }
+}
+
+/* Header */
+>>>>>>> Stashed changes
 #chatbot-header {
     /* background: #2c3e50; */
     background: #764ba2;
@@ -108,3 +159,138 @@
     color: red;
 }
 
+<<<<<<< Updated upstream
+=======
+.typing span {
+    width: 6px;
+    height: 6px;
+    background: #888;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.typing span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.typing span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+}  
+
+.bot-messages{
+    background: #f1f3f5;
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-top: 8px;  
+    margin-bottom: 12px; 
+    max-width: 80%;
+
+}
+
+.chat-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+    margin-top: 10px;
+}
+
+/* =============================================================
+   DARK MODE — chatbot overrides
+   ============================================================= */
+
+[data-theme="dark"] #chatbot-window {
+    background: #21262d;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] #chatbot-messages {
+    background: #161b22;
+}
+
+[data-theme="dark"] .question {
+    background: #21262d;
+    border-color: #30363d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .question:hover {
+    background: #2d333b;
+}
+
+[data-theme="dark"] #chatbot-input-area {
+    background: #21262d;
+    border-top-color: #30363d;
+}
+
+[data-theme="dark"] #chatbot-input {
+    background: #161b22;
+    border-color: #30363d;
+    color: #f0f6fc;
+}
+
+[data-theme="dark"] #chatbot-input::placeholder {
+    color: #8b949e;
+}
+
+[data-theme="dark"] .chat.user {
+    background: #2d3a5c;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .chat.bot {
+    background: #2d333b;
+    color: #c9d1d9;
+    border-color: #30363d;
+}
+
+[data-theme="dark"] .bot-messages {
+    background: #21262d;
+    color: #c9d1d9;
+}
+
+[data-theme="dark"] .typing {
+    color: #8b949e;
+}
+
+[data-theme="dark"] .typing span {
+    background: #8b949e;
+}
+
+.chat-options button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 25px; 
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.chat-options button:hover {
+    background: #5a67d8;
+}
+
+/* Hide chatbot while mobile fullscreen menus are open */
+body.site-nav-open #chatbot-button,
+body.site-nav-open #chatbot-window,
+body.landing-menu-open #chatbot-button,
+body.landing-menu-open #chatbot-window {
+    display: none !important;
+}
+
+html.site-nav-open #chatbot-button,
+html.site-nav-open #chatbot-window,
+html.landing-menu-open #chatbot-button,
+html.landing-menu-open #chatbot-window,
+body.menu-overlay-open #chatbot-button,
+body.menu-overlay-open #chatbot-window,
+html.menu-overlay-open #chatbot-button,
+html.menu-overlay-open #chatbot-window {
+    display: none !important;
+}
+>>>>>>> Stashed changes

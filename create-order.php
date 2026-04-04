@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Order - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
     <style>
         .order-form-container {
             max-width: 600px;
@@ -63,17 +63,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             padding: 0 20px;
         }
         .order-form-box {
-            background: white;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
         }
         .order-form-box h1 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 10px;
         }
         .order-form-box .subtitle {
-            color: #666;
+            color: var(--text-secondary);
             margin-bottom: 25px;
         }
         .form-row {
@@ -81,6 +82,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+        @media (max-width: 768px) {
+            .order-form-container {
+                margin: 20px auto;
+                padding: 0 12px;
+            }
+
+            .order-form-box {
+                padding: 20px 16px;
+            }
+
+            .order-form-box h1 {
+                font-size: 26px;
+                line-height: 1.2;
+            }
+
+            .login-footer {
+                margin-top: 12px;
+                padding-top: 14px;
+            }
+
+            .login-footer p {
+                word-break: break-word;
+            }
+        }
+
         @media (max-width: 500px) {
             .form-row { grid-template-columns: 1fr; }
         }
@@ -170,6 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
     </div>
 
     <?php include 'includes/footer.php'; ?>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>

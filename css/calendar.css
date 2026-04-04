@@ -28,6 +28,7 @@
     align-items: center;
     gap: 12px;
     margin-top: 12px;
+    flex-wrap: wrap;
 }
 
 .calendar-status {
@@ -147,6 +148,7 @@
     color: #adb5bd;
     font-size: 18px;
     cursor: grab;
+    -webkit-user-select: none;
     user-select: none;
 }
 
@@ -186,6 +188,8 @@
     gap: 8px;
     flex-shrink: 0;
     min-width: 140px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .queue-item-actions .btn {
@@ -342,21 +346,54 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .calendar-container {
+        padding: 12px;
+    }
+
     .calendar-content {
-        padding: 20px;
+        padding: 16px;
+    }
+
+    .calendar-header h1 {
+        font-size: 22px;
+        line-height: 1.2;
+    }
+
+    .calendar-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calendar-toolbar .btn {
+        width: 100%;
     }
 
     .queue-item {
         grid-template-columns: 1fr;
         gap: 8px;
+        padding: 12px;
     }
 
     .queue-item-actions {
         grid-column: 1;
+        min-width: 0;
+        justify-content: stretch;
+    }
+
+    .queue-item-actions .btn {
+        width: 100%;
     }
 
     .queue-item-handle {
         order: -1;
+    }
+
+    .queue-item-meta span {
+        display: block;
+    }
+
+    .queue-item-meta span + span::before {
+        content: '';
     }
 
     .queue-item-equipment,
@@ -367,4 +404,94 @@
     .utilization-grid {
         grid-template-columns: 1fr;
     }
+
+    .modal {
+        width: calc(100% - 20px);
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-container {
+        padding: 8px;
+    }
+
+    .calendar-content {
+        padding: 14px;
+    }
+
+    .queue-item-order {
+        font-size: 14px;
+    }
+}
+
+/* =============================================================
+   DARK MODE — calendar.css element overrides
+   ============================================================= */
+
+[data-theme="dark"] .queue-item-order,
+[data-theme="dark"] .utilization-section h2,
+[data-theme="dark"] .util-card h3,
+[data-theme="dark"] .util-slot-order,
+[data-theme="dark"] .edit-modal-finish-title,
+[data-theme="dark"] .modal h2 {
+    color: var(--text-primary, #f0f6fc);
+}
+
+[data-theme="dark"] .queue-item-meta,
+[data-theme="dark"] .queue-item-equipment,
+[data-theme="dark"] .queue-item-completion,
+[data-theme="dark"] .util-slot-time,
+[data-theme="dark"] .edit-modal-finish-desc {
+    color: var(--text-secondary, #c9d1d9);
+}
+
+[data-theme="dark"] .queue-subsection h3 {
+    color: var(--accent-primary, #818cf8);
+}
+
+[data-theme="dark"] .queue-item.drag-over {
+    background: #21262d;
+}
+
+[data-theme="dark"] .legend-pending {
+    background: #21262d;
+    color: var(--text-secondary, #c9d1d9);
+}
+
+[data-theme="dark"] .legend-inprogress {
+    background: rgba(0, 123, 255, 0.2);
+    color: #9cc7ff;
+}
+
+[data-theme="dark"] .legend-completed {
+    background: rgba(40, 167, 69, 0.2);
+    color: #86e2a0;
+}
+
+[data-theme="dark"] .util-card {
+    background: var(--bg-elevated, #21262d);
+    border-color: var(--border-color, #30363d);
+}
+
+[data-theme="dark"] .util-card h3 {
+    border-bottom-color: var(--border-color, #30363d);
+}
+
+[data-theme="dark"] .util-slot {
+    background: var(--bg-surface, #161b22);
+    border-color: var(--border-color, #30363d);
+}
+
+[data-theme="dark"] .modal {
+    background: var(--bg-elevated, #21262d);
+}
+
+[data-theme="dark"] .edit-modal-divider {
+    border-top-color: var(--border-color, #30363d);
+}
+
+[data-theme="dark"] .util-slot-empty,
+[data-theme="dark"] .queue-item-handle {
+    color: var(--text-muted, #8b949e);
 }

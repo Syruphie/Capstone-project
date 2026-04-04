@@ -41,10 +41,15 @@ foreach ($orders as $o) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - <?php echo APP_NAME; ?></title>
+<<<<<<< Updated upstream
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pO1P5TixY9gSBchiS+OgGnl78rk+Lv9De/0EaP0Z5d+twT0FhbhLukItJNclvYLIT5Q1eI3xg5RjyV9O6LDD1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+=======
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/admin.css?v=<?php echo ASSET_VERSION; ?>">
+>>>>>>> Stashed changes
     <style>
         /* let the global stylesheet control body background (blue gradient) */
         .orders-container {
@@ -54,20 +59,21 @@ foreach ($orders as $o) {
             background: transparent; /* let body color show through */
         }
         .orders-header {
-            background: white;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 25px 30px;
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .orders-header h1 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 5px;
             font-size: 26px;
             font-weight: 600;
         }
         .orders-header p {
-            color: #666;
+            color: var(--text-secondary);
             margin: 0;
             font-size: 14px;
         }
@@ -85,7 +91,8 @@ foreach ($orders as $o) {
             flex: 1 1 400px;
         }
         .status-card {
-            background: white;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 20px 15px;
             text-align: center;
@@ -114,7 +121,7 @@ foreach ($orders as $o) {
             color: #667eea;
         }
         .status-card .label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 14px;
             margin-top: 5px;
         }
@@ -132,13 +139,14 @@ foreach ($orders as $o) {
             flex: 1 1 500px;
         }
         .orders-table-container {
-            background: white;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .orders-table-container h2 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 20px;
             font-size: 18px;
         }
@@ -169,10 +177,10 @@ foreach ($orders as $o) {
         .empty-orders {
             text-align: center;
             padding: 60px 20px;
-            color: #666;
+            color: var(--text-secondary);
         }
         .empty-orders h3 {
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 10px;
         }
         .empty-orders p {
@@ -182,8 +190,147 @@ foreach ($orders as $o) {
             display: inline-block;
             margin-top: 15px;
         }
+<<<<<<< Updated upstream
         /* calendar styling */
         #calendar { max-width:100%; margin:20px auto 20px; background:#f9fafb; padding:15px; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.05); min-height:400px; }
+=======
+        .orders-table-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .orders-table-container .admin-table.customer-orders-table {
+            min-width: 0;
+        }
+
+        @media (max-width: 768px) {
+            .orders-container {
+                padding: 12px;
+            }
+
+            .orders-header,
+            .status-card,
+            .orders-table-container {
+                padding: 16px;
+            }
+
+            .orders-header h1 {
+                font-size: 24px;
+                line-height: 1.2;
+            }
+
+            .status-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .status-card .count {
+                font-size: 24px;
+            }
+
+            .orders-table-container .admin-table th,
+            .orders-table-container .admin-table td {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .customer-orders-table {
+                min-width: 0;
+                width: 100%;
+                border-spacing: 0;
+            }
+
+            .customer-orders-table thead {
+                display: none;
+            }
+
+            .customer-orders-table tbody {
+                display: grid;
+                gap: 10px;
+            }
+
+            .customer-orders-table tbody tr {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                background: var(--bg-surface);
+            }
+
+            .customer-orders-table tbody tr:hover {
+                background: var(--bg-surface);
+            }
+
+            .customer-orders-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                border-bottom: none;
+                padding: 0;
+                font-size: 13px;
+            }
+
+            .customer-orders-table td::before {
+                font-weight: 600;
+                color: var(--text-secondary);
+                flex-shrink: 0;
+            }
+
+            .customer-orders-table td:nth-child(1)::before {
+                content: 'Order #';
+            }
+
+            .customer-orders-table td:nth-child(2)::before {
+                content: 'Submitted';
+            }
+
+            .customer-orders-table td:nth-child(3)::before {
+                content: 'Priority';
+            }
+
+            .customer-orders-table td:nth-child(4)::before {
+                content: 'Samples';
+            }
+
+            .customer-orders-table td:nth-child(5)::before {
+                content: 'Status';
+            }
+
+            .customer-orders-table td:nth-child(6)::before {
+                content: 'Action';
+            }
+
+            .customer-orders-table td:nth-child(6) .btn {
+                margin-left: auto;
+            }
+
+            .orders-table-container .btn {
+                white-space: nowrap;
+            }
+
+            .orders-table-footer {
+                text-align: left;
+            }
+
+            .orders-table-footer .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .status-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .orders-header,
+            .orders-table-container {
+                padding: 14px;
+            }
+        }
+>>>>>>> Stashed changes
     </style>
 </head>
 <body>
@@ -251,7 +398,7 @@ foreach ($orders as $o) {
                 </div>
             <?php else: ?>
                 <div class="admin-table-container">
-                    <table class="admin-table">
+                    <table class="admin-table customer-orders-table">
                         <thead>
                             <tr>
                                 <th>Order #</th>
@@ -292,6 +439,7 @@ foreach ($orders as $o) {
     </div>
 
     <?php include 'includes/footer.php'; ?>
+<<<<<<< Updated upstream
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
     <script>
@@ -366,5 +514,8 @@ foreach ($orders as $o) {
     });
     </script>
     <script src="js/main.js"></script>
+=======
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
+>>>>>>> Stashed changes
 </body>
 </html>

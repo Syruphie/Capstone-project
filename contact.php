@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     Calgary, AB<br>
                     Canada
                 </p>
-                <p style="margin-top:10px; color:#6c757d; font-size:13px;">
+                <p style="margin-top:10px; color:var(--text-muted); font-size:13px;">
                     Our team is available during regular business hours to assist with order questions, scheduling, and general inquiries.
                 </p>
             </div>
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php include 'includes/footer.php'; ?>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
 </body>
 </html>
 

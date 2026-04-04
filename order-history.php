@@ -35,6 +35,7 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order History - <?php echo APP_NAME; ?></title>
+<<<<<<< Updated upstream
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <!-- FullCalendar CSS -->
@@ -78,19 +79,75 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
         }
         .history-section { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .history-section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
+=======
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/admin.css?v=<?php echo ASSET_VERSION; ?>">
+    <style>
+        .orders-container { max-width: 1200px; margin: 0 auto; padding: 20px; width: 100%; }
+        .orders-header { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .orders-header h1 { color: var(--text-primary); margin-bottom: 5px; }
+        .orders-header p { color: var(--text-secondary); margin: 0; }
+        .search-form { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .search-form {
+            overflow: visible;
+        }
+        .search-form form {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            align-items: end;
+            width: 100%;
+        }
+        .search-form form.search-form-customer {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .search-form form > * {
+            min-width: 0;
+        }
+        .search-field { min-width: 0; }
+        .search-actions {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            width: 100%;
+        }
+        .search-form label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+        .search-form input[type="text"], .search-form input[type="date"] { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); background: var(--bg-elevated); color: var(--text-primary); border-radius: 6px; min-width: 0; }
+        .search-form button { width: 100%; padding: 8px 20px; background: linear-gradient(135deg, var(--btn-grad-start, #5f72ff) 0%, var(--btn-grad-end, #9b23ea) 100%); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .search-form button[type="reset"] { background: linear-gradient(135deg, var(--btn-grad-start, #5f72ff) 0%, var(--btn-grad-end, #9b23ea) 100%); }
+        .history-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .history-section h2 { color: var(--text-primary); margin-bottom: 15px; font-size: 18px; }
+>>>>>>> Stashed changes
         .admin-table-container { overflow-x: auto; }
         .admin-table { width: 100%; border-collapse: collapse; }
-        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .admin-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .admin-table th { background: var(--bg-elevated); font-weight: 600; color: var(--text-primary); }
         .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
         .status-results_available, .status-completed { background: #d4edda; color: #155724; }
         .badge-standard { background: #e9ecef; color: #495057; }
         .badge-prioritized { background: #fff3cd; color: #856404; }
+<<<<<<< Updated upstream
         .empty-history { text-align: center; padding: 40px 20px; color: #666; }
         /* calendar box styling */
         .calendar-card { max-width:900px; margin:0 auto 20px; background:#f9fafb; padding:15px; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.05); min-height:400px; }
         .calendar-card h2 { text-align:center; margin:0 0 10px; }
         .sidebar h2, .calendar-card h2 { font-size:18px; color:#333; margin-bottom:15px; }
+=======
+        .empty-history { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+        @media (max-width: 992px) {
+            .search-form form,
+            .search-form form.search-form-customer { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .orders-container { padding: 12px 14px 16px; }
+            .orders-header, .search-form, .history-section { padding: 18px 14px; }
+            .search-form form { align-items: stretch; grid-template-columns: 1fr; }
+            .search-actions { grid-template-columns: 1fr; }
+            .search-actions button { width: 100%; }
+        }
+>>>>>>> Stashed changes
     </style>
 </head>
 <body>
@@ -111,26 +168,31 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
         <div class="layout">
             <aside class="sidebar">
         <div class="search-form">
+<<<<<<< Updated upstream
             <h2>Filters</h2>
             <form method="get" action="order-history.php">
+=======
+            <form method="get" action="order-history.php" class="<?php echo $role === 'customer' ? 'search-form-customer' : ''; ?>">
+>>>>>>> Stashed changes
                 <?php if ($role === 'administrator'): ?>
-                    <div>
+                    <div class="search-field">
                         <label>Customer name</label>
                         <input type="text" name="customer_name" value="<?php echo htmlspecialchars($searchCustomerName); ?>" placeholder="Name or email">
                     </div>
                 <?php endif; ?>
-                <div>
+                <div class="search-field">
                     <label>Order number</label>
                     <input type="text" name="order_number" value="<?php echo htmlspecialchars($searchOrderNumber); ?>" placeholder="e.g. ORD-">
                 </div>
-                <div>
+                <div class="search-field">
                     <label>From date</label>
                     <input type="date" name="date_from" value="<?php echo htmlspecialchars($searchDateFrom); ?>">
                 </div>
-                <div>
+                <div class="search-field">
                     <label>To date</label>
                     <input type="date" name="date_to" value="<?php echo htmlspecialchars($searchDateTo); ?>">
                 </div>
+<<<<<<< Updated upstream
                 <div>
                     <label>Status</label>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;">
@@ -145,6 +207,9 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
                     </div>
                 </div>
                 <div>
+=======
+                <div class="search-actions">
+>>>>>>> Stashed changes
                     <button type="submit">Search</button>
                     <button type="reset" onclick="window.location='order-history.php';">Clear</button>
                 </div>
@@ -240,6 +305,7 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
     </div>
 
     <?php include 'includes/footer.php'; ?>
+<<<<<<< Updated upstream
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
     <script>
@@ -282,5 +348,8 @@ $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'
     });
     </script>
     <script src="js/main.js"></script>
+=======
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
+>>>>>>> Stashed changes
 </body>
 </html>

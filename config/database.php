@@ -8,6 +8,7 @@ define('DB_NAME', 'globentech_db');
 // Application configuration
 define('APP_NAME', 'GlobenTech');
 define('BASE_URL', 'http://localhost:8000');
+define('ASSET_VERSION', '20260401c');
 
 // Mail configuration (for Mailpit/similar local SMTP)
 define('MAIL_USE_SMTP', true);

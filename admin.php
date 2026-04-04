@@ -126,10 +126,15 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - <?php echo APP_NAME; ?></title>
+<<<<<<< Updated upstream
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+=======
+    <link rel="stylesheet" href="css/style.css?v=<?php echo ASSET_VERSION; ?>">
+    <link rel="stylesheet" href="css/admin.css?v=<?php echo ASSET_VERSION; ?>">
+>>>>>>> Stashed changes
 </head>
 <body>
     <?php include 'includes/header.php'; ?>
@@ -249,7 +254,7 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                         <td><?php echo $eq['break_interval']; ?></td>
                         <td><?php echo $eq['daily_capacity']; ?></td>
                         <td>
-                            <span class="status-pill <?php echo $eq['is_available'] ? 'available' : 'unavailable'; ?>">
+                            <span class="badge status-pill <?php echo $eq['is_available'] ? 'available' : 'unavailable'; ?>">
                                 <?php echo $eq['is_available'] ? 'Available' : 'Unavailable'; ?>
                             </span>
                         </td>
@@ -265,6 +270,113 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
     </div>
 </section>
 
+<<<<<<< Updated upstream
+=======
+    <!-- Add Equipment Modal -->
+    <div class="modal-overlay" id="addEquipmentModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="addEquipmentModalTitle">
+            <h2 id="addEquipmentModalTitle">Add Equipment</h2>
+            <form id="addEquipmentForm">
+                <div class="form-group">
+                    <label for="eq_name">Name *</label>
+                    <input type="text" id="eq_name" name="name" required maxlength="20" placeholder="e.g. ICP Spectrometer">
+                </div>
+                <div class="form-group">
+                    <label for="eq_type">Equipment Type *</label>
+                    <input type="text" id="eq_type" name="equipment_type" required maxlength="20" placeholder="e.g. ICP, XRF">
+                </div>
+                <div class="form-group">
+                    <label for="eq_processing">Processing Time per Sample (min) *</label>
+                    <input type="number" id="eq_processing" name="processing_time_per_sample" required min="0" value="2">
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eq_warmup">Warmup Time (min)</label>
+                        <input type="number" id="eq_warmup" name="warmup_time" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq_capacity">Daily Capacity</label>
+                        <input type="number" id="eq_capacity" name="daily_capacity" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eq_break_interval">Break Interval (samples)</label>
+                        <input type="number" id="eq_break_interval" name="break_interval" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq_break_duration">Break Duration (min)</label>
+                        <input type="number" id="eq_break_duration" name="break_duration" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eq_last_maintenance">Last Maintenance (optional)</label>
+                    <input type="date" id="eq_last_maintenance" name="last_maintenance">
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label><input type="checkbox" name="is_available" id="eq_available" checked> Available</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="addEquipmentCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Equipment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Equipment Modal -->
+    <div class="modal-overlay" id="editEquipmentModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="editEquipmentModalTitle">
+            <h2 id="editEquipmentModalTitle">Edit Equipment</h2>
+            <form id="editEquipmentForm">
+                <input type="hidden" id="eqe_id" name="id" value="">
+                <div class="form-group">
+                    <label for="eqe_name">Name *</label>
+                    <input type="text" id="eqe_name" name="name" required maxlength="20" placeholder="e.g. ICP Spectrometer">
+                </div>
+                <div class="form-group">
+                    <label for="eqe_type">Equipment Type *</label>
+                    <input type="text" id="eqe_type" name="equipment_type" required maxlength="20" placeholder="e.g. ICP, XRF">
+                </div>
+                <div class="form-group">
+                    <label for="eqe_processing">Processing Time per Sample (min) *</label>
+                    <input type="number" id="eqe_processing" name="processing_time_per_sample" required min="0" value="2">
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eqe_warmup">Warmup Time (min)</label>
+                        <input type="number" id="eqe_warmup" name="warmup_time" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eqe_capacity">Daily Capacity</label>
+                        <input type="number" id="eqe_capacity" name="daily_capacity" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="eqe_break_interval">Break Interval (samples)</label>
+                        <input type="number" id="eqe_break_interval" name="break_interval" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="eqe_break_duration">Break Duration (min)</label>
+                        <input type="number" id="eqe_break_duration" name="break_duration" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="eqe_last_maintenance">Last Maintenance (optional)</label>
+                    <input type="date" id="eqe_last_maintenance" name="last_maintenance">
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label><input type="checkbox" name="is_available" id="eqe_available" checked> Available</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="editEquipmentCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+>>>>>>> Stashed changes
 
             <?php elseif ($currentTab === 'samples'): ?>
                 <!-- Manage Samples Section -->
@@ -462,12 +574,109 @@ $usersList = $user->getAllUsers($userRoleFilter ?: null, $userSearch ?: null, $u
                     </div>
                 </section>
 
+<<<<<<< Updated upstream
+=======
+            <?php elseif ($currentTab === 'catalogue'): ?>
+                <!-- Order Catalogue – Admin CRUD for order types -->
+                <section class="admin-section">
+                    <div class="equipment-header">
+                        <div>
+                            <h1>Order Catalogue</h1>
+                            <p class="section-desc">Create and manage order types that customers can select when placing orders. Each type has a configurable cost.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-small" id="addOrderTypeBtn">Add Order Type</button>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Cost</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTypesTableBody">
+                                <?php
+                                $typesList = $orderType->getAll(false);
+                                if (empty($typesList)):
+                                ?>
+                                <tr>
+                                    <td colspan="6" class="empty-state">No order types. Add one to get started.</td>
+                                </tr>
+                                <?php else: ?>
+                                    <?php foreach ($typesList as $ot): ?>
+                                    <tr data-id="<?php echo (int) $ot['id']; ?>">
+                                        <td><?php echo htmlspecialchars($ot['name']); ?></td>
+                                        <td><?php echo isset($ot['sample_type']) ? ucfirst($ot['sample_type']) : 'Ore'; ?></td>
+                                        <td><?php echo htmlspecialchars(mb_substr($ot['description'] ?? '', 0, 60)); ?><?php echo mb_strlen($ot['description'] ?? '') > 60 ? '…' : ''; ?></td>
+                                        <td><?php echo number_format((float) $ot['cost'], 2); ?></td>
+                                        <td>
+                                            <span class="badge status-pill <?php echo $ot['is_active'] ? 'available' : 'unavailable'; ?>">
+                                                <?php echo $ot['is_active'] ? 'Active' : 'Inactive'; ?>
+                                            </span>
+                                        </td>
+                                        <td class="actions">
+                                            <button type="button" class="btn btn-xs btn-secondary btn-edit-type" data-id="<?php echo (int) $ot['id']; ?>">Edit</button>
+                                            <button type="button" class="btn btn-xs btn-danger btn-delete-type" data-id="<?php echo (int) $ot['id']; ?>">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <!-- Add/Edit Order Type Modal -->
+                <div class="modal-overlay" id="orderTypeModal" aria-hidden="true">
+                    <div class="modal" role="dialog">
+                        <h2 id="orderTypeModalTitle">Add Order Type</h2>
+                        <form id="orderTypeForm">
+                            <input type="hidden" id="ot_id" name="id" value="">
+                            <div class="form-group">
+                                <label for="ot_name">Name *</label>
+                                <input type="text" id="ot_name" name="name" required maxlength="255">
+                            </div>
+                            <div class="form-group">
+                                <label for="ot_description">Description</label>
+                                <textarea id="ot_description" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="ot_sample_type">Sample Type *</label>
+                                <select id="ot_sample_type" name="sample_type" required>
+                                    <option value="ore">Ore (30 min prep)</option>
+                                    <option value="liquid">Liquid (no prep)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ot_cost">Cost (<?php echo htmlspecialchars('$'); ?>) *</label>
+                                <input type="number" id="ot_cost" name="cost" required min="0" step="0.01" value="0">
+                            </div>
+                            <div class="form-group form-group-checkbox" id="ot_activeWrap">
+                                <label><input type="checkbox" name="is_active" id="ot_active" checked> Active</label>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="orderTypeModalCancel">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+>>>>>>> Stashed changes
             <?php endif; ?>
         </main>
     </div>
 
     <?php include 'includes/footer.php'; ?>
+<<<<<<< Updated upstream
     <script src="js/main.js"></script>
+=======
+    <script src="js/main.js?v=<?php echo ASSET_VERSION; ?>"></script>
+    <?php if ($currentTab === 'equipment'): ?>
+>>>>>>> Stashed changes
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calEl = document.getElementById('approvalsCalendar');
