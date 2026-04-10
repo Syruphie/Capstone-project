@@ -53,10 +53,18 @@ include __DIR__ . '/_html_start.php';
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
                                                 <button type="submit" name="approve_order" class="btn btn-small btn-success">Approve</button>
                                             </form>
-                                            <form method="POST" style="display:inline;">
+                                            <!-- <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
                                                 <input type="hidden" name="rejection_reason" value="Order rejected">
                                                 <button type="submit" name="reject_order" class="btn btn-small btn-danger">Reject</button>
+                                            </form> -->
+
+                                            <form method="POST" class="reject-order-form" style="display:inline;">
+                                                <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
+                                                <input type="hidden" name="rejection_reason" value="">
+                                                <button type="button" class="btn btn-small btn-danger btn-open-reject-modal">
+                                                    Reject
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>
@@ -66,6 +74,38 @@ include __DIR__ . '/_html_start.php';
                         </table>
                     </div>
                 </section>
+                <div class="modal-overlay" id="rejectOrderModal" aria-hidden="true">
+                    <div class="modal" role="dialog" aria-labelledby="rejectOrderModalTitle">
+                        <h2 id="rejectOrderModalTitle">Reject Order</h2>
+                        <p style="margin-bottom: 12px;">Are you sure you want to reject this order?</p>
+                        <div class="form-group">
+                            <label for="reject_reason_text">Reason for customer *</label>
+                            <!-- <textarea
+                            id="reject_reason_text"
+                            rows="4"
+                            placeholder="Enter the reason for rejecting this order..."
+                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;"
+                            ></textarea>
+                            <small id="rejectReasonError" style="color:#dc3545; display:none; margin-top:6px;">
+                                Please enter a rejection reason.
+                            </small> -->
+                            <textarea
+                            id="reject_reason_text"
+                            rows="4"
+                            placeholder="Enter the reason for rejecting this order..."
+                            style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;"
+                            ></textarea>
+                            <small id="rejectReasonWordCount" style="display:block; margin-top:6px; color:#666;">
+                                0 / 500 words
+                            </small>
+                        </div>
+                        
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelRejectModal">Cancel</button>
+                            <button type="button" class="btn btn-danger" id="confirmRejectModal">Confirm Reject</button>
+                        </div>
+                    </div>
+                </div>
 <?php include __DIR__ . '/_html_end.php'; ?>
     <script type="module" src="frontend/src/pages/admin/adminShared.js"></script>
 </body>

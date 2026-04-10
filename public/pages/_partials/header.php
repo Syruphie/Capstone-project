@@ -46,7 +46,7 @@ if (preg_match('#/public/pages/(.+)$#', $script, $m)) {
                 <?php if (isset($_SESSION['user_name'])): ?>
                     <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                 <?php endif; ?>
-                <a href="<?php echo htmlspecialchars(app_path('account/settings.php'), ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small btn-secondary" style="margin-right:8px;">Account</a>
+                <a href="<?php echo htmlspecialchars(app_path('account/settings.php'), ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small btn-account <?php echo $currentRoute === 'account/settings.php' ? 'active' : ''; ?>" style="margin-right:8px;">Account</a>
                 <a href="<?php echo htmlspecialchars(app_path('auth/logout.php'), ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small">Logout</a>
             <?php endif; ?>
         </div>

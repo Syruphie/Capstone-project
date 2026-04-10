@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const windowBox = document.getElementById('chatbot-window');
     const closeBtn = document.getElementById('chatbot-close');
     const messages = document.getElementById('chatbot-messages');
+    const input = document.getElementById('chatbot-input');
+    const sendBtn = document.getElementById('chatbot-send');
 
     if (!button || !windowBox || !closeBtn || !messages) return;
 
@@ -26,6 +28,19 @@ document.addEventListener('DOMContentLoaded', function () {
         windowBox.style.display = 'none';
         button.style.display = 'flex';
     });
+
+    if (sendBtn && input) {
+        sendBtn.addEventListener('click', function () {
+            handleUserMessage();
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleUserMessage();
+            }
+        });
+    }
 
     function botGreeting() {
         showTyping();
@@ -45,8 +60,10 @@ document.addEventListener('DOMContentLoaded', function () {
             '<button type="button" data-opt="equipment">Where can I manage equipment?</button>' +
             '<button type="button" data-opt="logout">How do I logout?</button>' +
             '</div>';
+
         messages.insertAdjacentHTML('beforeend', optionsHTML);
         messages.scrollTop = messages.scrollHeight;
+
         messages.querySelectorAll('.chat-options button').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 handleOption(btn.getAttribute('data-opt'));
@@ -57,37 +74,68 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleOption(type) {
         document.querySelector('.chat-options')?.remove();
 
-        let reply = '';
+        let userQuestion = '';
 
         switch (type) {
             case 'approve':
-                reply =
-                    'To approve orders, open the Approvals tab from the top navigation. This option is available only for admin users.';
+                userQuestion = 'How do I approve orders?';
                 break;
-
             case 'newOrder':
-                reply = 'You can create a new order from the Dashboard. Look for the New Order option.';
+                userQuestion = 'How do I create a new order?';
                 break;
-
             case 'equipment':
-                reply = 'Equipment management is available in the Admin panel under the Equipment section.';
+                userQuestion = 'Where can I manage equipment?';
                 break;
-
             case 'logout':
-                reply = 'The logout option is located at the top-right corner of the application.';
+                userQuestion = 'How do I logout?';
                 break;
             default:
                 return;
         }
 
-        showTyping();
-
-        setTimeout(function () {
-            removeTyping();
-            addBotMessage(reply);
-            showOptions();
-        }, 1000);
+        addUserMessage(userQuestion);
+        fetchBotReply(userQuestion);
     }
+
+    function handleUserMessage() {
+        if (!input) return;
+
+        const text = input.value.trim();
+        if (!text) return;
+
+        addUserMessage(text);
+        input.value = '';
+        fetchBotReply(text);
+    }
+
+    function fetchBotReply(text) {
+    showTyping();
+
+    fetch('/Capstone-project/Capstone-project/public/pages/ai_reply.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: text })
+    })
+        .then(function (res) {
+            if (!res.ok) {
+                throw new Error('HTTP error ' + res.status);
+            }
+            return res.json();
+        })
+        .then(function (data) {
+            removeTyping();
+            addBotMessage(data.reply || 'Sorry, I could not process that.');
+            showOptions();
+        })
+        .catch(function (error) {
+            removeTyping();
+            console.error('AI fetch error:', error);
+            addBotMessage('Error connecting to the AI assistant.');
+            showOptions();
+        });
+}
 
     function addBotMessage(text) {
         messages.insertAdjacentHTML(
@@ -97,7 +145,16 @@ document.addEventListener('DOMContentLoaded', function () {
         messages.scrollTop = messages.scrollHeight;
     }
 
+    function addUserMessage(text) {
+        messages.insertAdjacentHTML(
+            'beforeend',
+            '<div class="user-message"><strong>You:</strong> ' + escapeHtml(text) + '</div>'
+        );
+        messages.scrollTop = messages.scrollHeight;
+    }
+
     function showTyping() {
+        removeTyping();
         messages.insertAdjacentHTML(
             'beforeend',
             '<div class="typing" id="typing">Bot is typing<span>.</span><span>.</span><span>.</span></div>'

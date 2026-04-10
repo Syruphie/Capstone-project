@@ -235,8 +235,8 @@ $equipment = new FrontendEquipment();
 
         <div class="dashboard-card system-info">
             <h3>System Information</h3>
-            <p><strong>Project:</strong> Phase 3 Prototype</p>
-            <p><strong>Status:</strong> Development</p>
+            <p><strong>Project:</strong> GlobenTech Lab System</p>
+            <p><strong>Status:</strong> Completed</p>
             <p><strong>Note:</strong> This is a school project prototype demonstrating core functionality.</p>
         </div>
     </div>

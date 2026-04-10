@@ -41,7 +41,7 @@ if ($role === 'customer') {
     <title>Order History - <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
-    <style>
+    <!-- <style>
         .orders-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .orders-header { background: white; border-radius: 10px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .orders-header h1 { color: #333; margin-bottom: 5px; }
@@ -63,7 +63,64 @@ if ($role === 'customer') {
         .badge-standard { background: #e9ecef; color: #495057; }
         .badge-prioritized { background: #fff3cd; color: #856404; }
         .empty-history { text-align: center; padding: 40px 20px; color: #666; }
-    </style>
+    </style> -->
+
+    <style>
+    .orders-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .orders-header { background: white; border-radius: 10px; padding: 25px 30px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .orders-header h1 { color: #333; margin-bottom: 5px; }
+    .orders-header p { color: #666; margin: 0; }
+
+    .search-form { background: white; border-radius: 10px; padding: 20px 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-form form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+    .search-form label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+
+    .search-form input[type="text"],
+    .search-form input[type="date"],
+    .search-form select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        min-width: 140px;
+        background: #fff;
+    }
+
+    .search-form button {
+        padding: 8px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .search-form button:hover {
+        opacity: 0.95;
+    }
+
+    .search-form .btn-clear {
+        background: #ef4444;
+        color: white;
+    }
+
+    .search-form .btn-clear:hover {
+        background: #dc2626;
+    }
+
+    .history-section { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .history-section h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
+    .admin-table-container { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+    .admin-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .status-results_available, .status-completed { background: #d4edda; color: #155724; }
+    .badge-standard { background: #e9ecef; color: #495057; }
+    .badge-prioritized { background: #fff3cd; color: #856404; }
+
+    .empty-history { text-align: center; padding: 40px 20px; color: #666; }
+</style>
 </head>
 <body>
     <?php include PAGE_PARTIALS . '/header.php'; ?>
@@ -77,27 +134,61 @@ if ($role === 'customer') {
         <div class="search-form">
             <form method="get" action="<?php echo htmlspecialchars(app_path('orders/order-history.php'), ENT_QUOTES, 'UTF-8'); ?>">
                 <?php if ($role === 'administrator'): ?>
+                    
                     <div>
                         <label>Customer name</label>
-                        <input type="text" name="customer_name" value="<?php echo htmlspecialchars($searchCustomerName); ?>" placeholder="Name or email">
+                        <input 
+                        type="text" 
+                        name="customer_name" 
+                        value="<?php echo htmlspecialchars($searchCustomerName); ?>" 
+                        placeholder="Name or email"
+                        maxlength="100"
+                        >
                     </div>
-                <?php endif; ?>
-                <div>
-                    <label>Order number</label>
-                    <input type="text" name="order_number" value="<?php echo htmlspecialchars($searchOrderNumber); ?>" placeholder="e.g. ORD-">
-                </div>
+                    
+                    <?php endif; ?>
+                    
+                    <div>
+                        <label>Order number</label>
+                        <input 
+                        type="text" 
+                        name="order_number" 
+                        value="<?php echo htmlspecialchars($searchOrderNumber); ?>" 
+                        placeholder="e.g. ORD-"
+                        maxlength="20"
+                        >
+                    </div>
+                    
                 <div>
                     <label>From date</label>
                     <input type="date" name="date_from" value="<?php echo htmlspecialchars($searchDateFrom); ?>">
                 </div>
+                <!-- <div>
+                    <label>To date</label>
+                    <input type="date" name="date_to" value="<?php echo htmlspecialchars($searchDateTo); ?>">
+                </div> -->
+                
                 <div>
                     <label>To date</label>
                     <input type="date" name="date_to" value="<?php echo htmlspecialchars($searchDateTo); ?>">
                 </div>
+                
+                <div>
+                    <label>Date range</label>
+                    <select name="quick_range" id="quick_range">
+                        <option value="">Custom</option>
+                        <option value="7days">Last 7 days</option>
+                        <option value="30days">Last 30 days</option>
+                        <option value="6months">Last 6 months</option>
+                        <option value="1year">Last 1 year</option>
+                    </select>
+                </div>
+
                 <div>
                     <button type="submit">Search</button>
                     <button type="reset" onclick="window.location='orders/order-history.php';">Clear</button>
                 </div>
+                
             </form>
         </div>
 

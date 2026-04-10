@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                         required 
                         placeholder="Enter your email"
                         autocomplete="email"
+                        title="Please enter a valid email address, like name@example.com"
                     >
                 </div>
 
@@ -71,6 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                         id="password" 
                         name="password" 
                         required 
+                        minlength="6"
+                        maxlength="32"
                         placeholder="Enter your password"
                         autocomplete="current-password"
                     >

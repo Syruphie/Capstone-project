@@ -7,9 +7,9 @@
 
         <div class="footer-section">
             <h4>Project Information</h4>
-            <p>Course: CPSY 301-D</p>
-            <p>Phase 3 Prototype</p>
-            <p>SAIT - 2025</p>
+            <p>Course: Capstone Project</p>
+            <p>Final Project</p>
+            <p>SAIT - 2026</p>
         </div>
 
         <div class="footer-section">
