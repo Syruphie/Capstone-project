@@ -1,0 +1,7 @@
+After Azure Database for MySQL (Flexible Server) is provisioned (see azure/main.bicep):
+
+1. Allow your client IP on the server firewall if importing from your PC, or use Cloud Shell with mysql.
+2. Import schema (from repo root):
+   mysql -h SERVER_FQDN -u ADMIN_USER -p --ssl-mode=REQUIRED DATABASE_NAME < database/schema.sql
+
+Use the same DB_NAME / DB_USER / DB_PASS in App Service Application Settings as in config/database.php (via env vars).

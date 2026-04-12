@@ -1,9 +1,6 @@
 <?php
-// Loads environment variables for Stripe from the project root.
-require_once __DIR__ . '/../../vendor/autoload.php';
 
-if (file_exists(__DIR__ . '/../../.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
-    $dotenv->load();
-}
+declare(strict_types=1);
 
+// Stripe and shared env: bootstrap loads .env and Azure Application Settings into $_ENV.
+require_once __DIR__ . '/../../config/bootstrap_env.php';

@@ -83,7 +83,10 @@ if (preg_match('#/public/pages/(.+)$#', $script, $m)) {
     </div>
 </div>
 
-<link rel="stylesheet" href="css/chat.css">
-<script type="module" src="frontend/src/components/chatbot/chatbotWidget.js"></script>
+<link rel="stylesheet" href="<?php echo htmlspecialchars(app_path('css/chat.css'), ENT_QUOTES, 'UTF-8'); ?>">
+<script>
+    window.__CHATBOT_AI_URL__ = <?php echo json_encode(app_path('ai_reply.php'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+</script>
+<script type="module" src="<?php echo htmlspecialchars(app_path('frontend/src/components/chatbot/chatbotWidget.js'), ENT_QUOTES, 'UTF-8'); ?>"></script>
 
 <!-- ================= CHATBOT END ================= -->

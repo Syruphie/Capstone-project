@@ -2,6 +2,10 @@
 /**
  * Centralized API router.
  * Usage: /api.php?endpoint=calendar-data
+ *
+ * Stripe webhooks (POST): /api.php?endpoint=payment-webhook
+ * Set STRIPE_WEBHOOK_SECRET in Application Settings to the signing secret for that endpoint
+ * (Dashboard: Developers → Webhooks → your endpoint → Signing secret).
  */
 
 declare(strict_types=1);

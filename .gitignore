@@ -4,6 +4,7 @@ vendor/
 # Environmental variables
 *.env
 .env*
+!.env.example
 
 # IDE files
 .vscode/

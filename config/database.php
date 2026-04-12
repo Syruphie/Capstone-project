@@ -1,21 +1,27 @@
 <?php
 declare(strict_types=1);
 
-// Database configuration (Laragon default: root / no password — change DB_PASS if your MySQL root has a password)
-const DB_HOST = 'localhost';
-const DB_USER = 'root';
-const DB_PASS = '';
-const DB_NAME = 'globentech_db';
+require_once __DIR__ . '/bootstrap_env.php';
 
-// Application configuration
-const APP_NAME = 'GlobenTech';
-const BASE_URL = 'http://localhost:8000';
+// Database — override with DB_* Application Settings / .env in Azure or production.
+define('DB_HOST', app_env('DB_HOST', 'localhost'));
+define('DB_USER', app_env('DB_USER', 'root'));
+define('DB_PASS', app_env('DB_PASS', ''));
+define('DB_NAME', app_env('DB_NAME', 'globentech_db'));
 
-// Mail configuration
-const MAIL_USE_SMTP = true;
-const MAIL_SMTP_HOST = '127.0.0.1';
-const MAIL_SMTP_PORT = 1025;
-const SUPPORT_EMAIL = 'support@globentech.com';
+// Application — BASE_URL must be https://your-app.azurewebsites.net (or custom domain) in production.
+define('APP_NAME', app_env('APP_NAME', 'GlobenTech'));
+define('BASE_URL', app_env('BASE_URL', 'http://localhost:8000'));
+
+// Mail — use MAIL_USE_SMTP=false only if PHP mail() is configured to relay (uncommon on Azure).
+define('MAIL_USE_SMTP', app_env_bool('MAIL_USE_SMTP', true));
+define('MAIL_SMTP_HOST', app_env('MAIL_SMTP_HOST', '127.0.0.1'));
+define('MAIL_SMTP_PORT', (int) app_env('MAIL_SMTP_PORT', '1025'));
+define('MAIL_SMTP_USER', app_env('MAIL_SMTP_USER', ''));
+define('MAIL_SMTP_PASS', app_env('MAIL_SMTP_PASS', ''));
+/** Empty, tls, or ssl */
+define('MAIL_SMTP_ENCRYPTION', app_env('MAIL_SMTP_ENCRYPTION', ''));
+define('SUPPORT_EMAIL', app_env('SUPPORT_EMAIL', 'support@globentech.com'));
 
 /**
  * Class Database

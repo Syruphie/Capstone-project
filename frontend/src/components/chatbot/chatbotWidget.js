@@ -109,33 +109,38 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fetchBotReply(text) {
-    showTyping();
+        showTyping();
 
-    fetch('/Capstone-project/Capstone-project/public/pages/ai_reply.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: text })
-    })
-        .then(function (res) {
-            if (!res.ok) {
-                throw new Error('HTTP error ' + res.status);
-            }
-            return res.json();
+        const aiUrl =
+            (typeof window.__CHATBOT_AI_URL__ === 'string' && window.__CHATBOT_AI_URL__.length > 0)
+                ? window.__CHATBOT_AI_URL__
+                : '/ai_reply.php';
+
+        fetch(aiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: text })
         })
-        .then(function (data) {
-            removeTyping();
-            addBotMessage(data.reply || 'Sorry, I could not process that.');
-            showOptions();
-        })
-        .catch(function (error) {
-            removeTyping();
-            console.error('AI fetch error:', error);
-            addBotMessage('Error connecting to the AI assistant.');
-            showOptions();
-        });
-}
+            .then(function (res) {
+                if (!res.ok) {
+                    throw new Error('HTTP error ' + res.status);
+                }
+                return res.json();
+            })
+            .then(function (data) {
+                removeTyping();
+                addBotMessage(data.reply || 'Sorry, I could not process that.');
+                showOptions();
+            })
+            .catch(function (error) {
+                removeTyping();
+                console.error('AI fetch error:', error);
+                addBotMessage('Error connecting to the AI assistant.');
+                showOptions();
+            });
+    }
 
     function addBotMessage(text) {
         messages.insertAdjacentHTML(
