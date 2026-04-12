@@ -36,6 +36,12 @@ function app_web_base(): string
             $cached = rtrim($m[1], '/');
             return $cached;
         }
+        // Web root = document root: path is /public/pages/... (no subfolder). Nginx may still set
+        // SCRIPT_NAME to the public URL (/auth/login.php), which would break dirname() below.
+        if (preg_match('#^/?public/pages/.+\.php$#', $relFromDoc)) {
+            $cached = '';
+            return $cached;
+        }
     }
 
     $dir = dirname($script);
