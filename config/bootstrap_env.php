@@ -12,7 +12,12 @@ if (file_exists($projectRoot . '/vendor/autoload.php')) {
 }
 
 if (class_exists(Dotenv\Dotenv::class) && file_exists($projectRoot . '/.env')) {
-    Dotenv\Dotenv::createImmutable($projectRoot)->safeLoad();
+    try {
+        Dotenv\Dotenv::createImmutable($projectRoot)->safeLoad();
+    } catch (Throwable $e) {
+        // Invalid .env (e.g. accidental paste of nginx config) must not take down the site.
+        error_log('bootstrap_env: failed to load .env — ' . $e->getMessage());
+    }
 }
 
 $envKeys = [
