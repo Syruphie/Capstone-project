@@ -5,3 +5,7 @@ After Azure Database for MySQL (Flexible Server) is provisioned (see azure/main.
    mysql -h SERVER_FQDN -u ADMIN_USER -p --ssl-mode=REQUIRED DATABASE_NAME < database/schema.sql
 
 Use the same DB_NAME / DB_USER / DB_PASS in App Service Application Settings as in config/database.php (via env vars).
+
+If the database was created from an older schema (before order_types / catalogue-linked samples), customer "Create order" and similar pages can return HTTP 500. Apply the idempotent patch once:
+
+  mysql -h SERVER_FQDN -u ADMIN_USER -p --ssl-mode=REQUIRED globentech_db < database/patch_order_catalogue_existing.sql

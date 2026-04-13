@@ -18,6 +18,7 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/../Repository/OrderRepository.php';
+require_once __DIR__ . '/../../Support/DateRangeValidator.php';
 
 class OrderHistoryService
 {
