@@ -30,13 +30,15 @@ If the question is unrelated, politely guide the user back to system-related hel
             'stream' => false
         );
 
+        set_time_limit(400);
+
         $ch = curl_init('http://localhost:11434/api/generate');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 360);
 
         $response = curl_exec($ch);
 

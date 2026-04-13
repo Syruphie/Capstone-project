@@ -39,6 +39,8 @@ if (!function_exists('curl_init')) {
     exit;
 }
 
+set_time_limit(400);
+
 $ch = curl_init('http://127.0.0.1:11434/api/generate');
 
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -46,7 +48,7 @@ curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+curl_setopt($ch, CURLOPT_TIMEOUT, 360);
 
 $response = curl_exec($ch);
 
@@ -62,9 +64,14 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($httpCode !== 200) {
+    $detail = '';
+    $decodedErr = json_decode((string) $response, true);
+    if (is_array($decodedErr) && isset($decodedErr['error'])) {
+        $detail = ': ' . $decodedErr['error'];
+    }
     echo json_encode([
-        'reply' => 'Ollama returned HTTP ' . $httpCode,
-        'raw' => $response
+        'reply' => 'Ollama returned HTTP ' . $httpCode . $detail,
+        'raw' => $response,
     ]);
     exit;
 }
