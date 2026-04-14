@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Reject modal
+    const approveModal = document.getElementById('approveOrderModal');
+    const approveButtons = document.querySelectorAll('.btn-open-approve-modal');
+    const cancelApproveModal = document.getElementById('cancelApproveModal');
+    const confirmApproveModal = document.getElementById('confirmApproveModal');
+    const approveOrderModalMessage = document.getElementById('approveOrderModalMessage');
+
     const rejectModal = document.getElementById('rejectOrderModal');
     const rejectButtons = document.querySelectorAll('.btn-open-reject-modal');
     const cancelRejectModal = document.getElementById('cancelRejectModal');
@@ -38,6 +44,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const rejectReasonWordCount = document.getElementById('rejectReasonWordCount');
 
     let activeRejectForm = null;
+    let activeApproveForm = null;
+    function openApproveModal(orderNumber) {
+        if (approveOrderModalMessage) {
+            approveOrderModalMessage.textContent = orderNumber
+                ? `Are you sure you want to approve order ${orderNumber}?`
+                : 'Are you sure you want to approve this order?';
+        }
+        if (approveModal) {
+            approveModal.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    function closeApproveModal() {
+        if (approveModal) {
+            approveModal.setAttribute('aria-hidden', 'true');
+        }
+        activeApproveForm = null;
+    }
+
 
     const bannedWords = [
         'idiot',
@@ -97,6 +122,45 @@ document.addEventListener('DOMContentLoaded', function () {
             openRejectModal();
         });
     });
+
+    approveButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            activeApproveForm = button.closest('.approve-order-form');
+            const orderNumber = button.dataset.orderNumber || '';
+            openApproveModal(orderNumber);
+        });
+    });
+
+    if (cancelApproveModal) {
+        cancelApproveModal.addEventListener('click', function () {
+            closeApproveModal();
+        });
+    }
+
+    if (confirmApproveModal) {
+        confirmApproveModal.addEventListener('click', function () {
+            if (!activeApproveForm) return;
+
+            let approveFlagInput = activeApproveForm.querySelector('input[name="approve_order"]');
+            if (!approveFlagInput) {
+                approveFlagInput = document.createElement('input');
+                approveFlagInput.type = 'hidden';
+                approveFlagInput.name = 'approve_order';
+                approveFlagInput.value = '1';
+                activeApproveForm.appendChild(approveFlagInput);
+            }
+
+            activeApproveForm.submit();
+        });
+    }
+
+    if (approveModal) {
+        approveModal.addEventListener('click', function (e) {
+            if (e.target === approveModal) {
+                closeApproveModal();
+            }
+        });
+    }
 
     if (cancelRejectModal) {
         cancelRejectModal.addEventListener('click', function () {

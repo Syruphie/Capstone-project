@@ -52,6 +52,36 @@ $unit = $result['unit'];
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay[aria-hidden="false"] {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            width: 100%;
+            max-width: 460px;
+            border-radius: 10px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+        .modal h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
         @media (max-width: 500px) {
             .form-row { grid-template-columns: 1fr; }
         }
@@ -76,7 +106,7 @@ $unit = $result['unit'];
                 </div>
             <?php endif; ?>
 
-            <form method="POST" class="login-form">
+            <form method="POST" class="login-form" id="createOrderForm">
                 <div class="form-group">
                     <label for="priority">Priority Level *</label>
                     <select id="priority" name="priority" required>
@@ -146,6 +176,16 @@ $unit = $result['unit'];
 
             <div class="login-footer">
                 <p><a href="<?php echo htmlspecialchars(app_path('dashboard/index.php'), ENT_QUOTES, 'UTF-8'); ?>">← Back to Dashboard</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="submitOrderModal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-labelledby="submitOrderModalTitle">
+            <h2 id="submitOrderModalTitle">Confirm Order Submission</h2>
+            <p>Please confirm you want to submit this order for review.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelSubmitOrderModal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmitOrderModal">Confirm Submit</button>
             </div>
         </div>
     </div>

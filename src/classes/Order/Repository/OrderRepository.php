@@ -75,6 +75,22 @@ class OrderRepository
         return $row ?: null;
     }
 
+    public function getByIdForCustomer(int $orderId, int $customerId): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT o.*,
+                    (SELECT COUNT(*) FROM samples WHERE order_id = o.id) AS sample_count
+             FROM orders o
+             WHERE o.id = ? AND o.customer_id = ?
+             LIMIT 1"
+        );
+        $stmt->execute([$orderId, $customerId]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
+    }
+
     public function createOrder(Order $order): int
     {
         $stmt = $this->db->prepare(
@@ -151,6 +167,32 @@ class OrderRepository
         );
 
         return $stmt->execute([$status, $orderId]);
+    }
+
+    public function cancelByCustomer(int $orderId, int $customerId, string $reason): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE orders
+             SET status = ?,
+                 rejection_reason = ?,
+                 approved_by = NULL,
+                 approved_at = NULL,
+                 updated_at = NOW()
+             WHERE id = ?
+               AND customer_id = ?
+               AND status IN (?, ?)"
+        );
+
+        $stmt->execute([
+            OrderStatus::REJECTED,
+            $reason,
+            $orderId,
+            $customerId,
+            OrderStatus::SUBMITTED,
+            OrderStatus::PENDING_APPROVAL,
+        ]);
+
+        return $stmt->rowCount() > 0;
     }
 
     public function approveOrder(int $approvedBy, int $orderId): bool

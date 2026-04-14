@@ -56,6 +56,11 @@ class FrontendOrder
         ];
     }
 
+    public function getOrderByIdForCustomer(int $orderId, int $customerId): ?array
+    {
+        return $this->repo->getByIdForCustomer($orderId, $customerId);
+    }
+
     public function getOrderWithCustomer(int $orderId): ?array
     {
         return $this->service->getOrderWithCustomer($orderId);
@@ -89,6 +94,11 @@ class FrontendOrder
     public function updateEstimatedCompletion(int $orderId, string $estimatedCompletion): bool
     {
         return $this->repo->updateEstimatedCompletion($estimatedCompletion, $orderId);
+    }
+
+    public function cancelOrderByCustomer(int $orderId, int $customerId): bool
+    {
+        return $this->repo->cancelByCustomer($orderId, $customerId, 'Cancelled by customer');
     }
 
     public function getOrderHistoryForCustomer(int $customerId, ?string $searchOrderNumber, ?string $searchDateFrom, ?string $searchDateTo): array

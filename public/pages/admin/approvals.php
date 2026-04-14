@@ -49,9 +49,9 @@ include __DIR__ . '/_html_start.php';
                                         </td>
                                         <td><?php echo $po['sample_count']; ?></td>
                                         <td class="actions">
-                                            <form method="POST" style="display:inline;">
+                                            <form method="POST" class="approve-order-form" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
-                                                <button type="submit" name="approve_order" class="btn btn-small btn-success">Approve</button>
+                                                <button type="button" name="approve_order" class="btn btn-small btn-success btn-open-approve-modal" data-order-number="<?php echo htmlspecialchars($po['order_number']); ?>">Approve</button>
                                             </form>
                                             <!-- <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
@@ -74,6 +74,16 @@ include __DIR__ . '/_html_start.php';
                         </table>
                     </div>
                 </section>
+                <div class="modal-overlay" id="approveOrderModal" aria-hidden="true">
+                    <div class="modal" role="dialog" aria-labelledby="approveOrderModalTitle">
+                        <h2 id="approveOrderModalTitle">Approve Order</h2>
+                        <p id="approveOrderModalMessage" style="margin-bottom: 12px;">Are you sure you want to approve this order?</p>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelApproveModal">Cancel</button>
+                            <button type="button" class="btn btn-success" id="confirmApproveModal">Confirm Approve</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="modal-overlay" id="rejectOrderModal" aria-hidden="true">
                     <div class="modal" role="dialog" aria-labelledby="rejectOrderModalTitle">
                         <h2 id="rejectOrderModalTitle">Reject Order</h2>

@@ -213,7 +213,7 @@ foreach ($orders as $o) {
                                     <?php elseif (in_array($o['status'], ['payment_confirmed', 'results_available', 'completed'], true)): ?>
                                         <a href="<?php echo htmlspecialchars(app_path('orders/invoice.php') . '?order_id=' . (int) $o['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small btn-secondary">View Invoice</a>
                                     <?php else: ?>
-                                        <a href="#" class="btn btn-small btn-secondary">View Details</a>
+                                        <a href="<?php echo htmlspecialchars(app_path('orders/order-details.php') . '?order_id=' . (int) $o['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small btn-secondary">View Details</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
