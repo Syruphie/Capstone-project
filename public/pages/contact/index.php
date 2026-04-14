@@ -32,8 +32,8 @@ $success = $result['success'];
             <p>If you have questions about your orders, schedules, or our services, please use the form below.</p>
         </div>
 
-        <div class="dashboard-grid full-width">
-            <div class="dashboard-card">
+        <div class="dashboard-grid full-width contact-layout">
+            <div class="dashboard-card feedback-card">
                 <?php if ($error): ?>
                     <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
                 <?php endif; ?>
@@ -71,7 +71,7 @@ $success = $result['success'];
                 </form>
             </div>
 
-            <div class="dashboard-card system-info">
+            <div class="dashboard-card system-info contact-system-info">
                 <h3>Contact Details</h3>
                 <p><strong>Laboratory:</strong> <?php echo APP_NAME; ?></p>
                 <p><strong>Email:</strong> <?php echo defined('SUPPORT_EMAIL') ? htmlspecialchars(SUPPORT_EMAIL) : 'support@example.com'; ?></p>
