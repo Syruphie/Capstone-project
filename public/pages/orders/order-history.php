@@ -22,6 +22,28 @@ $searchDateFrom   = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
 $searchDateTo     = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
 $searchCustomerName = isset($_GET['customer_name']) ? trim($_GET['customer_name']) : '';
 
+/**
+ * @param array<string, mixed> $orderRow
+ */
+function order_history_details_payload(array $orderRow): string
+{
+    $payload = [
+        'orderNumber' => $orderRow['order_number'] ?? '',
+        'status' => isset($orderRow['status']) ? ucfirst(str_replace('_', ' ', (string) $orderRow['status'])) : '',
+        'priority' => isset($orderRow['priority']) ? ucfirst((string) $orderRow['priority']) : '',
+        'customerName' => $orderRow['customer_name'] ?? null,
+        'sampleCount' => isset($orderRow['sample_count']) ? ((string) ((int) $orderRow['sample_count'])) . ' sample(s)' : null,
+        'createdAt' => $orderRow['created_at'] ?? null,
+        'estimatedCompletion' => $orderRow['estimated_completion'] ?? null,
+        'approvedAt' => $orderRow['approved_at'] ?? null,
+        'completedAt' => $orderRow['completed_at'] ?? null,
+        'rejectionReason' => $orderRow['rejection_reason'] ?? null,
+        'orderNote' => $orderRow['order_note'] ?? null,
+    ];
+
+    return htmlspecialchars(json_encode($payload, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+}
+
 if ($role === 'customer') {
     $orders = $order->getOrderHistoryForCustomer($_SESSION['user_id'], $searchOrderNumber, $searchDateFrom, $searchDateTo);
     $standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
@@ -212,6 +234,7 @@ if ($role === 'customer') {
                                 <th>Completed / Date</th>
                                 <th>Samples</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -224,6 +247,9 @@ if ($role === 'customer') {
                                 <td><?php echo $o['completed_at'] ? date('M d, Y H:i', strtotime($o['completed_at'])) : (isset($o['estimated_completion']) && $o['estimated_completion'] ? date('M d, Y', strtotime($o['estimated_completion'])) : '-'); ?></td>
                                 <td><?php echo (int)($o['sample_count'] ?? 0); ?></td>
                                 <td><span class="status-badge status-<?php echo $o['status'] ?? 'completed'; ?>"><?php echo ucfirst(str_replace('_', ' ', $o['status'] ?? 'Completed')); ?></span></td>
+                                <td>
+                                    <button type="button" class="btn btn-small btn-secondary btn-view-order-details" data-order-details="<?php echo order_history_details_payload($o); ?>">View Details</button>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -244,6 +270,7 @@ if ($role === 'customer') {
                                 <th>Completed / Date</th>
                                 <th>Samples</th>
                                 <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -256,6 +283,9 @@ if ($role === 'customer') {
                                 <td><?php echo $o['completed_at'] ? date('M d, Y H:i', strtotime($o['completed_at'])) : (isset($o['estimated_completion']) && $o['estimated_completion'] ? date('M d, Y', strtotime($o['estimated_completion'])) : '-'); ?></td>
                                 <td><?php echo (int)($o['sample_count'] ?? 0); ?></td>
                                 <td><span class="status-badge status-<?php echo $o['status'] ?? 'completed'; ?>"><?php echo ucfirst(str_replace('_', ' ', $o['status'] ?? 'Completed')); ?></span></td>
+                                <td>
+                                    <button type="button" class="btn btn-small btn-secondary btn-view-order-details" data-order-details="<?php echo order_history_details_payload($o); ?>">View Details</button>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

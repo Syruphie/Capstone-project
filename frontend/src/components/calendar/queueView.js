@@ -12,7 +12,7 @@ function statusGroup(s) {
     return 'pending';
 }
 
-export function renderQueue(queueListEl, queueEmptyEl, data, openEditModal, setStatus, load) {
+export function renderQueue(queueListEl, queueEmptyEl, data, openEditModal, openDetailsModal, setStatus, load) {
     const q = data.queue || [];
     queueEmptyEl.style.display = q.length ? 'none' : 'block';
     if (!q.length) {
@@ -56,6 +56,7 @@ export function renderQueue(queueListEl, queueEmptyEl, data, openEditModal, setS
             html += '<div class="queue-item-equipment">' + escapeHtml(eq) + '</div>';
             html += '<div class="queue-item-completion">' + escapeHtml(comp) + '</div>';
             html += '<div class="queue-item-actions">';
+            html += '<button type="button" class="btn btn-small btn-secondary btn-view-details">View Details</button>';
             html += '<button type="button" class="btn btn-small btn-secondary btn-edit">Edit</button>';
             html += '<button type="button" class="btn btn-small btn-primary btn-finish">Finish</button>';
             html += '</div>';
@@ -92,6 +93,18 @@ export function renderQueue(queueListEl, queueEmptyEl, data, openEditModal, setS
             });
             if (!entry) return;
             openEditModal(entry);
+        });
+    });
+    queueListEl.querySelectorAll('.btn-view-details').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const item = btn.closest('.queue-item');
+            if (!item) return;
+            const qid = item.getAttribute('data-queue-id');
+            const entry = (data.queue || []).find(function (r) {
+                return String(r.queue_id) === qid;
+            });
+            if (!entry) return;
+            openDetailsModal(entry);
         });
     });
 }

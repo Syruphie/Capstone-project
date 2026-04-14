@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS orders (
     approved_by INT NULL,
     approved_at TIMESTAMP NULL,
     rejection_reason TEXT NULL,
+    order_note TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     completed_at TIMESTAMP NULL,

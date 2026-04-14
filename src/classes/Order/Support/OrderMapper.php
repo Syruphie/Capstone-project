@@ -33,6 +33,7 @@ class OrderMapper
         $order->setApprovedBy(isset($row['approved_by']) ? (int)$row['approved_by'] : null);
         $order->setApprovedAt($row['approved_at'] ?? null);
         $order->setRejectionReason($row['rejection_reason'] ?? null);
+        $order->setOrderNote($row['order_note'] ?? null);
         $order->setCreatedAt($row['created_at'] ?? null);
         $order->setUpdatedAt($row['updated_at'] ?? null);
         $order->setCompletedAt($row['completed_at'] ?? null);

@@ -17,6 +17,27 @@ $order = new FrontendOrder();
  
 // Get customer's orders
 $orders = $order->getOrdersByCustomer($userId);
+
+/**
+ * @param array<string, mixed> $orderRow
+ */
+function my_orders_details_payload(array $orderRow): string
+{
+    $payload = [
+        'orderNumber' => $orderRow['order_number'] ?? '',
+        'status' => isset($orderRow['status']) ? ucfirst(str_replace('_', ' ', (string) $orderRow['status'])) : '',
+        'priority' => isset($orderRow['priority']) ? ucfirst((string) $orderRow['priority']) : '',
+        'sampleCount' => isset($orderRow['sample_count']) ? ((string) ((int) $orderRow['sample_count'])) . ' sample(s)' : null,
+        'createdAt' => $orderRow['created_at'] ?? null,
+        'estimatedCompletion' => $orderRow['estimated_completion'] ?? null,
+        'approvedAt' => $orderRow['approved_at'] ?? null,
+        'completedAt' => $orderRow['completed_at'] ?? null,
+        'rejectionReason' => $orderRow['rejection_reason'] ?? null,
+        'orderNote' => $orderRow['order_note'] ?? null,
+    ];
+
+    return htmlspecialchars(json_encode($payload, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+}
  
 // Count orders by status
 $statusCounts = [
@@ -212,9 +233,12 @@ foreach ($orders as $o) {
                                         <a href="orders/checkout.php?order_id=<?php echo (int) $o['id']; ?>" class="btn btn-small btn-primary">Pay Now</a>
                                     <?php elseif (in_array($o['status'], ['payment_confirmed', 'results_available', 'completed'], true)): ?>
                                         <a href="<?php echo htmlspecialchars(app_path('orders/invoice.php') . '?order_id=' . (int) $o['id'], ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-small btn-secondary">View Invoice</a>
-                                    <?php else: ?>
-                                        <a href="#" class="btn btn-small btn-secondary">View Details</a>
                                     <?php endif; ?>
+                                    <button
+                                        type="button"
+                                        class="btn btn-small btn-secondary btn-view-order-details"
+                                        data-order-details="<?php echo my_orders_details_payload($o); ?>"
+                                    >View Details</button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

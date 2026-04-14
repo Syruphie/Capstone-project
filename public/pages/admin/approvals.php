@@ -4,6 +4,28 @@ declare(strict_types=1);
 $__adminTitle = 'Pending Approvals';
 require __DIR__ . '/_init.php';
 include __DIR__ . '/_html_start.php';
+
+/**
+ * @param array<string, mixed> $orderRow
+ */
+function approvals_details_payload(array $orderRow): string
+{
+    $payload = [
+        'orderNumber' => $orderRow['order_number'] ?? '',
+        'status' => isset($orderRow['status']) ? ucfirst(str_replace('_', ' ', (string) $orderRow['status'])) : '',
+        'priority' => isset($orderRow['priority']) ? ucfirst((string) $orderRow['priority']) : '',
+        'customerName' => $orderRow['customer_name'] ?? null,
+        'companyName' => $orderRow['company_name'] ?? null,
+        'sampleCount' => isset($orderRow['sample_count']) ? ((string) ((int) $orderRow['sample_count'])) . ' sample(s)' : null,
+        'createdAt' => $orderRow['created_at'] ?? null,
+        'estimatedCompletion' => $orderRow['estimated_completion'] ?? null,
+        'approvedAt' => $orderRow['approved_at'] ?? null,
+        'rejectionReason' => $orderRow['rejection_reason'] ?? null,
+        'orderNote' => $orderRow['order_note'] ?? null,
+    ];
+
+    return htmlspecialchars(json_encode($payload, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+}
 ?>
 <!-- Pending Approvals – same order approval page for Admin and Technician -->
                 <section class="admin-section">
@@ -53,6 +75,11 @@ include __DIR__ . '/_html_start.php';
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
                                                 <button type="submit" name="approve_order" class="btn btn-small btn-success">Approve</button>
                                             </form>
+                                            <button
+                                                type="button"
+                                                class="btn btn-small btn-secondary btn-view-order-details"
+                                                data-order-details="<?php echo approvals_details_payload($po); ?>"
+                                            >View Details</button>
                                             <!-- <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
                                                 <input type="hidden" name="rejection_reason" value="Order rejected">

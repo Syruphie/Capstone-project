@@ -2,6 +2,7 @@ import { fetchCalendarData } from '../../services/api/calendarApi.js';
 import { renderQueue } from '../../components/calendar/queueView.js';
 import { renderUtilization } from '../../components/calendar/utilizationView.js';
 import { bindEditModal } from '../../components/calendar/editModal.js';
+import { openOrderDetailsDialog } from '../../utils/orderDetailsDialog.js';
 
 const POLL_INTERVAL_MS = 15000;
 
@@ -30,12 +31,25 @@ const POLL_INTERVAL_MS = 15000;
     }
 
     let openEditModal = function () {};
+    let openDetailsModal = function (entry) {
+        openOrderDetailsDialog({
+            orderNumber: entry.order_number,
+            status: entry.order_status ? entry.order_status.replaceAll('_', ' ') : '',
+            priority: entry.priority,
+            customerName: entry.customer_name,
+            companyName: entry.company_name,
+            sampleTypes: entry.sample_types || [],
+            createdAt: entry.created_at,
+            estimatedCompletion: entry.estimated_completion,
+            orderNote: entry.order_note
+        });
+    };
 
     function load() {
         setStatus('Loading…');
         fetchCalendarData()
             .then(function (data) {
-                renderQueue(queueListEl, queueEmptyEl, data, openEditModal, setStatus, load);
+                renderQueue(queueListEl, queueEmptyEl, data, openEditModal, openDetailsModal, setStatus, load);
                 renderUtilization(utilGridEl, utilEmptyEl, data);
                 setStatus('Updated ' + new Date().toLocaleTimeString());
             })

@@ -33,6 +33,7 @@ class Order
     private ?int $approvedBy;
     private ?string $approvedAt;
     private ?string $rejectionReason;
+    private ?string $orderNote;
     private ?string $createdAt;
     private ?string $updatedAt;
     private ?string $completedAt;
@@ -46,6 +47,7 @@ class Order
         $this->approvedBy = null;
         $this->approvedAt = null;
         $this->rejectionReason = null;
+        $this->orderNote = null;
         $this->createdAt = null;
         $this->updatedAt = null;
         $this->completedAt = null;
@@ -154,6 +156,16 @@ class Order
     public function getCreatedAt(): ?string
     {
         return $this->createdAt;
+    }
+
+    public function getOrderNote(): ?string
+    {
+        return $this->orderNote;
+    }
+
+    public function setOrderNote(?string $orderNote): void
+    {
+        $this->orderNote = $orderNote;
     }
 
     public function setCreatedAt(?string $createdAt): void

@@ -24,9 +24,9 @@ class FrontendOrder
         $this->reportingService = new OrderReportingService($this->repo);
     }
 
-    public function createOrder(int $customerId, string $priority = 'standard'): int
+    public function createOrder(int $customerId, string $priority = 'standard', ?string $orderNote = null): int
     {
-        $orderId = $this->service->createOrder($customerId, $priority);
+        $orderId = $this->service->createOrder($customerId, $priority, $orderNote);
         $this->repo->updateOrderStatus($orderId, 'submitted');
 
         return $orderId;
@@ -50,6 +50,7 @@ class FrontendOrder
             'approved_by' => $order->getApprovedBy(),
             'approved_at' => $order->getApprovedAt(),
             'rejection_reason' => $order->getRejectionReason(),
+            'order_note' => $order->getOrderNote(),
             'created_at' => $order->getCreatedAt(),
             'updated_at' => $order->getUpdatedAt(),
             'completed_at' => $order->getCompletedAt(),

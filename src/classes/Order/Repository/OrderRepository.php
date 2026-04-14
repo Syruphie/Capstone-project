@@ -87,8 +87,9 @@ class OrderRepository
                 estimated_completion,
                 approved_by,
                 approved_at,
-                rejection_reason
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                rejection_reason,
+                order_note
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
         $stmt->execute([
@@ -101,6 +102,7 @@ class OrderRepository
             $order->getApprovedBy(),
             $order->getApprovedAt(),
             $order->getRejectionReason(),
+            $order->getOrderNote(),
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -123,6 +125,7 @@ class OrderRepository
                  approved_by = ?,
                  approved_at = ?,
                  rejection_reason = ?,
+                 order_note = ?,
                  updated_at = NOW()
              WHERE id = ?"
         );
@@ -137,6 +140,7 @@ class OrderRepository
             $order->getApprovedBy(),
             $order->getApprovedAt(),
             $order->getRejectionReason(),
+            $order->getOrderNote(),
             $order->getId(),
         ]);
     }

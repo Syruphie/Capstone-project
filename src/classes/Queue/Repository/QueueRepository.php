@@ -256,13 +256,15 @@ class QueueRepository
     {
         $stmt = $this->db->prepare(
             "SELECT q.id AS queue_id, q.order_id, q.equipment_id, q.position, q.scheduled_start, q.scheduled_end,
-                    q.queue_type, o.order_number, o.status AS order_status, o.priority, o.estimated_completion,
+                    q.queue_type, o.order_number, o.status AS order_status, o.priority, o.created_at, o.estimated_completion, o.order_note,
+                    u.full_name AS customer_name, u.company_name,
                     e.name AS equipment_name,
                     (SELECT GROUP_CONCAT(DISTINCT s.sample_type ORDER BY s.sample_type)
                      FROM samples s
                      WHERE s.order_id = o.id) AS sample_types
              FROM queue q
              JOIN orders o ON q.order_id = o.id
+             JOIN users u ON o.customer_id = u.id
              LEFT JOIN equipment e ON q.equipment_id = e.id
              WHERE o.status NOT IN ('results_available', 'completed')
              ORDER BY q.queue_type DESC, q.position ASC"

@@ -33,7 +33,7 @@ class OrderService
         $this->repository = $repository;
     }
 
-    public function createOrder(int $customerId, string $priority = OrderPriority::STANDARD): int
+    public function createOrder(int $customerId, string $priority = OrderPriority::STANDARD, ?string $orderNote = null): int
     {
         if (!OrderPriority::isValid($priority)) {
             throw new InvalidArgumentException("Invalid order priority: {$priority}");
@@ -45,6 +45,7 @@ class OrderService
         $order->setStatus(OrderStatus::SUBMITTED);
         $order->setPriority($priority);
         $order->setTotalCost(0.0);
+        $order->setOrderNote($orderNote);
 
         return $this->repository->createOrder($order);
     }

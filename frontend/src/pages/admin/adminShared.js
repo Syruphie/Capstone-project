@@ -1,9 +1,12 @@
 import { attachRequiredFieldValidation } from '../../utils/formValidation.js';
 import { initAutoHideAlerts } from '../../utils/alerts.js';
+import { openConfirmDialog } from '../../utils/confirmDialog.js';
+import { bindOrderDetailsButtons } from '../../utils/orderDetailsDialog.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     attachRequiredFieldValidation();
     initAutoHideAlerts();
+    bindOrderDetailsButtons();
 
     // Notification bell
     const notificationBell = document.getElementById('notificationBell');
@@ -172,4 +175,28 @@ document.addEventListener('DOMContentLoaded', function () {
             activeRejectForm.submit();
         });
     }
+
+    const approveForms = document.querySelectorAll('form');
+    approveForms.forEach(function (form) {
+        const approveButton = form.querySelector('button[name="approve_order"]');
+        if (!approveButton) return;
+
+        form.addEventListener('submit', async function (event) {
+            if (form.dataset.confirmed === 'true') return;
+
+            event.preventDefault();
+
+            const isConfirmed = await openConfirmDialog({
+                title: 'Approve Order',
+                message: 'Are you sure you want to approve this order?',
+                confirmText: 'Approve',
+                cancelText: 'Cancel'
+            });
+
+            if (!isConfirmed) return;
+
+            form.dataset.confirmed = 'true';
+            form.requestSubmit(approveButton);
+        });
+    });
 });

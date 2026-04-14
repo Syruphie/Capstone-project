@@ -18,6 +18,7 @@ $error = $result['error'];
 $success = $result['success'];
 $priority = $result['priority'];
 $unit = $result['unit'];
+$orderNote = $result['orderNote'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -139,6 +140,17 @@ $unit = $result['unit'];
 
                         </select>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="order_note">Description / Note (optional)</label>
+                    <textarea
+                        id="order_note"
+                        name="order_note"
+                        rows="4"
+                        maxlength="1000"
+                        placeholder="Add sample specifications, handling instructions, or extra details."
+                    ><?php echo htmlspecialchars($orderNote ?? ''); ?></textarea>
                 </div>
 
                 <button type="submit" name="submit_order" class="btn btn-primary">Submit Order</button>
