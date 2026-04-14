@@ -25,11 +25,11 @@ $searchCustomerName = isset($_GET['customer_name']) ? trim($_GET['customer_name'
 if ($role === 'customer') {
     $orders = $order->getOrderHistoryForCustomer($_SESSION['user_id'], $searchOrderNumber, $searchDateFrom, $searchDateTo);
     $standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
-    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'prioritized'; });
+    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'priority'; });
 } else {
     $orders = $order->getOrderHistoryForAdmin($searchCustomerName, $searchOrderNumber, $searchDateFrom, $searchDateTo);
     $standardOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'standard'; });
-    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'prioritized'; });
+    $prioritizedOrders = array_filter($orders, function ($o) { return ($o['priority'] ?? '') === 'priority'; });
 }
 ?>
 <!DOCTYPE html>
