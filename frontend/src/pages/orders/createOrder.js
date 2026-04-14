@@ -12,6 +12,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const cancelSubmitOrderModal = document.getElementById('cancelSubmitOrderModal');
     const confirmSubmitOrderModal = document.getElementById('confirmSubmitOrderModal');
     let isSubmittingConfirmed = false;
+    let isFinalSubmitInProgress = false;
+
+    function submitFormCompat(form) {
+        if (!form) return;
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+            return;
+        }
+        form.submit();
+    }
 
     function openSubmitModal() {
         if (submitOrderModal) {
@@ -44,9 +54,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (confirmSubmitOrderModal && createOrderForm) {
         confirmSubmitOrderModal.addEventListener('click', function () {
+            if (isFinalSubmitInProgress) {
+                return;
+            }
+            isFinalSubmitInProgress = true;
+            confirmSubmitOrderModal.disabled = true;
             isSubmittingConfirmed = true;
             closeSubmitModal();
-            createOrderForm.requestSubmit();
+            submitFormCompat(createOrderForm);
         });
     }
 

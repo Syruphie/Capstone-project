@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let activeRejectForm = null;
     let activeApproveForm = null;
+    let isApproveSubmitInProgress = false;
+    let isRejectSubmitInProgress = false;
     function openApproveModal(orderNumber) {
         if (approveOrderModalMessage) {
             approveOrderModalMessage.textContent = orderNumber
@@ -124,7 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     approveButtons.forEach(function (button) {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
             activeApproveForm = button.closest('.approve-order-form');
             const orderNumber = button.dataset.orderNumber || '';
             openApproveModal(orderNumber);
@@ -140,6 +143,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirmApproveModal) {
         confirmApproveModal.addEventListener('click', function () {
             if (!activeApproveForm) return;
+            if (isApproveSubmitInProgress) return;
+            isApproveSubmitInProgress = true;
+            confirmApproveModal.disabled = true;
 
             let approveFlagInput = activeApproveForm.querySelector('input[name="approve_order"]');
             if (!approveFlagInput) {
@@ -191,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (confirmRejectModal) {
         confirmRejectModal.addEventListener('click', function () {
             if (!activeRejectForm) return;
+            if (isRejectSubmitInProgress) return;
 
             const reason = rejectReasonText.value.trim();
             const wordCount = getWordCount(reason);
@@ -218,6 +225,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 return;
             }
+
+            isRejectSubmitInProgress = true;
+            confirmRejectModal.disabled = true;
 
             const hiddenReasonInput = activeRejectForm.querySelector('input[name="rejection_reason"]');
             if (hiddenReasonInput) {
