@@ -316,6 +316,11 @@ body {
    
 }
 
+/* Contact page should use full desktop width */
+.dashboard-container.contact-page-container {
+    max-width: 100%;
+}
+
 .dashboard-container::before {
     content: "";
     position: absolute;

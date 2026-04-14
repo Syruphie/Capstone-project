@@ -26,7 +26,7 @@ $success = $result['success'];
 <body>
     <?php include PAGE_PARTIALS . '/header.php'; ?>
 
-    <div class="dashboard-container">
+    <div class="dashboard-container contact-page-container">
         <div class="welcome-section">
             <h1>Contact Us</h1>
             <p>If you have questions about your orders, schedules, or our services, please use the form below.</p>
