@@ -456,27 +456,28 @@ body {
     grid-column: 1 / -1;
 }
 
-/* Contact page: feedback form 3/4, system info 1/4 on right */
-.dashboard-grid.contact-layout {
-    grid-template-columns: 3fr 1fr;
+/* Contact page: feedback fills remaining space, system info fixed on right */
+.dashboard-container.contact-page-container .dashboard-grid.contact-layout {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 320px;
     align-items: start;
 }
 
-.dashboard-grid.contact-layout .feedback-card {
+.dashboard-container.contact-page-container .dashboard-grid.contact-layout .feedback-card {
     grid-column: 1;
 }
 
-.dashboard-grid.contact-layout .contact-system-info {
+.dashboard-container.contact-page-container .dashboard-grid.contact-layout .contact-system-info {
     grid-column: 2;
 }
 
 @media (max-width: 900px) {
-    .dashboard-grid.contact-layout {
+    .dashboard-container.contact-page-container .dashboard-grid.contact-layout {
         grid-template-columns: 1fr;
     }
 
-    .dashboard-grid.contact-layout .feedback-card,
-    .dashboard-grid.contact-layout .contact-system-info {
+    .dashboard-container.contact-page-container .dashboard-grid.contact-layout .feedback-card,
+    .dashboard-container.contact-page-container .dashboard-grid.contact-layout .contact-system-info {
         grid-column: 1;
     }
 }
