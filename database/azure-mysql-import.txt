@@ -9,7 +9,3 @@ Use the same DB_NAME / DB_USER / DB_PASS in App Service Application Settings as 
 If the database was created from an older schema (before order_types / catalogue-linked samples), customer "Create order" and similar pages can return HTTP 500. Apply the idempotent patch once:
 
   mysql -h SERVER_FQDN -u ADMIN_USER -p --ssl-mode=REQUIRED globentech_db < database/patch_order_catalogue_existing.sql
-
-If order history (`/orders/order-history.php`) returns HTTP 500, the `orders` table may be missing `completed_at` (used by order history queries). Apply:
-
-  mysql -h SERVER_FQDN -u ADMIN_USER -p --ssl-mode=REQUIRED globentech_db < database/patch_orders_completed_at.sql
