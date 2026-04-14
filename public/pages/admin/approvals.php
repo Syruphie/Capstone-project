@@ -51,7 +51,7 @@ include __DIR__ . '/_html_start.php';
                                         <td class="actions">
                                             <form method="POST" class="approve-order-form" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">
-                                                <button type="submit" name="approve_order" class="btn btn-small btn-success btn-open-approve-modal" data-order-number="<?php echo htmlspecialchars($po['order_number']); ?>">Approve</button>
+                                                <button type="button" class="btn btn-small btn-success btn-open-approve-modal" data-order-number="<?php echo htmlspecialchars($po['order_number']); ?>">Approve</button>
                                             </form>
                                             <!-- <form method="POST" style="display:inline;">
                                                 <input type="hidden" name="order_id" value="<?php echo $po['id']; ?>">

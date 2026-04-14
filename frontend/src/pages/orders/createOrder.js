@@ -14,13 +14,36 @@ document.addEventListener('DOMContentLoaded', function () {
     let isSubmittingConfirmed = false;
     let isFinalSubmitInProgress = false;
 
-    function submitFormCompat(form) {
+    /**
+     * Must pass the real submit button so the POST includes submit_order (PHP checks isset($_POST['submit_order'])).
+     * requestSubmit() with no argument can omit the submitter in some browsers.
+     */
+    function submitFormCompat(form, submitter) {
         if (!form) return;
         if (typeof form.requestSubmit === 'function') {
-            form.requestSubmit();
+            try {
+                if (submitter) {
+                    form.requestSubmit(submitter);
+                } else {
+                    form.requestSubmit();
+                }
+            } catch (_e) {
+                ensureSubmitOrderFlag(form);
+                form.submit();
+            }
             return;
         }
+        ensureSubmitOrderFlag(form);
         form.submit();
+    }
+
+    function ensureSubmitOrderFlag(form) {
+        if (form.querySelector('input[type="hidden"][name="submit_order"]')) return;
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'submit_order';
+        hidden.value = '1';
+        form.appendChild(hidden);
     }
 
     function openSubmitModal() {
@@ -52,6 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const submitOrderButton = createOrderForm
+        ? createOrderForm.querySelector('button[name="submit_order"]')
+        : null;
+
     if (confirmSubmitOrderModal && createOrderForm) {
         confirmSubmitOrderModal.addEventListener('click', function () {
             if (isFinalSubmitInProgress) {
@@ -61,7 +88,13 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmSubmitOrderModal.disabled = true;
             isSubmittingConfirmed = true;
             closeSubmitModal();
-            submitFormCompat(createOrderForm);
+            try {
+                submitFormCompat(createOrderForm, submitOrderButton);
+            } catch (_e) {
+                isSubmittingConfirmed = false;
+                isFinalSubmitInProgress = false;
+                confirmSubmitOrderModal.disabled = false;
+            }
         });
     }
 
